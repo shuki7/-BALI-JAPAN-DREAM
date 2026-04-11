@@ -60,9 +60,12 @@ const translations = {
         fac_promo: "Ada ASRAMA GRATIS untuk 60 MURID PERTAMA !!!",
 
         staff_badge: "Message",
-        staff_title: "Sejak masa SMA, saya memiliki mimpi untuk menjadi \"jembatan penghubung\".",
-        staff_p1: "Setelah terus mengejar mimpi itu, kini saya mewujudkannya di Bali, Indonesia. Dari pengalaman ini, saya merasakan betapa pentingnya mengejar mimpi dan potensi besar yang terbuka di masa depan.",
-        staff_p2: "Kami, \"🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM\", hadir untuk membantu Anda pergi ke Jepang dan mewujudkan mimpi Anda. Melalui dukungan yang sesuai dengan tujuan Anda, kami siap mendukung tantangan Anda sepenuhnya!",
+        staff_title: "Pesan dari Kami",
+        staff_p1: "Sejak masa SMA, saya memiliki mimpi untuk menjadi 'jembatan penghubung antara Indonesia dan Jepang.' Setelah terus mengejar mimpi itu, kini saya mewujudkannya di Bali, Indonesia.",
+        staff_p2: "Dari pengalaman ini, saya merasakan betapa pentingnya mengejar mimpi dan potensi besar yang terbuka di masa depan.",
+        staff_p3: "Kami, '🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM,' hadir untuk membantu Anda pergi ke Jepang dan mewujudkan mimpi Anda.",
+        staff_p4: "Melalui dukungan yang sesuai dengan tujuan Anda, seperti pembelajaran bahasa Jepang, pemahaman budaya, dan dukungan pekerjaan, kami siap mendukung tantangan Anda sepenuhnya.",
+        staff_p5: "Mimpi Anda memiliki kekuatan untuk mengubah masa depan. Mari kita melangkah bersama untuk mengambil langkah pertama itu. 🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM akan mendukung Anda sepenuhnya dalam mengejar mimpi Anda!",
 
         cta_title: "BATCH 5 Segera Hadir di Tahun 2026!",
         cta_desc: "Penerimaan Mahasiswa Baru telah dibuka. Wujudkan impianmu bersama BALI JAPAN DREAM!",
@@ -170,9 +173,12 @@ const translations = {
         fac_promo: "先着60名様に無料の学生寮をご用意！！！",
 
         staff_badge: "メッセージ",
-        staff_title: "「懸け橋になる」という夢は、高校時代から抱き続けてきました。",
-        staff_p1: "その夢を追い続け、今ここインドネシアのバリ島で実現しています。この経験から、夢を追いかけることの大切さと、未来に開かれた大きな可能性を感じています。",
-        staff_p2: "私たち「🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM」は、皆さんが日本に行き、夢を実現するお手伝いをするためにここにいます。皆さんの目標に合わせたサポートを通じて、私たちは皆さんの挑戦を全力で支援します！",
+        staff_title: "高校時代からの夢、「架け橋」としての実現。",
+        staff_p1: "高校時代から、インドネシアと日本の「架け橋」になりたいという夢を持っていました。その夢を追い続け、今ここインドネシアのバリ島で実現しています。",
+        staff_p2: "この経験から、夢を追いかけることの大切さと、未来に開かれた大きな可能性を感じています。",
+        staff_p3: "私たち「🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM」は、皆さんが日本に行き、夢を実現するお手伝いをするためにここにいます。",
+        staff_p4: "日本語学習、文化への理解、就職支援など、皆さんの目標に合わせた包括的なサポートを通じて、皆さんの挑戦を全力で支援します。",
+        staff_p5: "皆さんの夢には未来を変える力があります。その第一歩を、私たちと一緒に踏み出しましょう。🇮🇩BALI 🇯🇵JAPAN 🌎️DREAMは、皆さんの夢の追求を全力で応援します！",
 
         cta_title: "バッチ5は2026年中に開始予定！",
         cta_desc: "新入生の募集を開始しました。BALI JAPAN DREAMと一緒に夢を実現しましょう！",
