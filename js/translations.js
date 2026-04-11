@@ -64,7 +64,7 @@ const translations = {
         staff_p1: "Setelah terus mengejar mimpi itu, kini saya mewujudkannya di Bali, Indonesia. Dari pengalaman ini, saya merasakan betapa pentingnya mengejar mimpi dan potensi besar yang terbuka di masa depan.",
         staff_p2: "Kami, \"🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM\", hadir untuk membantu Anda pergi ke Jepang dan mewujudkan mimpi Anda. Melalui dukungan yang sesuai dengan tujuan Anda, kami siap mendukung tantangan Anda sepenuhnya!",
 
-        cta_title: "BATCH 4 Segera Hadir di Tahun 2026!",
+        cta_title: "BATCH 5 Segera Hadir di Tahun 2026!",
         cta_desc: "Penerimaan Mahasiswa Baru telah dibuka. Wujudkan impianmu bersama BALI JAPAN DREAM!",
 
         qa_title: "Pertanyaan yang Sering Diajukan (Q&A)",
@@ -174,7 +174,7 @@ const translations = {
         staff_p1: "その夢を追い続け、今ここインドネシアのバリ島で実現しています。この経験から、夢を追いかけることの大切さと、未来に開かれた大きな可能性を感じています。",
         staff_p2: "私たち「🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM」は、皆さんが日本に行き、夢を実現するお手伝いをするためにここにいます。皆さんの目標に合わせたサポートを通じて、私たちは皆さんの挑戦を全力で支援します！",
 
-        cta_title: "バッチ4は2026年中に開始予定！",
+        cta_title: "バッチ5は2026年中に開始予定！",
         cta_desc: "新入生の募集を開始しました。BALI JAPAN DREAMと一緒に夢を実現しましょう！",
 
         qa_title: "よくある質問 (Q&A)",
