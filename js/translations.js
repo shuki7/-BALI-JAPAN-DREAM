@@ -74,7 +74,7 @@ const translations = {
         q2: "Q. Panduan apa yang Anda berikan untuk bekerja di Jepang?",
         a2: "A. Kami menyediakan berbagai macam pelatihan, termasuk pelatihan untuk memperdalam pemahaman tentang budaya Jepang, disiplin, tata krama dan aturan di Jepang, dan panduan gaya hidup.",
         q3: "Q. Apa itu visa TOKUTEIGINOU (Specified Skilled Worker SSW)?",
-        a3: "A. Visa Specified Skilled Worker (SSW) merupakan visa yang diperkenalkan untuk bidang tertentu. Untuk Keterampilan Khusus 1, terdapat 14 sektor industri, dengan masa tinggal maksimal 5 tahun.",
+        a3: "A. Visa Specified Skilled Worker (SSW) merupakan visa yang diperkenalkan untuk bidang tertentu. Untuk Keterampilan Khusus 1, terdapat 16 sektor industri, dengan masa tinggal maksimal 5 tahun.",
         q4: "Q. Apa itu visa GIJINKOKU?",
         a4: "A. Visa kerja di Jepang yang memungkinkan seseorang bekerja di bidang teknologi, pengetahuan kemanusiaan, atau urusan internasional. Syarat utamanya adalah lulusan S1 atau D3.",
 
@@ -184,7 +184,7 @@ const translations = {
         q2: "Q. 日本で働くためにどのような指導をしてもらえますか？",
         a2: "A. 日本文化への理解を深める研修や、日本での作法・ルール、生活指導など、幅広い研修を提供しています。",
         q3: "Q. 特定技能ビザ（SSW）とは何ですか？",
-        a3: "A. 特定の分野で導入された就労ビザです。特定技能1号では14の産業分野があり、最大5年間の滞在が可能です。",
+        a3: "A. 特定の分野で導入された就労ビザです。特定技能1号では16の産業分野があり、最大5年間の滞在が可能です。",
         q4: "Q. 技人国（GIJINKOKU）ビザとは何ですか？",
         a4: "A. 技術、人文知識、または国際業務の分野で働くことができる日本の就労ビザです。主な要件として大卒または専門卒（D3）である必要があります。",
 
