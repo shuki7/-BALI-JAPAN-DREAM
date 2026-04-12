@@ -1027,3 +1027,88 @@ footer {
     gap: 2rem;
   }
 }
+
+/* Location Summary Section */
+.location-summary {
+  padding: 5rem 0;
+  text-align: center;
+  background: white;
+}
+
+.location-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 3.5rem;
+}
+
+.location-logos img.top-banner-logo {
+  max-height: 180px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.location-catchphrases {
+    margin-bottom: 2.5rem;
+}
+
+.location-catchphrases h3 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 1.2rem;
+  color: #222;
+}
+
+.location-catchphrases p {
+  font-size: 1.6rem;
+  margin: 0.3rem 0;
+  font-weight: 600;
+  color: #333;
+}
+
+.location-address {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 2.5rem 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.maps-pin {
+  width: 50px;
+  height: auto;
+}
+
+.location-description {
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.7;
+  font-size: 1.05rem;
+  color: #333;
+  padding: 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .location-logos img.top-banner-logo {
+        max-height: 90px;
+    }
+    .location-catchphrases h3 {
+        font-size: 1.5rem;
+    }
+    .location-catchphrases p {
+        font-size: 1.1rem;
+    }
+}
+
+/* Staff Signature */
+.staff-signature {
+  text-align: right;
+  margin-top: 2.5rem;
+  font-weight: 700;
+  line-height: 1.6;
+  font-size: 1.1rem;
+  color: var(--text-dark);
+}

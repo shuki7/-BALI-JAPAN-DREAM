@@ -20,9 +20,7 @@
     <!-- Header -->
     <header id="header">
         <div class="container navbar">
-            <a href="#" class="logo">
-                <img src="images/balijapan_logo.webp" alt="Bali Japan Dream Logo" style="height: 50px;">
-            </a>
+            <div></div> <!-- Empty div to maintain spacing if justify-content: space-between is used -->
             
             <button class="hamburger" id="hamburger">
                 <i class="fas fa-bars"></i>
@@ -42,15 +40,12 @@
             </nav>
         </div>
     </header>
-
     <!-- Hero Section -->
     <section id="top" class="hero">
         <div class="container">
             <div class="hero-content" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                <!-- Main BJD Logo Neonbox -->
-                <img src="images/BJD_Logo_Neonbox_transparent.webp" alt="BJD Logo Neonbox" class="hero-logo">
-                
-                <div class="hero-badge" data-i18n="hero_badge">in WARMADEWA COLLEGE</div>
+                <!-- High-res Banner Logo -->
+                <img src="images/top_banner_logos.webp" alt="Bali Japan Dream Logo" class="hero-banner-logo" style="max-width: 900px; width: 100%; height: auto; margin-bottom: 2rem;">
                 <h1 class="gradient-text" data-i18n="hero_title">Ayo daftar! Kami mencari siswa yang ingin kerja di Jepang!</h1>
                 <p data-i18n="hero_desc">Wujudkan impian Anda untuk belajar di Bali dan bekerja di Jepang! 〜 No. 1 sekolah bahasa Jepang terpopuler di Indonesia 〜</p>
                 <div class="hero-buttons">
@@ -69,6 +64,30 @@
                         <i class="fas fa-volume-mute"></i>
                     </button>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Location and Philosophy Section -->
+    <section id="lokasi-info" class="location-summary">
+        <div class="container">
+            <div class="location-logos">
+                <!-- Banner moved to Hero section per user preference -->
+            </div>
+            
+            <div class="location-catchphrases">
+                <h3 data-i18n="loc_catchphrase">Wujudkan impian Anda untuk belajar di Bali dan bekerja di Jepang!</h3>
+                <p data-i18n="loc_popular">～ No. 1 sekolah bahasa Jepang terpopuler di Indonesia ～</p>
+                <p data-i18n="loc_economic">～ Untuk pembangunan ekonomi Indonesia dan Jepang ～</p>
+            </div>
+            
+            <div class="location-address">
+                <img src="images/maps_pin.webp" alt="Map Pin" class="maps-pin">
+                <span data-i18n="loc_address">Jl. Merdeka VI No.5, Sumerta Kelod, Kec. Denpasar Tim., Kota Denpasar, Bali 80239</span>
+            </div>
+            
+            <div class="location-description">
+                <p data-i18n="loc_desc"></p>
             </div>
         </div>
     </section>
@@ -101,28 +120,6 @@
                     <div class="icon-wrapper"><i class="fas fa-building"></i></div>
                     <h3 data-i18n="feat4_title">Fasilitas nyaman nomor satu</h3>
                     <p data-i18n="feat4_desc">Lingkungan belajar terbaik di Bali dengan fasilitas yang sangat lengkap.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Program Overview Panel -->
-    <section class="programs-overview" style="background-color: white;">
-        <div class="container">
-            <div class="split-panel">
-                <div class="panel-content">
-                    <h3 data-i18n="prog_title">🇯🇵 TOKUTEI GINOU CLASS</h3>
-                    <p data-i18n="prog_desc">Kurikulum Pembelajaran Bahasa Jepang yang komprehensif, disesuaikan dengan tingkat dan tujuan masing-masing individu.</p>
-                    <ul class="check-list">
-                        <li data-i18n="prog_li1">Kursus singkat 6 bulan（JFT A2 + SSW + JOB Matching＋α ）</li>
-                        <li data-i18n="prog_li3">Dibimbing oleh guru bahasa Jepang yang berpengalaman</li>
-                        <li data-i18n="prog_li4">Belajar di ruang kelas universitas yang bersih dan nyaman</li>
-                        <li data-i18n="prog_li5">Asrama pelajar disediakan gratis bagi yang membutuhkan</li>
-                    </ul>
-                    <a href="https://wa.me/6285190078685" class="btn btn-primary" target="_blank" data-i18n="btn_register_now">Daftar Sekarang</a>
-                </div>
-                <div class="panel-img">
-                    <img src="images/hero.webp" alt="Hero Image">
                 </div>
             </div>
         </div>
@@ -265,6 +262,7 @@
                     <p data-i18n="staff_p3"></p>
                     <p data-i18n="staff_p4"></p>
                     <p data-i18n="staff_p5"></p>
+                    <p class="staff-signature" data-i18n="staff_signature" data-i18n-html="true"></p>
                 </div>
                 <div class="panel-img">
                     <img src="images/staff_message.webp" alt="Staf Message">
@@ -272,7 +270,7 @@
             </div>
         </div>
     </section>
-
+    
     <!-- Section for Extra Menu Items -->
     <div id="lowongan-kerja" style="padding-top:80px;"></div>
     <div id="siswa-baru" style="padding-top:80px;"></div>

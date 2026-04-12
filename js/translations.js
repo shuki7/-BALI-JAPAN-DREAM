@@ -66,9 +66,16 @@ const translations = {
         staff_p3: "Kami, '🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM,' hadir untuk membantu Anda pergi ke Jepang dan mewujudkan mimpi Anda.",
         staff_p4: "Melalui dukungan yang sesuai dengan tujuan Anda, seperti pembelajaran bahasa Jepang, pemahaman budaya, dan dukungan pekerjaan, kami siap mendukung tantangan Anda sepenuhnya.",
         staff_p5: "Mimpi Anda memiliki kekuatan untuk mengubah masa depan. Mari kita melangkah bersama untuk mengambil langkah pertama itu. 🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM akan mendukung Anda sepenuhnya dalam mengejar mimpi Anda!",
+        staff_signature: "Principal<br>CHIKAKO ISHIKAWA",
 
         cta_title: "BATCH 5 Segera Hadir di Tahun 2026!",
         cta_desc: "Penerimaan Mahasiswa Baru telah dibuka. Wujudkan impianmu bersama BALI JAPAN DREAM!",
+
+        loc_catchphrase: "Wujudkan impian Anda untuk belajar di Bali dan bekerja di Jepang!",
+        loc_popular: "～ No. 1 sekolah bahasa Jepang terpopuler di Indonesia ～",
+        loc_economic: "～ Untuk pembangunan ekonomi Indonesia dan Jepang ～",
+        loc_address: "Jl. Merdeka VI No.5, Sumerta Kelod, Kec. Denpasar Tim., Kota Denpasar, Bali 80239",
+        loc_desc: "Perguruan Tinggi Warmadewa berlokasi strategis di Renon, Denpasar. Ini adalah gedung serbaguna yang juga dapat digunakan sebagai fasilitas pelatihan Warmadewa College, dan sangat nyaman, dengan ruang kerja bergaya kafe. Tentu saja, kelebihan lainnya adalah tempat parkirnya luas dan mudah diakses",
 
         qa_title: "Pertanyaan yang Sering Diajukan (Q&A)",
         qa_desc: "Temukan jawaban untuk pertanyaan umum mengenai program kerja di Jepang.",
@@ -179,9 +186,16 @@ const translations = {
         staff_p3: "私たち「🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM」は、皆さんが日本に行き、夢を実現するお手伝いをするためにここにいます。",
         staff_p4: "日本語学習、文化への理解、就職支援など、皆さんの目標に合わせた包括的なサポートを通じて、皆さんの挑戦を全力で支援します。",
         staff_p5: "皆さんの夢には未来を変える力があります。その第一歩を、私たちと一緒に踏み出しましょう。🇮🇩BALI 🇯🇵JAPAN 🌎️DREAMは、皆さんの夢の追求を全力で応援します！",
+        staff_signature: "校長<br>CHIKAKO ISHIKAWA",
 
         cta_title: "バッチ5は2026年中に開始予定！",
         cta_desc: "新入生の募集を開始しました。BALI JAPAN DREAMと一緒に夢を実現しましょう！",
+
+        loc_catchphrase: "バリ島で学び、日本で働く夢を実現しましょう！",
+        loc_popular: "～ インドネシアで最も人気のある日本語学校 No. 1 ～",
+        loc_economic: "～ インドネシアと日本の経済発展のために ～",
+        loc_address: "Jl. Merdeka VI No.5, Sumerta Kelod, Kec. Denpasar Tim., Kota Denpasar, Bali 80239",
+        loc_desc: "ワルマデワ大学はデンパサールのレノンに位置し、多目的に利用できる建物です。ワルマデワ・カレッジの研修施設としても使用され、カフェのようなワークスペースがあり非常に快適です。もちろん、駐車スペースも広くアクセスも抜群です。",
 
         qa_title: "よくある質問 (Q&A)",
         qa_desc: "日本での就労プログラムに関するよくある質問の答えを見つけましょう。",
