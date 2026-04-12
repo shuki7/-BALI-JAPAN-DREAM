@@ -8,6 +8,7 @@ const translations = {
         nav_diterima_kerja: "DITERIMA KERJA",
         nav_qa: "Q&A",
         nav_pendaftaran: "PENDAFTARAN",
+        nav_greeting: "PESAN",
 
         hero_badge: "in WARMADEWA COLLEGE",
         hero_title: "Ayo daftar! Kami mencari siswa yang ingin kerja di Jepang!",
@@ -128,6 +129,7 @@ const translations = {
         nav_diterima_kerja: "採用実績",
         nav_qa: "Q&A",
         nav_pendaftaran: "お申し込み",
+        nav_greeting: "ご挨拶",
 
         hero_badge: "in WARMADEWA COLLEGE",
         hero_title: "登録しよう！日本で働きたい学生を募集しています！",
