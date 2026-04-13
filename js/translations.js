@@ -59,6 +59,7 @@ const translations = {
         fac_img1: "Gedung sekolah dan kantor BJD",
         fac_img2: "Lobby & Ruang Bersantai",
         fac_school_title: "Fasilitas Sekolah",
+        fac_activity_title: "Aktivitas Siswa",
         fac_dorm_title: "Fasilitas Asrama",
         fac_school_img1: "Lobby & Ruang Bersantai",
         fac_school_img2: "Ruang Kantor & Resepsionis",
@@ -126,7 +127,33 @@ const translations = {
         job_matching_course_li5: "Bimbingan tata krama, cara sukses wawancara, dan latihan simulasi.",
         job_matching_course_li6: "Berbicara dengan banyak relawan Jepang dalam berbagai dialek.",
         job_matching_course_li7: "Setelah lulus wawancara dengan perusahaan Jepang dan mendapatkan kontrak kerja (Naitei), siswa dinyatakan lulus.",
-        job_matching_course_li8: "Tersedia asrama bagi siswa di luar Bali. Tersedia juga opsi kelas online bagi peserta dari luar pulau (silakan hubungi kami untuk detailnya)."
+        job_matching_course_li8: "Tersedia asrama bagi siswa di luar Bali. Tersedia juga opsi kelas online bagi peserta dari luar pulau (silakan hubungi kami untuk detailnya).",
+        
+        staf_title_page: "Staf & Manajemen",
+        staf_desc_page: "Tim profesional kami yang berdedikasi untuk membimbing Anda mencapai impian di Jepang.",
+        
+        staf_name_ishikawa: "CHIKAKO ISHIKAWA",
+        staf_role_ishikawa: "Kepala Sekolah / Principal",
+        staf_name_christine: "Christine dewi sasmito",
+        staf_role_christine: "Humas & Guru Bahasa Jepang",
+        staf_name_irani: "Irani Sofira Oktavianda",
+        staf_role_irani: "ADMIN",
+        staf_name_damar: "Damar Negara",
+        staf_role_damar: "ADMIN",
+        staf_name_fajri: "MUHAMMAD NUR FAJRI",
+        staf_role_fajri: "Guru Bahasa Jepang",
+        staf_name_inaba: "TAKAYOSHI INABA",
+        staf_role_inaba: "Guru Bahasa Jepang",
+        staf_name_adrian: "I NYOMAN GEDE ADRIAN D.K.N",
+        staf_role_adrian: "Guru Bahasa Jepang",
+        staf_name_martyn: "Martyn Christian Redondo",
+        staf_role_martyn: "Guru Bahasa Jepang",
+        staf_name_shuki: "SHUKI UEMURA",
+        staf_role_shuki: "ORGANIZER",
+        
+        partner_title: "Mitra dari Jepang",
+        partner_desc: "Bekerja sama dengan berbagai perusahaan dan organisasi terkemuka di Jepang.",
+        partner_tokutei: "Mitra TOKUTEI GINOU"
     },
     ja: {
         nav_fasilitas: "施設",
@@ -184,9 +211,10 @@ const translations = {
         "visa3_li3": "迅速な渡航プロセス",
 
         fac_title: "施設の紹介",
-        fac_desc: "ワルマデワ大学はデンパサールのレノンという好立地にあります。快適な多目的ビルで、カフェ風のワークスペースも備えています。",
+        fac_desc: "ワルマデワ大学はデンパサールのレノンに位置し、多目的に利用できる建物です。ワルマデワ・カレッジの研修施設としても使用され、様々なワークスペースがあり非常に快適です。もちろん、駐車スペースも広くアクセスも抜群です。\n大学と同じ財団系列が運営する職業訓練・専門スキル教育機関（LKP）です。大学が「学問や学位の取得」を目的とするのに対し、カレッジは「社会で即戦力となる実用的なスキルの習得や資格取得」に特化しています。",
         fac_img2: "ロビーとリラックススペース",
         fac_school_title: "校舎・施設紹介",
+        fac_activity_title: "生徒の活動",
         fac_dorm_title: "学生寮の紹介",
         fac_school_img1: "ロビー & ラウンジスペース",
         fac_school_img2: "受付・オフィスエリア",
@@ -212,7 +240,7 @@ const translations = {
         loc_popular: "～ インドネシアで最も人気のある日本語学校 No. 1 ～",
         loc_economic: "～ インドネシアと日本の経済発展のために ～",
         loc_address: "Jl. Merdeka VI No.5, Sumerta Kelod, Kec. Denpasar Tim., Kota Denpasar, Bali 80239",
-        loc_desc: "ワルマデワ大学はデンパサールのレノンに位置し、多目的に利用できる建物です。ワルマデワ・カレッジの研修施設としても使用され、カフェのようなワークスペースがあり非常に快適です。もちろん、駐車スペースも広くアクセスも抜群です。",
+        loc_desc: "ワルマデワ大学はデンパサールのレノンに位置し、多目的に利用できる建物です。ワルマデワ・カレッジの研修施設としても使用され、様々なワークスペースがあり非常に快適です。もちろん、駐車スペースも広くアクセスも抜群です。\n大学と同じ財団系列が運営する職業訓練・専門スキル教育機関（LKP）です。大学が「学問や学位の取得」を目的とするのに対し、カレッジは「社会で即戦力となる実用的なスキルの習得や資格取得」に特化しています。",
 
         qa_title: "よくある質問 (Q&A)",
         qa_desc: "日本での就労プログラムに関するよくある質問の答えを見つけましょう。",
@@ -254,6 +282,32 @@ const translations = {
         job_matching_course_li5: "日本の企業面接のマナー、コツ、模擬面談を専門の指導者が実施。",
         job_matching_course_li6: "日本人ボランティアと様々な方言（関西弁・関東弁等）で話す機会が豊富。",
         job_matching_course_li7: "日本企業との面談に受かり内定が決まれば卒業です。",
-        job_matching_course_li8: "バリ島以外の方のための寮も完備。また、他島の方向けにオンラインコースを設けている場合もあります。詳細はまずはお問い合わせください。"
+        job_matching_course_li8: "バリ島以外の方のための寮も完備。また、他島の方向けにオンラインコースを設けている場合もあります。詳細はまずはお問い合わせください。",
+        
+        staf_title_page: "スタッフ & マネジメント",
+        staf_desc_page: "日本での夢を実現するために、私たちプロフェッショナルチームが全力でサポートします。",
+        
+        staf_name_ishikawa: "石川 近子 (CHIKAKO ISHIKAWA)",
+        staf_role_ishikawa: "校長 / Principal",
+        staf_name_christine: "Christine dewi sasmito",
+        staf_role_christine: "広報 & 日本語教師",
+        staf_name_irani: "Irani Sofira Oktavianda",
+        staf_role_irani: "事務 / ADMIN",
+        staf_name_damar: "Damar Negara",
+        staf_role_damar: "事務 / ADMIN",
+        staf_name_fajri: "MUHAMMAD NUR FAJRI",
+        staf_role_fajri: "日本語教師",
+        staf_name_inaba: "稲葉 孝嘉 (TAKAYOSHI INABA)",
+        staf_role_inaba: "日本語教師",
+        staf_name_adrian: "I NYOMAN GEDE ADRIAN D.K.N",
+        staf_role_adrian: "日本語教師",
+        staf_name_martyn: "Martyn Christian Redondo",
+        staf_role_martyn: "日本語教師",
+        staf_name_shuki: "植村 春樹 (SHUKI UEMURA)",
+        staf_role_shuki: "オーガナイザー / ORGANIZER",
+        
+        partner_title: "日本の提携パートナー",
+        partner_desc: "日本国内の優良企業や団体と強力なネットワークを築いています。",
+        partner_tokutei: "特定技能提携先"
     }
 };

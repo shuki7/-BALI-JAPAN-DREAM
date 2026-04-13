@@ -601,6 +601,27 @@ header.scrolled {
   gap: 1.5rem;
 }
 
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem auto;
+  max-width: 900px;
+}
+
+@media (max-width: 768px) {
+  .activity-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .activity-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
 .gallery-item {
   border-radius: 20px;
   overflow: hidden;
@@ -639,6 +660,36 @@ header.scrolled {
 .gallery-item:hover .gallery-caption {
   transform: translateY(0);
   opacity: 1;
+}
+
+/* Student Activity Circles */
+.activity-circle {
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1 !important;
+  background: var(--bg-white);
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+  margin: 0 auto; /* Center within grid cell */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  max-width: 200px; /* Prevent them from getting too large on wide screens */
+}
+
+.activity-circle img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.activity-circle:hover {
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 15px 30px rgba(211, 31, 31, 0.1) !important;
+  border-color: var(--primary-light);
 }
 
 /* Q&A Accordion */
@@ -1111,4 +1162,123 @@ footer {
   line-height: 1.6;
   font-size: 1.1rem;
   color: var(--text-dark);
+}
+
+/* Staff Page Specific Styles */
+.staff-page-hero {
+  padding: 8rem 0 4rem;
+  background: linear-gradient(135deg, var(--bg-light) 0%, #fff 100%);
+  text-align: center;
+}
+
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
+  margin-top: 3rem;
+}
+
+.staff-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  transition: var(--transition);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.staff-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border-color: var(--primary-light);
+}
+
+.staff-img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.staff-img i {
+  font-size: 5rem;
+  color: #cbd5e1;
+}
+
+.staff-info {
+  padding: 1.5rem;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.staff-info h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.staff-info p {
+  font-size: 0.95rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.partner-section {
+  padding: 6rem 0;
+  background: var(--bg-light);
+}
+
+.partner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+  align-items: center;
+  justify-items: center;
+}
+
+.partner-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+  transition: var(--transition);
+}
+
+.partner-card:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.partner-logo {
+  max-width: 120px;
+  height: auto;
+  opacity: 0.8;
+  transition: var(--transition);
+  filter: grayscale(100%);
+}
+
+.partner-card:hover .partner-logo {
+  opacity: 1;
+  filter: grayscale(0%);
+}
+
+.partner-name {
+  margin-top: 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
 }
