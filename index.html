@@ -93,6 +93,27 @@
         </div>
     </section>
 
+    <!-- Staff Message -->
+    <section id="staf" class="staff" style="background: white;">
+        <div class="container">
+            <div class="split-panel reverse">
+                <div class="panel-content">
+                    <div class="hero-badge" data-i18n="staff_badge">Message</div>
+                    <h3 data-i18n="staff_title">Sejak masa SMA, saya memiliki mimpi untuk menjadi "jembatan penghubung".</h3>
+                    <p data-i18n="staff_p1"></p>
+                    <p data-i18n="staff_p2"></p>
+                    <p data-i18n="staff_p3"></p>
+                    <p data-i18n="staff_p4"></p>
+                    <p data-i18n="staff_p5"></p>
+                    <p class="staff-signature" data-i18n="staff_signature" data-i18n-html="true"></p>
+                </div>
+                <div class="panel-img">
+                    <img src="images/staff_message.webp" alt="Staf Message">
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Features Section / Why Choose Us -->
     <section class="features" id="features">
         <div class="container">
@@ -233,41 +254,47 @@
                 <h2 data-i18n="fac_title">Fasilitas Kami</h2>
                 <p data-i18n="fac_desc">Perguruan Tinggi Warmadewa berlokasi strategis di Renon, Denpasar. Gedung serbaguna yang nyaman, dengan ruang kerja bergaya kafe.</p>
             </div>
-            
-            <div class="gallery-grid">
-                <div class="gallery-item">
-                    <img src="images/gedung.webp" alt="Gedung sekolah dan kantor BJD">
-                    <div class="gallery-caption" data-i18n="fac_img1">Gedung sekolah dan kantor BJD</div>
+
+            <!-- Category 1: School Facilities -->
+            <div style="margin-bottom: 4rem;">
+                <h3 style="margin-bottom: 1.5rem; color: var(--primary); text-align: center; font-size: 1.8rem;" data-i18n="fac_school_title">Fasilitas Sekolah</h3>
+                <div class="gallery-grid">
+                    <div class="gallery-item">
+                        <img src="images/school_fac_3.webp" alt="Gedung Merdeka">
+                        <div class="gallery-caption" data-i18n="fac_school_img3">Gedung Sekolah & Materi Pembelajaran</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="images/school_fac_1.webp" alt="Lobby">
+                        <div class="gallery-caption" data-i18n="fac_school_img1">Lobby & Ruang Bersantai</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="images/school_fac_2.webp" alt="Office">
+                        <div class="gallery-caption" data-i18n="fac_school_img2">Ruang Kantor & Resepsionis</div>
+                    </div>
                 </div>
-                <div class="gallery-item">
-                    <img src="images/lobby.webp" alt="Lobby">
-                    <div class="gallery-caption" data-i18n="fac_img2">Lobby & Ruang Bersantai</div>
+            </div>
+
+            <!-- Category 2: Dormitory Facilities -->
+            <div>
+                <h3 style="margin-bottom: 1.5rem; color: var(--primary); text-align: center; font-size: 1.8rem;" data-i18n="fac_dorm_title">Fasilitas Asrama</h3>
+                <div class="gallery-grid">
+                    <div class="gallery-item">
+                        <img src="images/dorm_fac_1.webp" alt="Dorm Exterior">
+                        <div class="gallery-caption" data-i18n="fac_dorm_img1">Gedung Asrama</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="images/dorm_fac_2.webp" alt="Dorm Interior">
+                        <div class="gallery-caption" data-i18n="fac_dorm_img2">Fasilitas Kamar Mandi & Wastafel</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="images/dorm_fac_3.webp" alt="Dorm Room">
+                        <div class="gallery-caption" data-i18n="fac_dorm_img3">Interior Kamar Asrama (Tempat Tidur Tingkat & Dapur Kecil)</div>
+                    </div>
                 </div>
             </div>
             
             <div style="text-align: center; margin-top: 3rem;">
-                <h3 style="color: var(--accent-red); margin-bottom: 1rem;" data-i18n="fac_promo">Ada ASRAMA GRATIS untuk 100 MURID PERTAMA !!!</h3>
-            </div>
-        </div>
-    </section>
-
-    <!-- Staff Message -->
-    <section id="staf" class="staff" style="background: white;">
-        <div class="container">
-            <div class="split-panel reverse">
-                <div class="panel-content">
-                    <div class="hero-badge" data-i18n="staff_badge">Message</div>
-                    <h3 data-i18n="staff_title">Sejak masa SMA, saya memiliki mimpi untuk menjadi "jembatan penghubung".</h3>
-                    <p data-i18n="staff_p1"></p>
-                    <p data-i18n="staff_p2"></p>
-                    <p data-i18n="staff_p3"></p>
-                    <p data-i18n="staff_p4"></p>
-                    <p data-i18n="staff_p5"></p>
-                    <p class="staff-signature" data-i18n="staff_signature" data-i18n-html="true"></p>
-                </div>
-                <div class="panel-img">
-                    <img src="images/staff_message.webp" alt="Staf Message">
-                </div>
+                <h3 style="color: var(--accent-red); margin-bottom: 1rem;" data-i18n="fac_promo">Ada ASRAMA GRATIS untuk 60 MURID PERTAMA !!!</h3>
             </div>
         </div>
     </section>
@@ -347,7 +374,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <div class="footer-logo">🇮🇩BALI 🇯🇵JAPAN <span>🌎️DREAM</span></div>
+                    <div class="footer-logo">BALI JAPAN DREAM</div>
                     <p class="footer-desc" data-i18n="footer_desc" data-i18n-html="true">
                         Jl. Merdeka VI No.5, Sumerta Kelod, Kec. Denpasar Tim., Kota Denpasar, Bali 80239<br><br>
                         Kantor BALI JAPAN DREAM di area WARMADEWA COLLEGE.
