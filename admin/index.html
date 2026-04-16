@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン | ADMIN BALI JAPAN DREAM</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="shortcut icon" type="image/webp" href="../images/balijapan_logo.webp">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>表示するにはパスワードを入力してください</h1>
+            <form id="loginForm">
+                <input type="password" id="password" placeholder="••••••••" required>
+                <!-- Simplified Mock reCAPTCHA UI -->
+                <div style="background: #f9f9f9; border: 1px solid #d3d3d3; padding: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-radius: 3px; cursor: pointer;">
+                    <div style="width: 28px; height: 28px; border: 2px solid #c1c1c1; border-radius: 2px;"></div>
+                    <span style="font-size: 14px; color: #555;">私はロボットではありません</span>
+                    <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" style="width: 24px; margin-left: auto;">
+                </div>
+                <button type="submit" id="submitBtn">続行</button>
+            </form>
+            <p id="errorMsg" style="color: #d32f2f; margin-top: 1rem; display: none;">パスワードが正しくありません。</p>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMsg = document.getElementById('errorMsg');
+
+        passwordInput.addEventListener('input', () => {
+            if (passwordInput.value.length > 0) {
+                submitBtn.classList.add('active');
+            } else {
+                submitBtn.classList.remove('active');
+            }
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pass = passwordInput.value;
+            
+            // Replicating the provided password logic
+            if (pass === 'adminbjd') {
+                sessionStorage.setItem('adminAuth', 'true');
+                window.location.href = 'dashboard.html';
+            } else {
+                errorMsg.style.display = 'block';
+                passwordInput.value = '';
+                submitBtn.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

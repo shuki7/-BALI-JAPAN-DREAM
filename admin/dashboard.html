@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | BALI JAPAN DREAM</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" type="image/webp" href="../images/balijapan_logo.webp">
+    <script>
+        // Simple authentication check
+        if (!sessionStorage.getItem('adminAuth')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</head>
+<body class="dashboard-body">
+    <header class="admin-header">
+        <img src="../images/balijapan_logo.webp" alt="Logo" class="admin-logo">
+        <div class="admin-title">
+            <h1>Admin 🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM</h1>
+            <p>ONE FOR ALL, ALL FOR ONE</p>
+            <p style="font-size: 0.9rem; font-weight: normal; color: #666;">~ Sasaran: Melatih dan mengirim 100 orang per tahun ~</p>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <!-- Top Widgets Section -->
+        <div class="top-widgets">
+            <a href="https://docs.google.com/spreadsheets/d/1ospeKA7Cned6wuL_ly5cgJIbol3eJD3YEyyLlSk1Ssg/edit?gid=0#gid=0" target="_blank" class="widget-box task" style="text-decoration: none; color: inherit;">
+                <div style="font-size: 2.5rem; color: #4285F4; margin-bottom: 5px;"><i class="fas fa-tasks"></i></div>
+                <div style="font-weight: bold; font-size: 1.1rem; border-bottom: 2px solid #ccc; padding-bottom: 3px;">TASK</div>
+                <ul style="list-style: none; text-align: left; margin-top: 10px; font-size: 0.8rem; line-height: 1.6;">
+                    <li>✓ ✓ ✓ ✓</li>
+                    <li>—————</li>
+                    <li>—————</li>
+                </ul>
+            </a>
+
+            <div class="widget-box" style="padding: 10px; min-width: 250px;">
+                <iframe src="https://indify.co/widgets/live/calendar/RI9PMXQkId0ERx2jnQID" style="width: 100%; height: 200px; border: none; border-radius: 4px;"></iframe>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <a href="https://docs.google.com/spreadsheets/d/1wepslMQaTAdTmSKDq7ZkEjXrASAi1TPl0FDhoCdIgds/edit?resourcekey=&gid=1808812653#gid=1808812653" target="_blank" class="admin-circle-btn" style="width: 200px; height: 60px; border-radius: 30px; border: 2px solid #ff5252; background: white; color: #ff5252; font-size: 0.8rem;">
+                    <span>Kelas trial bahasa Jepang gratis selama 90 menit!</span>
+                </a>
+                <a href="https://docs.google.com/spreadsheets/d/1cOJ2E_iRHh6EKBm2BFjNkGJypzYbtQPmOqc39Px5Wyo/edit?usp=sharing" target="_blank" class="admin-circle-btn" style="width: 200px; height: 60px; border-radius: 30px; border: 2px solid #ff5252; background: #e53935; color: white; font-size: 0.8rem;">
+                    <span>🎉Terima kasih telah mendaftar</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Button Grid -->
+        <div class="button-grid">
+            <a href="https://drive.google.com/drive/folders/13tFx8snEzPl4hCPzl6zkTIZ0pshjxq0p?usp=sharing" target="_blank" class="admin-circle-btn">
+                <span>①BJD教材</span>
+                <span>bahan ajar</span>
+            </a>
+            <a href="https://drive.google.com/drive/folders/1RriGisTuCL6QyLQ7DqmW28muNrIXWvlT?usp=drive_link" target="_blank" class="admin-circle-btn">
+                <span>②生徒管理</span>
+                <span>Laporan Akademik</span>
+            </a>
+            <a href="https://drive.google.com/drive/folders/1fPztmkS09YMrPN28rA9CBg2lkRSgwGA8?usp=sharing" target="_blank" class="admin-circle-btn">
+                <span>③営業用資料</span>
+                <span>Materi penjualan</span>
+            </a>
+            <div class="admin-circle-btn disabled">
+                <span>④制作デザイン</span>
+                <span>Desain Produksi</span>
+            </div>
+            <a href="https://drive.google.com/drive/folders/12wuqS3H4xaD86rLTJzyhogSbDMnpoOZM?usp=drive_link" target="_blank" class="admin-circle-btn">
+                <span>⑤JOB MATCHING</span>
+            </a>
+            <a href="https://drive.google.com/drive/folders/1IwkwDew-yVic2J_WslF9bwHWFhO19CrC?usp=drive_link" target="_blank" class="admin-circle-btn">
+                <span>⑥学生寮</span>
+                <span>Asrama</span>
+            </a>
+            <a href="https://1drv.ms/f/c/27d1745fc5439787/Epg4DtTJIPZEn7l6fN7iiPYBfk1G_UbaSNtE7MNMyyDGuw?e=oFcKLZ" target="_blank" class="admin-circle-btn">
+                <span>内定者リスト</span>
+                <span>Kandidat yang diterima</span>
+            </a>
+            <a href="https://1drv.ms/f/c/27d1745fc5439787/EnvbglWvKgBOkyGMfbyeCwwBiYvdjT3lE9AQ1YeqH7Dx5A?e=4ReDXP" target="_blank" class="admin-circle-btn">
+                <span>KEIJI Carrier ONE DRIVE</span>
+            </a>
+
+            <!-- Row 2 -->
+            <div class="admin-circle-btn disabled">
+                <span>BATCH① SAKURA</span>
+            </div>
+            <div class="admin-circle-btn disabled">
+                <span>BATCH② HIMAWARI</span>
+            </div>
+            <div class="admin-circle-btn disabled">
+                <span>CLASS MALAM</span>
+            </div>
+            <a href="https://docs.google.com/spreadsheets/d/1x2uZcP8_2pcIaZCdbdwp0bz7rDHkuG2gO8hRXED1HQc/edit?usp=sharing" target="_blank" class="admin-circle-btn">
+                <span>BATCH3</span>
+            </a>
+            <a href="https://docs.google.com/document/d/16lBOWn0RqLJVPIVVzfOlicoTSc_sQwbRgYxbWZJYD8Y/edit?usp=drive_link" target="_blank" class="admin-circle-btn">
+                <span>ASRAMA</span>
+            </a>
+            <a href="https://drive.google.com/drive/folders/10VhK-YJoBKWDmxZoC-rd6G1Txf04Tsif?usp=drive_link" target="_blank" class="admin-circle-btn">
+                <span>契約書雛形</span>
+                <span>Templat kontrak</span>
+            </a>
+            <a href="https://drive.google.com/drive/folders/1JIQiPg6H_tZI3ncsOHvQozynDXSsfbQs?usp=drive_link" target="_blank" class="admin-circle-btn">
+                <span>提携先情報</span>
+                <span>Partner's infomation</span>
+            </a>
+            <div class="admin-circle-btn disabled"></div>
+        </div>
+
+        <!-- Info Sections -->
+        <div class="info-sections">
+            <!-- WiFi Info -->
+            <div class="section">
+                <div class="section-head">
+                    <i class="fas fa-wifi"></i>
+                    <span>Wifi WARMADEWA COLLEGE</span>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>SSID</th>
+                            <th>PASS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="highlight">IT_Room</td><td class="highlight">ITroom2022</td></tr>
+                        <tr><td>Cafetaria</td><td>warcollnet2022</td></tr>
+                        <tr><td>CoWorking</td><td>coworking2022</td></tr>
+                        <tr><td>Warmadewa_Collage</td><td>warcoll2022</td></tr>
+                        <tr><td>Warcoll_Office</td><td>office2022</td></tr>
+                        <tr><td>Laboratorium</td><td>labkom2022</td></tr>
+                        <tr><td>RuangBelajar</td><td>ruangbelajar2022</td></tr>
+                        <tr><td>Perpustakaan</td><td>perpus2022</td></tr>
+                        <tr><td>RuangKelas</td><td>ruangkelas2022</td></tr>
+                        <tr><td>HALL</td><td>warcollhall2022</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bank Info -->
+            <div class="section">
+                <div class="section-head">
+                    <i class="fas fa-university"></i>
+                    <span>口座一覧</span>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>銀行名</th>
+                            <th>口座番号</th>
+                            <th>口座名義</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="highlight">PT BALI JAPAN DREAM</td>
+                            <td>BNI</td>
+                            <td class="highlight">1915673006</td>
+                            <td>PT BALI JAPAN DREAM</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; color: #888; border-top: 1px solid #eee; margin-top: auto;">
+        &copy; 2025 BALI JAPAN DREAM. All Rights Reserved.
+    </footer>
+</body>
+</html>

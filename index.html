@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BALI JAPAN DREAM | Pilihan Visa Tercepat Bekerja di Jepang</title>
-    <meta name="description" content="Wujudkan impian Anda untuk belajar di Bali dan bekerja di Jepang! BALI JAPAN DREAM di Warmadewa College.">
+    <title>🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM | Pilihan Visa Tercepat Bekerja di Jepang</title>
+    <meta name="description" content="Wujudkan impian Anda untuk belajar di Bali dan bekerja di Jepang! 🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM di Warmadewa College.">
     
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -32,12 +32,13 @@
                 <a href="#fasilitas" data-i18n="nav_fasilitas">FASILITAS</a>
                 <a href="#main-programs" data-i18n="nav_program">PROGRAM</a>
                 <a href="staf.html" data-i18n="nav_staf">STAF</a>
-                <a href="#lowongan-kerja" data-i18n="nav_lowongan_kerja">LOWONGAN KERJA</a>
+                <a href="jobs.html" data-i18n="nav_lowongan_kerja">LOWONGAN KERJA</a>
                 <a href="#siswa-baru" data-i18n="nav_siswa_baru">SISWA BARU</a>
                 <a href="#diterima-kerja" data-i18n="nav_diterima_kerja">DITERIMA KERJA</a>
                 <a href="#qa" data-i18n="nav_qa">Q&A</a>
                 <a href="https://wa.me/6285190078685" class="btn-pendaftaran" data-i18n="nav_pendaftaran">PENDAFTARAN</a>
                 <button id="lang-switch" class="btn btn-outline" style="padding: 0.4rem 0.6rem; font-size: 1.2rem; margin-left: 0.5rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;" data-i18n="lang_switch" title="Ganti Bahasa / 言語切替">🇯🇵</button>
+                <a href="recruitment.html" data-i18n="nav_recruitment" style="margin-left: 0.5rem;">採用・提携情報</a>
             </nav>
         </div>
     </header>
@@ -54,10 +55,29 @@
                     <a href="https://wa.me/6285190078685" class="btn btn-accent" target="_blank" data-i18n="btn_register_new">新規体験入校お申し込み</a>
                     <a href="https://wa.me/6285190078685" class="btn btn-outline" target="_blank" data-i18n="btn_free_trial">90 minutes Free Trial Class!!</a>
                 </div>
+                
+                <!-- SNS Follow CTA for Mobile -->
+                <div class="hero-sns-follow" style="margin-top: 2.5rem; text-align: center;">
+                    <p style="font-weight: 800; margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-bullhorn"></i>
+                        <span data-i18n="sns_follow_msg">Dapatkan info terbaru! Jangan lupa follow kami:</span>
+                    </p>
+                    <div style="display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="https://www.instagram.com/balijapandream?igsh=MWc4cXp1YmF1aHRr" target="_blank" style="display: flex; align-items: center; justify-content: center; width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; font-size: 1.8rem; box-shadow: 0 5px 15px rgba(220, 39, 67, 0.4); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.facebook.com/share/1HhWBxygYv/" target="_blank" style="display: flex; align-items: center; justify-content: center; width: 55px; height: 55px; border-radius: 50%; background: #1877F2; color: white; font-size: 1.8rem; box-shadow: 0 5px 15px rgba(24, 119, 242, 0.4); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                            <i class="fab fa-facebook-f" style="margin-top: 2px;"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@balijapandream0?_r=1&_t=ZS-95VeKz6Q40K" target="_blank" style="display: flex; align-items: center; justify-content: center; width: 55px; height: 55px; border-radius: 50%; background: #000000; color: white; font-size: 1.8rem; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="hero-media">
                 <div class="video-wrapper">
-                    <video autoplay muted loop playsinline poster="images/hero.webp" class="hero-video" id="hero-video">
+                    <video autoplay muted loop playsinline preload="metadata" poster="images/hero.webp" class="hero-video" id="hero-video">
                         <source src="images/bjdmovie01.mp4" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
@@ -70,7 +90,7 @@
     </section>
 
     <!-- Location and Philosophy Section -->
-    <section id="lokasi-info" class="location-summary">
+    <section id="lokasi-info" class="location-summary" style="padding-bottom: 2rem;">
         <div class="container">
             <div class="location-logos">
                 <!-- Banner moved to Hero section per user preference -->
@@ -94,7 +114,7 @@
     </section>
 
     <!-- Staff Message -->
-    <section id="staf" class="staff" style="background: white;">
+    <section id="staf" class="staff" style="background: white; padding-top: 1rem;">
         <div class="container">
             <div class="split-panel reverse">
                 <div class="panel-content">
@@ -108,7 +128,33 @@
                     <p class="staff-signature" data-i18n="staff_signature" data-i18n-html="true"></p>
                 </div>
                 <div class="panel-img">
-                    <img src="images/staff_message.webp" alt="Staf Message">
+                    <img src="images/staff_message.webp" alt="Staf Message" loading="lazy">
+                </div>
+            </div>
+
+            <!-- Student Batch Video Showcase -->
+            <div class="video-box-container">
+                <div class="video-wrapper">
+                    <video autoplay muted loop playsinline preload="metadata" poster="images/student_batch_1.webp">
+                        <source src="images/VID_20260413_113306_475.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+
+            <!-- Student Success Records Row -->
+            <div class="success-records-row-home" style="display: flex; gap: 1.5rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; padding: 0 1rem;">
+                <div style="flex: 1; min-width: 200px; max-width: 280px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+                    <img src="images/student_batch_1.webp" alt="Student Batch 1" style="width: 100%; height: auto; display: block;" loading="lazy">
+                </div>
+                <div style="flex: 1; min-width: 200px; max-width: 280px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+                    <img src="images/student_batch_2.webp" alt="Student Batch 2" style="width: 100%; height: auto; display: block;" loading="lazy">
+                </div>
+                <div style="flex: 1; min-width: 200px; max-width: 280px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+                    <img src="images/student_batch_3.webp" alt="Student Batch 3" style="width: 100%; height: auto; display: block;" loading="lazy">
+                </div>
+                <div style="flex: 1; min-width: 200px; max-width: 280px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden;">
+                    <img src="images/student_batch_4.webp" alt="Student Batch 4" style="width: 100%; height: auto; display: block;" loading="lazy">
                 </div>
             </div>
         </div>
@@ -143,6 +189,16 @@
                     <h3 data-i18n="feat4_title">Fasilitas nyaman nomor satu</h3>
                     <p data-i18n="feat4_desc">Lingkungan belajar terbaik di Bali dengan fasilitas yang sangat lengkap.</p>
                 </div>
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-bed"></i></div>
+                    <h3 data-i18n="feat5_title">学生寮完備</h3>
+                    <p data-i18n="feat5_desc">他島からの生徒の受け入れも可能です。エアコン、冷蔵庫、キッチン、シャワー完備</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-university"></i></div>
+                    <h3 data-i18n="feat6_title">ワルマデワ大学の応援体制</h3>
+                    <p data-i18n="feat6_desc">大学各部への啓蒙活動を通じ、学生の日本でのキャリア形成を強力にバックアップしています。</p>
+                </div>
             </div>
         </div>
     </section>
@@ -160,34 +216,50 @@
                     <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
                     <h3 data-i18n="ssw_course_title">Kursus Tokutei Ginou (SSW)</h3>
                     <p class="card-subtitle" data-i18n="ssw_course_subtitle">Penguasaan Bahasa Jepang + Kualifikasi SSW (Kurikulum 6 Bulan)</p>
-                    <div class="card-price" data-i18n="ssw_course_price">Biaya: 20 Juta Rupiah</div>
+                    <div class="card-price" data-i18n="ssw_course_price" data-i18n-html="true" style="background: var(--primary); white-space: normal; text-align: left; display: block; line-height: 1.4; padding: 1.2rem; font-size: 0.95rem;">Biaya: 20 Juta Rupiah</div>
                     <ul class="program-details">
                         <li data-i18n="ssw_course_li1">Masa pelatihan intensif selama 6 bulan.</li>
                         <li data-i18n="ssw_course_li2">Asrama pelajar tersedia gratis bagi yang membutuhkan. *Biaya pemeliharaan dikenakan.</li>
                         <li data-i18n="ssw_course_li3">Latihan penuh waktu (Senin - Sabtu, 09:00 - 16:30).</li>
                         <li data-i18n="ssw_course_li4">Bimbingan intensif untuk lulus JFT A2 atau JLPT N4 + SSW dalam 6 bulan.</li>
                         <li data-i18n="ssw_course_li5">Ujian Specific Skilled Worker (SSW). Biaya ujian sudah termasuk.</li>
-                        <li data-i18n="ssw_course_li6">Bagi siswa yang lulus dalam 6 bulan akan diberikan sertifikat kelulusan (diploma).</li>
+                        <li data-i18n="ssw_course_li6" data-i18n-html="true">Bagi siswa yang lulus dalam 6 bulan akan diberikan sertifikat kelulusan (diploma).</li>
                     </ul>
+                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed rgba(0,0,0,0.1); text-align: center;">
+                        <p style="font-weight: bold; margin-bottom: 0.8rem; font-size: 1.1rem; color: #25D366;">
+                            <i class="fab fa-whatsapp" style="margin-right: 5px;"></i><span data-i18n="wa_group_join_ssw">Grup WA Info (Belum Daftar Boleh Gabung)</span>
+                        </p>
+                        <a href="https://chat.whatsapp.com/BqaegpIKH5n7R50DrQLAvk?mode=gi_t" target="_blank">
+                            <img src="images/wa_group_qr_ssw.webp" alt="WhatsApp Group QR Code" style="max-width: 160px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); margin: 0 auto; transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Course 2: Job Matching -->
                 <div class="main-program-card accent">
                     <div class="card-tag popular" data-i18n="job_matching_badge">SANGAT POPULER</div>
                     <div class="card-icon"><i class="fas fa-handshake"></i></div>
-                    <h3 data-i18n="job_matching_course_title">Kursus Job Matching</h3>
+                    <h3 data-i18n="job_matching_course_title">Kursus Job Matching (Kelas gratis di BJD 3x seminggu bagi yang berminat)</h3>
                     <p class="card-highlight" data-i18n="job_matching_highlight">Tersedia banyak lowongan kerja dari berbagai perusahaan Jepang!</p>
-                    <div class="card-price" data-i18n="job_matching_course_li3" style="background: var(--accent);">Biaya bulanan: 1,0 Juta Rupiah (Tambahan 500rb untuk asrama).</div>
+                    <div class="card-price" data-i18n="job_matching_course_li3" data-i18n-html="true" style="background: var(--accent); white-space: normal; text-align: left; display: block; line-height: 1.4; padding: 1.2rem; font-size: 0.95rem;"><b>Biaya: 20 Juta Rupiah (Bisa dicicil)</b><br>Biaya Registrasi Awal: 5 Juta Rupiah<br>Diberikan Buku/Materi dan Dasi untuk wawancara<br><br><b>Jika asrama diperlukan:</b><br>Tambahan 500rb per bulan.</div>
                     <ul class="program-details">
                         <li data-i18n="job_matching_course_li1">Terbuka bagi seluruh warga Indonesia (termasuk siswa sekolah lain).</li>
                         <li data-i18n="job_matching_course_li1b">Syarat: Sudah memiliki JFT A2/N4 DAN lulus minimal satu ujian SSW.</li>
-                        <li data-i18n="job_matching_course_li2">Bekerja di siang hari dan belajar di malam hari (Senin - Jumat, 18:00 - 21:00).</li>
-                        <li data-i18n="job_matching_course_li4">Fokus pada percakapan setara level JLPT N3.</li>
-                        <li data-i18n="job_matching_course_li5">Bimbingan tata krama, cara sukses wawancara, dan latihan simulasi.</li>
-                        <li data-i18n="job_matching_course_li6">Berbicara dengan banyak relawan Jepang dalam berbagai dialek.</li>
-                        <li data-i18n="job_matching_course_li7">Setelah lulus wawancara dengan perusahaan Jepang und mendapatkan kontrak kerja (Naitei), siswa dinyatakan lulus.</li>
-                        <li data-i18n="job_matching_course_li8">Terbuka untuk luar Bali (Asrama/Kelas Online).</li>
+                        <li data-i18n="job_matching_course_li2">Bekerja di siang hari dan belajar di malam hari (Senin - Jumat, 18:30 - 21:30).</li>
+                        <li data-i18n="job_matching_course_li4">Fokus pada percakapan praktis setara level JLPT N3.</li>
+                        <li data-i18n="job_matching_course_li5">Bimbingan tata krama, tips wawancara perusahaan Jepang, dan simulasi wawancara oleh instruktur ahli.</li>
+                        <li data-i18n="job_matching_course_li6">Setelah lulus wawancara perusahaan Jepang, siswa dapat tetap mengikuti kelas hingga keberangkatan ke Jepang.</li>
+                        <li data-i18n="job_matching_course_li7" data-i18n-html="true"><span style='font-size: 0.9em; color: var(--primary);'>*Bagi yang tidak bisa hadir, biaya Job Matching akan dikenakan setelah mendapatkan Naitei (kontrak kerja) pasca wawancara.</span></li>
+                        <li data-i18n="job_matching_course_li8">Fasilitas asrama tersedia bagi peserta dari luar Bali.</li>
                     </ul>
+                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed rgba(0,0,0,0.1); text-align: center;">
+                        <p style="font-weight: bold; margin-bottom: 0.8rem; font-size: 1.1rem; color: #25D366;">
+                            <i class="fab fa-whatsapp" style="margin-right: 5px;"></i><span data-i18n="wa_group_join">Bergabung dengan Grup WA</span>
+                        </p>
+                        <a href="https://chat.whatsapp.com/GSdtTNrLOVgCKPPNHzZsvA?mode=gi_t" target="_blank">
+                            <img src="images/wa_group_qr.webp" alt="WhatsApp Group QR Code" style="max-width: 160px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); margin: 0 auto; transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -247,12 +319,69 @@
         </div>
     </section>
 
+    <!-- Diterima Kerja (Employment Record) -->
+    <section id="diterima-kerja" class="gallery" style="background: white; padding-top: 4rem;">
+        <div class="container">
+            <div class="section-header">
+                <h2 data-i18n="record_title">採用実績 / DITERIMA KERJA</h2>
+                <p data-i18n="record_desc">Pencapaian siswa-siswi kami yang telah diterima bekerja di perusahaan Jepang!</p>
+            </div>
+            
+            <div class="gallery-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_1.webp" alt="Diterima Kerja 1" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_2.webp" alt="Diterima Kerja 2" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_3.webp" alt="Diterima Kerja 3" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_4.webp" alt="Diterima Kerja 4" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_5.webp" alt="Diterima Kerja 5" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_6.webp" alt="Diterima Kerja 6" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_7.webp" alt="Diterima Kerja 7" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <!-- 2 New Photos Added -->
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_8.webp" alt="Diterima Kerja 8" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_9.webp" alt="Diterima Kerja 9" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+                <div class="gallery-item" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); aspect-ratio: 4/5; background: #f8f9fa;">
+                    <img src="images/record_10.webp" alt="Diterima Kerja 10" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Facilities -->
     <section id="fasilitas" class="gallery">
         <div class="container">
             <div class="section-header">
                 <h2 data-i18n="fac_title">Fasilitas Kami</h2>
                 <p data-i18n="fac_desc">Perguruan Tinggi Warmadewa berlokasi strategis di Renon, Denpasar. Gedung serbaguna yang nyaman, dengan ruang kerja bergaya kafe.</p>
+            </div>
+
+            <!-- Building Tour Video Showcase -->
+            <div class="video-box-container" style="margin-top: 0; margin-bottom: 4rem;">
+                <div class="video-wrapper">
+                    <video controls preload="none" muted playsinline poster="images/school_fac_3.webp" style="max-height: 600px;">
+                        <source src="images/building_tour_bjd.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted); font-style: italic; font-size: 1rem;" data-i18n="fac_video_caption">
+                    Sedikit building tour 🇮🇩BALI 🇯🇵JAPAN 🌏️DREAM Minasan yg di Bali boleh yaa kalau mau main2 k
+                </p>
             </div>
 
             <!-- Category 1: School Facilities -->
@@ -278,15 +407,15 @@
                 <h3 style="margin-bottom: 1.5rem; color: var(--primary); text-align: center; font-size: 1.8rem;" data-i18n="fac_dorm_title">Fasilitas Asrama</h3>
                 <div class="gallery-grid">
                     <div class="gallery-item">
-                        <img src="images/dorm_fac_1.webp" alt="Dorm Exterior">
+                        <img src="images/dorm_fac_1.webp" alt="Dorm Exterior" loading="lazy">
                         <div class="gallery-caption" data-i18n="fac_dorm_img1">Gedung Asrama</div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/dorm_fac_2.webp" alt="Dorm Interior">
+                        <img src="images/dorm_fac_2.webp" alt="Dorm Interior" loading="lazy">
                         <div class="gallery-caption" data-i18n="fac_dorm_img2">Fasilitas Kamar Mandi & Wastafel</div>
                     </div>
                     <div class="gallery-item">
-                        <img src="images/dorm_fac_3.webp" alt="Dorm Room">
+                        <img src="images/dorm_fac_3.webp" alt="Dorm Room" loading="lazy">
                         <div class="gallery-caption" data-i18n="fac_dorm_img3">Interior Kamar Asrama (Tempat Tidur Tingkat & Dapur Kecil)</div>
                     </div>
                 </div>
@@ -299,15 +428,36 @@
     </section>
     
     <!-- Section for Extra Menu Items -->
-    <div id="lowongan-kerja" style="padding-top:80px;"></div>
-    <div id="siswa-baru" style="padding-top:80px;"></div>
-    <div id="diterima-kerja" style="padding-top:80px;"></div>
+    <div id="lowongan-kerja"></div>
+    <div id="siswa-baru"></div>
 
     <!-- CTA Section (Siswa Baru / Diterima Kerja etc proxy) -->
     <section class="cta" style="padding: 0 2rem;">
         <div class="cta-banner">
-            <h2 data-i18n="cta_title">BATCH 4 Dimulai JAN 19, 2026</h2>
-            <p data-i18n="cta_desc">Penerimaan Mahasiswa Baru telah dibuka. Wujudkan impianmu bersama BALI JAPAN DREAM!</p>
+            <h2 data-i18n="cta_title">Batch 5 Dimulai pada 22 Juni 2026!</h2>
+            <p data-i18n="cta_desc">Kesempatan untuk pergi ke Jepang telah tiba! Wujudkan impianmu bersama 🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM!</p>
+            
+            <div style="display: flex; gap: 2rem; justify-content: center; margin: 3rem 0; flex-wrap: wrap;">
+                <img src="images/siswa_baru_1.webp" alt="Penerimaan Siswa Baru 1" style="max-width: 100%; width: 400px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);" loading="lazy">
+                <img src="images/siswa_baru_2.webp" alt="Penerimaan Siswa Baru 2" style="max-width: 100%; width: 400px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);" loading="lazy">
+            </div>
+
+            <!-- Community Group Invitation -->
+            <div class="community-box" style="background: rgba(255,255,255,0.1); padding: 2.5rem; border-radius: 20px; max-width: 600px; margin: 0 auto 3rem; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                <p style="font-size: 1.1rem; margin-bottom: 2rem; color: #fff; line-height: 1.6;" data-i18n="community_join_text"></p>
+                <div style="background: #000; padding: 1.5rem; border-radius: 15px; display: inline-block; box-shadow: 0 15px 35px rgba(0,0,0,0.3);">
+                    <a href="https://chat.whatsapp.com/BqaegpIKH5n7R50DrQLAvk?mode=gi_t" target="_blank" style="display: block; width: 180px; margin: 0 auto;">
+                        <img src="images/wa_group_qr_ssw.webp" alt="WhatsApp Community QR" style="width: 100%; border-radius: 10px;">
+                    </a>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <a href="https://chat.whatsapp.com/BqaegpIKH5n7R50DrQLAvk?mode=gi_t" target="_blank" class="btn btn-outline" style="border-color: #25D366; color: #25D366; background: rgba(37, 211, 102, 0.1); font-weight: 700;">
+                        <i class="fab fa-whatsapp" style="margin-right: 10px; font-size: 1.2rem;"></i>
+                        <span data-i18n="community_wa_btn">WAグループへ参加（入学前でも大歓迎）</span>
+                    </a>
+                </div>
+            </div>
+            
             <a href="https://wa.me/6285190078685" target="_blank" class="btn btn-primary" style="background: white; color: var(--primary); font-size: 1.1rem; padding: 1.2rem 2.5rem;" data-i18n="btn_register_new">PENDAFTARAN SISWA BARU</a>
         </div>
     </section>
@@ -324,44 +474,132 @@
                 <!-- FAQ Item 1 -->
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span data-i18n="q1">Q. Tingkat bahasa Jepang apa yang akan Anda kuasai pada saat Anda mulai bekerja?</span>
+                        <span data-i18n="q1"></span>
                         <i class="fas fa-plus"></i>
                     </div>
                     <div class="faq-answer">
-                        <p data-i18n="a1">A. Setelah 4-6 bulan pelatihan, kami menawarkan kurikulum yang akan memungkinkan Anda untuk mencapai tingkat di mana Anda dapat bekerja di Jepang, berteman, dan menikmati bekerja dalam kehidupan sehari-hari.</p>
+                        <p data-i18n="a1" data-i18n-html="true"></p>
                     </div>
                 </div>
 
                 <!-- FAQ Item 2 -->
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span data-i18n="q2">Q. Panduan apa yang Anda berikan untuk bekerja di Jepang?</span>
+                        <span data-i18n="q2"></span>
                         <i class="fas fa-plus"></i>
                     </div>
                     <div class="faq-answer">
-                        <p data-i18n="a2">A. Kami menyediakan berbagai macam pelatihan, termasuk pelatihan untuk memperdalam pemahaman tentang budaya Jepang, disiplin, tata krama dan aturan di Jepang, dan panduan gaya hidup.</p>
+                        <p data-i18n="a2" data-i18n-html="true"></p>
                     </div>
                 </div>
 
                 <!-- FAQ Item 3 -->
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span data-i18n="q3">Q. Apa itu visa TOKUTEIGINOU (Specified Skilled Worker SSW)?</span>
+                        <span data-i18n="q3"></span>
                         <i class="fas fa-plus"></i>
                     </div>
                     <div class="faq-answer">
-                        <p data-i18n="a3">A. Visa Specified Skilled Worker (SSW) merupakan visa yang diperkenalkan untuk bidang tertentu. Untuk Keterampilan Khusus 1, terdapat 14 sektor industri, dengan masa tinggal maksimal 5 tahun.</p>
+                        <p data-i18n="a3" data-i18n-html="true"></p>
                     </div>
                 </div>
 
                 <!-- FAQ Item 4 -->
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span data-i18n="q4">Q. Apa itu visa GIJINKOKU?</span>
+                        <span data-i18n="q4"></span>
                         <i class="fas fa-plus"></i>
                     </div>
                     <div class="faq-answer">
-                        <p data-i18n="a4">A. Visa kerja di Jepang yang memungkinkan seseorang bekerja di bidang teknologi, pengetahuan kemanusiaan, atau urusan internasional. Syarat utamanya adalah lulusan S1 atau D3.</p>
+                        <p data-i18n="a4" data-i18n-html="true"></p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span data-i18n="q5"></span>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p data-i18n="a5" data-i18n-html="true"></p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 6 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span data-i18n="q6"></span>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p data-i18n="a6" data-i18n-html="true"></p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 7 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span data-i18n="q7"></span>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p data-i18n="a7" data-i18n-html="true"></p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 8 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span data-i18n="q8"></span>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p data-i18n="a8" data-i18n-html="true"></p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 9 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span data-i18n="q9"></span>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p data-i18n="a9" data-i18n-html="true"></p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 10 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span data-i18n="q10"></span>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p data-i18n="a10" data-i18n-html="true"></p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 11 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span data-i18n="q11"></span>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p data-i18n="a11" data-i18n-html="true"></p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 12 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span data-i18n="q12"></span>
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p data-i18n="a12" data-i18n-html="true"></p>
                     </div>
                 </div>
             </div>
@@ -373,7 +611,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <div class="footer-logo">BALI JAPAN DREAM</div>
+                    <div class="footer-logo">🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM</div>
                     <p class="footer-desc" data-i18n="footer_desc" data-i18n-html="true">
                         Jl. Merdeka VI No.5, Sumerta Kelod, Kec. Denpasar Tim., Kota Denpasar, Bali 80239<br><br>
                         Kantor BALI JAPAN DREAM di area WARMADEWA COLLEGE.
@@ -400,7 +638,8 @@
                 <div class="footer-links">
                     <h4 data-i18n="footer_info_lainnya">Informasi Lainnya</h4>
                     <ul>
-                        <li><a href="#lowongan-kerja" data-i18n="nav_lowongan_kerja">LOWONGAN KERJA</a></li>
+                        <li><a href="jobs.html" data-i18n="nav_lowongan_kerja">LOWONGAN KERJA</a></li>
+                        <li><a href="recruitment.html" data-i18n="nav_recruitment">採用・提携情報</a></li>
                         <li><a href="#siswa-baru" data-i18n="nav_siswa_baru">SISWA BARU</a></li>
                         <li><a href="#diterima-kerja" data-i18n="nav_diterima_kerja">DITERIMA KERJA</a></li>
                         <li><a href="#qa" data-i18n="nav_qa">Q&A</a></li>
@@ -409,7 +648,7 @@
             </div>
             
             <div class="footer-bottom">
-                &copy; <script>document.write(new Date().getFullYear())</script> BALI JAPAN DREAM. All Rights Reserved.
+                &copy; 2025 BALI JAPAN DREAM. All Rights Reserved.
             </div>
         </div>
     </footer>
@@ -418,5 +657,9 @@
     <script src="js/translations.js"></script>
     <!-- Custom JS -->
     <script src="js/script.js"></script>
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/6285190078685" class="floating-whatsapp" target="_blank" aria-label="Chat via WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 </body>
 </html>

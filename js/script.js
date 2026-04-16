@@ -78,10 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 5. Language Switcher (I18N)
     const langBtn = document.getElementById('lang-switch');
-    let currentLang = 'id'; // Default language is Indonesian
+    let currentLang = localStorage.getItem('bjd_lang') || 'id'; // Default language is Indonesian
 
     function updateLanguage(lang) {
         if (!translations || !translations[lang]) return;
+
+        // Save selection to localStorage
+        localStorage.setItem('bjd_lang', lang);
 
         // Change HTML lang attribute
         document.documentElement.lang = lang;

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOWONGAN KERJA | 🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM</title>
+    <meta name="description" content="Informasi lowongan kerja dari mitra kami di Jepangmelalui 🇮🇩BALI 🇯🇵JAPAN 🌎️DREAM.">
+    
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/webp" href="images/balijapan_logo.webp">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        .flip-book {
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
+            display: none; /* hidden until initialized */
+            margin: 0 auto;
+        }
+        .page {
+            background-color: #fdfdfd;
+            border: solid 1px #dfdfdf;
+            overflow: hidden;
+        }
+        .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #fff;
+        }
+        /* Page shadow when flipping */
+        .page.--left {
+            border-right: 0;
+            box-shadow: inset -7px 0 30px -7px rgba(0, 0, 0, 0.1);
+        }
+        .page.--right {
+            border-left: 0;
+            box-shadow: inset 7px 0 30px -7px rgba(0, 0, 0, 0.1);
+        }
+        
+        .swipe-hint {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            animation: pulseHint 2s infinite;
+        }
+        
+        @keyframes pulseHint {
+            0% { opacity: 0.5; transform: translateX(-5px); }
+            50% { opacity: 1; transform: translateX(5px); }
+            100% { opacity: 0.5; transform: translateX(-5px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header id="header">
+        <div class="container navbar">
+            <div></div>
+            
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <nav class="nav-links" id="nav-links">
+                <a href="index.html#top">TOP</a>
+                <a href="index.html#staf" data-i18n="nav_greeting">ご挨拶</a>
+                <a href="index.html#fasilitas" data-i18n="nav_fasilitas">FASILITAS</a>
+                <a href="index.html#main-programs" data-i18n="nav_program">PROGRAM</a>
+                <a href="staf.html" data-i18n="nav_staf">STAF</a>
+                <a href="jobs.html" class="active" data-i18n="nav_lowongan_kerja">LOWONGAN KERJA</a>
+                <a href="index.html#siswa-baru" data-i18n="nav_siswa_baru">SISWA BARU</a>
+                <a href="index.html#diterima-kerja" data-i18n="nav_diterima_kerja">DITERIMA KERJA</a>
+                <a href="index.html#qa" data-i18n="nav_qa">Q&A</a>
+                <a href="https://wa.me/6285190078685" class="btn-pendaftaran" data-i18n="nav_pendaftaran">PENDAFTARAN</a>
+                <button id="lang-switch" class="btn btn-outline" style="padding: 0.4rem 0.6rem; font-size: 1.2rem; margin-left: 0.5rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;" data-i18n="lang_switch" title="Ganti Bahasa / 言語切替">🇯🇵</button>
+                <a href="recruitment.html" data-i18n="nav_recruitment" style="margin-left: 0.5rem;">採用・提携情報</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Hero -->
+    <section class="staff-page-hero">
+        <div class="container">
+            <h1 class="gradient-text" data-i18n="jobs_title_page">Lowongan Kerja</h1>
+            <p data-i18n="jobs_desc_page">Informasi lowongan kerja dari mitra kami di Jepang. Silakan buka halaman seperti membaca buku.</p>
+        </div>
+    </section>
+
+    <!-- Book Flip Section -->
+    <section class="jobs-book-section" style="padding: 4rem 1rem 6rem; background: var(--bg-light); display: flex; flex-direction: column; align-items: center;">
+        <div class="container">
+            <div id="book" class="flip-book">
+                <!-- Pages 1 to 12 -->
+                <div class="page"><img src="images/job_1.webp" alt="Job Posting 1"></div>
+                <div class="page"><img src="images/job_2.webp" alt="Job Posting 2"></div>
+                <div class="page"><img src="images/job_3.webp" alt="Job Posting 3"></div>
+                <div class="page"><img src="images/job_4.webp" alt="Job Posting 4"></div>
+                <div class="page"><img src="images/job_5.webp" alt="Job Posting 5"></div>
+                <div class="page"><img src="images/job_6.webp" alt="Job Posting 6"></div>
+                <div class="page"><img src="images/job_7.webp" alt="Job Posting 7"></div>
+                <div class="page"><img src="images/job_8.webp" alt="Job Posting 8"></div>
+                <div class="page"><img src="images/job_9.webp" alt="Job Posting 9"></div>
+                <div class="page"><img src="images/job_10.webp" alt="Job Posting 10"></div>
+                <div class="page"><img src="images/job_11.webp" alt="Job Posting 11"></div>
+                <div class="page"><img src="images/job_12.webp" alt="Job Posting 12"></div>
+                <!-- Menambahkan 7 halaman baru (13 - 19) -->
+                <div class="page"><img src="images/job_13.webp" alt="Job Posting 13"></div>
+                <div class="page"><img src="images/job_14.webp" alt="Job Posting 14"></div>
+                <div class="page"><img src="images/job_15.webp" alt="Job Posting 15"></div>
+                <div class="page"><img src="images/job_16.webp" alt="Job Posting 16"></div>
+                <div class="page"><img src="images/job_17.webp" alt="Job Posting 17"></div>
+                <div class="page"><img src="images/job_18.webp" alt="Job Posting 18"></div>
+                <div class="page"><img src="images/job_19.webp" alt="Job Posting 19"></div>
+            </div>
+            
+            <div class="swipe-hint">
+                <i class="fas fa-hand-pointer"></i> スワイプしてめくる / Swipe to flip
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="margin-top: 0;">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-info">
+                    <img src="images/balijapan_logo.webp" alt="Bali Japan Dream Logo" style="height: 60px; margin-bottom: 1.5rem;">
+                    <p data-i18n="footer_desc"></p>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/share/1HhWBxygYv/" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.instagram.com/balijapandream?igsh=MWc4cXp1YmF1aHRr" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@balijapandream?_t=ZS-8wChBwmSD2n&_r=1" target="_blank"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4 data-i18n="footer_menu_cepat">Menu Cepat</h4>
+                    <ul>
+                        <li><a href="index.html#top">TOP</a></li>
+                        <li><a href="index.html#staf" data-i18n="nav_greeting">PESAN</a></li>
+                        <li><a href="index.html#fasilitas" data-i18n="nav_fasilitas">FASILITAS</a></li>
+                        <li><a href="index.html#main-programs" data-i18n="nav_program">PROGRAM</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4 data-i18n="footer_info_lainnya">Informasi Lainnya</h4>
+                    <ul>
+                        <li><a href="jobs.html" class="active" data-i18n="nav_lowongan_kerja">LOWONGAN KERJA</a></li>
+                        <li><a href="recruitment.html" data-i18n="nav_recruitment">採用・提携情報</a></li>
+                        <li><a href="index.html#qa">Q&A</a></li>
+                        <li><a href="https://wa.me/6285190078685" data-i18n="nav_pendaftaran">PENDAFTARAN</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                &copy; 2025 BALI JAPAN DREAM. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Translation Dictionary -->
+    <script src="js/translations.js"></script>
+    <!-- Custom JS -->
+    <script src="js/script.js"></script>
+    
+    <!-- PageFlip JS -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookEl = document.getElementById('book');
+            bookEl.style.display = 'block';
+            
+            const pageFlip = new St.PageFlip(bookEl, {
+                width: 461, // Base page width
+                height: 651, // Base page height
+                size: "stretch",
+                minWidth: 315,
+                maxWidth: 600,
+                minHeight: 445,
+                maxHeight: 1000,
+                drawShadow: true,
+                showCover: true,
+                mobileScrollSupport: false,
+                usePortrait: true // Enables portrait mode on mobile
+            });
+
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+        });
+    </script>
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/6285190078685" class="floating-whatsapp" target="_blank" aria-label="Chat via WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+</body>
+</html>

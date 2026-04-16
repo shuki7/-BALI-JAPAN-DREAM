@@ -343,13 +343,11 @@ header.scrolled {
 
 .video-wrapper iframe,
 .video-wrapper video {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
+  height: auto;
   border: none;
   object-fit: cover;
+  display: block;
 }
 
 .video-mute-btn {
@@ -1281,4 +1279,100 @@ footer {
   font-size: 0.9rem;
   color: var(--text-muted);
   text-align: center;
+}
+
+/* Floating WhatsApp Button */
+.floating-whatsapp {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 65px;
+    height: 65px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+    z-index: 9999;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: floatWa 3s infinite ease-in-out;
+}
+
+.floating-whatsapp:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    color: white;
+}
+
+@keyframes floatWa {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .floating-whatsapp {
+        bottom: 20px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+        font-size: 2rem;
+    }
+}
+
+/* Video Showcase Styles */
+.video-box-container {
+    max-width: 1000px;
+    margin: 3rem auto 0 auto;
+    padding: 0 1rem;
+    perspective: 1000px;
+}
+
+.video-wrapper {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    background: #000;
+    line-height: 0;
+    transition: transform 0.5s ease;
+}
+
+.video-wrapper:hover {
+    transform: translateY(-5px);
+}
+
+.video-wrapper video {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 600px;
+    object-fit: cover;
+}
+
+/* Specific fix for vertical/portrait videos on mobile */
+@media (max-width: 768px) {
+    .video-box-container {
+        margin-top: 2rem;
+        padding: 0 0.5rem;
+    }
+    .video-wrapper {
+        aspect-ratio: auto; /* Allow the container to follow video's vertical height */
+        border-radius: 12px;
+        border-width: 2px;
+    }
+    .video-wrapper video {
+        max-height: 85vh; /* Allow tall portrait videos on mobile screens */
+        object-fit: contain; /* Don't crop if it's vertical on mobile */
+        background: #000;
+    }
+    .hero-media {
+        max-width: 100%;
+        margin: 1rem auto;
+        padding: 0;
+    }
 }
