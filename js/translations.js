@@ -143,7 +143,7 @@ const translations = {
         job_matching_course_li1: "Terbuka bagi seluruh warga Indonesia (termasuk siswa sekolah lain).",
         job_matching_course_li1b: "Syarat: Sudah memiliki JFT A2/N4 DAN lulus minimal satu ujian SSW.",
         job_matching_course_li2: "Bekerja di siang hari dan belajar di malam hari (Senin - Jumat, 18:30 - 21:30).",
-        job_matching_course_li3: "<b>Biaya: 20 Juta Rupiah (Bisa dicicil)</b><br>Biaya Registrasi Awal: 5 Juta Rupiah<br>Diberikan Buku/Materi dan Dasi untuk wawancara<br><br><b>Jika asrama diperlukan:</b><br>Tambahan 500rb per bulan.",
+        job_matching_course_li3: "<b>Biaya: 20 Juta Rupiah (Bisa dicicil)</b><br>Diberikan Buku/Materi dan Dasi untuk wawancara<br><br><b>Jika asrama diperlukan:</b><br>Tambahan 500rb per bulan.",
         job_matching_course_li4: "Fokus pada percakapan praktis setara level JLPT N3.",
         job_matching_course_li5: "Bimbingan tata krama, tips wawancara perusahaan Jepang, dan simulasi wawancara oleh instruktur ahli.",
         job_matching_course_li6: "Setelah lulus wawancara perusahaan Jepang, siswa dapat tetap mengikuti kelas hingga keberangkatan ke Jepang.",
@@ -208,7 +208,9 @@ const translations = {
         jobs_desc_page: "Informasi lowongan kerja dari mitra kami di Jepang. Silakan buka halaman seperti membaca buku.",
         
         record_title: "DITERIMA KERJA",
-        record_desc: "Berbagai pencapaian siswa-siswi kami yang telah diterima bekerja di perusahaan Jepang!"
+        record_desc: "Berbagai pencapaian siswa-siswi kami yang telah diterima bekerja di perusahaan Jepang!",
+        departure_title: "SENIOR YANG TELAH BERANGKAT KE JEPANG",
+        departure_desc: "Siswa-siswi kami yang telah resmi berangkat untuk memulai karir mereka di Jepang!"
     },
     ja: {
         nav_fasilitas: "施設",
@@ -353,7 +355,7 @@ const translations = {
         job_matching_course_li1: "他の学校の生徒でも、インドネシア人であれば誰でも入学可能です。",
         job_matching_course_li1b: "条件：JFT A2/N4保持 ＋ SSW試験を1つ以上合格していること。",
         job_matching_course_li2: "昼間は働きながら夜間に通学（月〜金の18:30〜21:30）。",
-        job_matching_course_li3: "<b>費用：20JUTAルピア（分割可能）</b><br>初期登録費：500万ルピア<br>教材、 面接用のネクタイ支給<br><br><b>学生寮が必要な場合：</b><br>別途50万ルピア（1ヶ月単位）が必要です。",
+        job_matching_course_li3: "<b>費用：20JUTAルピア（分割可能）</b><br>教材、 面接用のネクタイ支給<br><br><b>学生寮が必要な場合：</b><br>別途50万ルピア（1ヶ月単位）が必要です。",
         job_matching_course_li4: "日本で働くための実戦的な会話力（JLPT N3相当）を目指します。",
         job_matching_course_li5: "日本の企業面接のマナー、コツ、模擬面談を専門の指導者が実施。",
         job_matching_course_li6: "日本企業との面談に受かり日本へ出発までは授業に出席できます。",
@@ -418,6 +420,8 @@ const translations = {
         jobs_desc_page: "日本の提携パートナーからの求人情報一覧です。本をめくるようにスワイプしてご覧ください。",
 
         record_title: "採用実績",
-        record_desc: "日本の提携企業様に採用され、夢への第一歩を踏み出した生徒たちのご紹介です！"
+        record_desc: "日本の提携企業様に採用され、夢への第一歩を踏み出した生徒たちのご紹介です！",
+        departure_title: "日本へ出発した先輩たち",
+        departure_desc: "採用され、いよいよ日本へ出発した生徒たちのご紹介です！"
     }
 };
