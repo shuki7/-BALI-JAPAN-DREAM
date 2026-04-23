@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -160,6 +160,71 @@ export default function StudentNew() {
   const form2 = useForm<Step2Data>({ resolver: zodResolver(step2Schema) as any, defaultValues: { parentRelationship: 'father', parentGender: 'male' } });
 
   const watchSource = form1.watch('source');
+
+  // --- Autosave / Draft logic ---
+  const DRAFT_KEY = 'student_new_draft';
+  const [hasDraft, setHasDraft] = useState(false);
+
+  useEffect(() => {
+    const draftStr = localStorage.getItem(DRAFT_KEY);
+    if (draftStr) {
+      try {
+        const draft = JSON.parse(draftStr);
+        if (draft.step) setStep(draft.step);
+        if (draft.step1Data) {
+          setStep1Data(draft.step1Data);
+          form1.reset(draft.step1Data);
+        }
+        if (draft.step2Data) {
+          setStep2Data(draft.step2Data);
+          form2.reset(draft.step2Data);
+        }
+        if (draft.step3Data) {
+          setStep3Data(draft.step3Data);
+        }
+        setHasDraft(true);
+      } catch (e) {
+        console.error('Failed to parse draft', e);
+      }
+    }
+  }, [form1, form2]);
+
+  const form1Values = form1.watch();
+  const form2Values = form2.watch();
+
+  useEffect(() => {
+    const dataToSave = {
+      step,
+      step1Data: Object.keys(form1Values).length > 0 ? form1Values : step1Data,
+      step2Data: Object.keys(form2Values).length > 0 ? form2Values : step2Data,
+      step3Data,
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(dataToSave));
+  }, [step, form1Values, form2Values, step3Data, step1Data, step2Data]);
+
+  const clearDraft = () => {
+    if (confirm('下書きを削除して最初からやり直しますか？（写真と書類は再度選択が必要です）')) {
+      localStorage.removeItem(DRAFT_KEY);
+      setStep(1);
+      setStep1Data(null);
+      setStep2Data(null);
+      form1.reset({ nationality: 'Indonesia', gender: 'male', programType: 'tokutei_ginou', source: 'direct', batchNumber: 5, educationLevel: 'smk', fullName: '', dateOfBirth: '', birthPlace: '', address: '', city: '', province: '', whatsapp: '' });
+      form2.reset({ parentRelationship: 'father', parentGender: 'male', parentName: '', parentNik: '', parentWhatsapp: '', parentAddress: '', parentCity: '', parentProvince: '', parentOccupation: '' });
+      setStep3Data({
+        educationPaymentMethod: 'lump_sum',
+        educationAmount: 0,
+        educationInstallments: 3,
+        educationSchedules: Array(5).fill({ dueDate: '', amount: 0, isPaid: false, notes: '' }),
+        hasDorm: false,
+        dormAmount: 500000,
+        hasJM: false,
+        jmAmount: 0,
+      });
+      setPhotos([]);
+      setEduDocs([]);
+      setHasDraft(false);
+    }
+  };
 
   const onStep1Submit = (data: Step1Data) => {
     setStep1Data(data);
@@ -404,6 +469,10 @@ export default function StudentNew() {
         alert('Googleトークンが期限切れです。再ログインして写真をアップロードしてください。');
       }
 
+      // 下書きをクリア
+      localStorage.removeItem(DRAFT_KEY);
+      setHasDraft(false);
+
       navigate('/students');
     } catch (err) {
       console.error(err);
@@ -420,6 +489,18 @@ export default function StudentNew() {
   return (
     <div style={{ maxWidth: 760, margin: '0 auto' }}>
       <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 24 }}>新規生徒登録</h1>
+
+      {hasDraft && (
+        <div style={{ background: '#e0f2fe', borderLeft: '4px solid #0284c7', padding: '12px 16px', borderRadius: '0 8px 8px 0', marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#0369a1' }}>前回の下書きを復元しました</div>
+            <div style={{ fontSize: 12, color: '#0284c7', marginTop: 4 }}>※写真や書類は復元されないため、再アップロードしてください。</div>
+          </div>
+          <button type="button" onClick={clearDraft} style={{ background: '#fff', border: '1px solid #bae6fd', color: '#0369a1', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+            下書きをクリアして最初から
+          </button>
+        </div>
+      )}
 
       {/* Step indicator */}
       <div style={{ display: 'flex', marginBottom: 28 }}>
