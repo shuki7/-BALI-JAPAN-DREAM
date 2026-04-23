@@ -57,6 +57,14 @@ function convertStudent(id: string, data: any): Student {
     departureDate: toDateOpt(data.departureDate),
     coeIssueDate: toDateOpt(data.coeIssueDate),
     coeCancellationDate: toDateOpt(data.coeCancellationDate),
+    jftPlannedDate: toDateOpt(data.jftPlannedDate),
+    jftPassedDate: toDateOpt(data.jftPassedDate),
+    sswPlannedDate: toDateOpt(data.sswPlannedDate),
+    sswPassedDate: toDateOpt(data.sswPassedDate),
+    interviews: data.interviews?.map((i: any) => ({
+      ...i,
+      date: toDate(i.date),
+    })),
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
   } as Student;

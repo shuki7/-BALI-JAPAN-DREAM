@@ -89,6 +89,16 @@ export interface Student {
   coeIssueDate?: Date;
   coeCancellationDate?: Date;
   driveFolderId?: string;
+  // 試験管理
+  jftPlannedDate?: Date;
+  jftPassedDate?: Date;
+  sswCategory?: string;
+  sswPlannedDate?: Date;
+  sswPassedDate?: Date;
+  
+  // 面接管理
+  interviews?: { date: Date; notes?: string }[];
+
   notes?: string;
   createdAt: Date;
   updatedAt: Date;

@@ -81,6 +81,16 @@ export const translations = {
     log_content: '内容',
     staff_name: '担当スタッフ',
     
+    exam_interview: '試験・面接',
+    jft_planned: 'JFT 受験予定日',
+    jft_passed_date: 'JFT 合格日',
+    ssw_category: 'SSW 職種',
+    ssw_planned: 'SSW 受験予定日',
+    ssw_passed_date: 'SSW 合格日',
+    interview_info: '面接情報',
+    interview_date: '面接日時',
+    interview_notes: '考察・メモ',
+    
     guarantor_info: '保証人基本情報',
     required_fields: '※ 全項目必須です',
     contact_info: '保証人連絡先',
@@ -195,6 +205,16 @@ export const translations = {
     add_log: 'Tambah Catatan',
     log_content: 'Isi Catatan',
     staff_name: 'Staf Penanggung Jawab',
+    
+    exam_interview: 'Ujian & Wawancara',
+    jft_planned: 'Rencana Ujian JFT',
+    jft_passed_date: 'Tanggal Lulus JFT',
+    ssw_category: 'Kategori SSW',
+    ssw_planned: 'Rencana Ujian SSW',
+    ssw_passed_date: 'Tanggal Lulus SSW',
+    interview_info: 'Informasi Wawancara',
+    interview_date: 'Tanggal Wawancara',
+    interview_notes: 'Catatan/Evaluasi',
     
     guarantor_info: 'Informasi Dasar Penjamin',
     required_fields: '※ Semua kolom wajib diisi',

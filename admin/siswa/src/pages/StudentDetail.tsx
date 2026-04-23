@@ -21,7 +21,26 @@ import { translations } from '../translations';
 import { useAuth } from '../context/AuthContext';
 import type { StudentStatus, DocumentType, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
 
-const TABS_KEYS = ['basic', 'family', 'payment', 'bank', 'documents', 'departure', 'notes', 'logs'];
+const SSW_CATEGORIES = [
+  'SSW 介護',
+  'SSW ビルクリーニング',
+  'SSW 工業製品製造業',
+  'SSW 建設',
+  'SSW 造船・舶用工業',
+  'SSW 自動車整備',
+  'SSW 航空',
+  'SSW 宿泊',
+  'SSW 農業',
+  'SSW 漁業',
+  'SSW 飲食料品製造業',
+  'SSW 外食業',
+  'SSW 自動車運送業',
+  'SSW 鉄道',
+  'SSW 林業',
+  'SSW 木材産業',
+];
+
+const TABS_KEYS = ['basic', 'family', 'payment', 'bank', 'documents', 'departure', 'notes', 'logs', 'exams'];
 
 const inputStyle = {
   width: '100%',
@@ -86,7 +105,7 @@ export default function StudentDetail() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(0);
   const [editModal, setEditModal] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Record<string, string | boolean | number>>({});
+  const [editData, setEditData] = useState<Record<string, any>>({});
 
   const { data: student, isLoading } = useQuery({
     queryKey: ['student', id],
@@ -179,6 +198,7 @@ export default function StudentDetail() {
     departure: language === 'ja' ? '渡航情報' : 'Informasi Keberangkatan',
     notes: t.memo,
     logs: t.daily_log,
+    exams: t.exam_interview,
   };
 
   if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>読み込み中...</div>;
@@ -679,6 +699,87 @@ export default function StudentDetail() {
       )}
 
 
+      {/* Tab 8: 試験・面接 */}
+      {activeTab === TABS_KEYS.indexOf('exams') && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+            <button
+              onClick={() => {
+                setEditModal('exams');
+                setEditData({
+                  jftPlannedDate: student.jftPlannedDate ? format(student.jftPlannedDate, 'yyyy-MM-dd') : '',
+                  jftPassedDate: student.jftPassedDate ? format(student.jftPassedDate, 'yyyy-MM-dd') : '',
+                  sswCategory: student.sswCategory || '',
+                  sswPlannedDate: student.sswPlannedDate ? format(student.sswPlannedDate, 'yyyy-MM-dd') : '',
+                  sswPassedDate: student.sswPassedDate ? format(student.sswPassedDate, 'yyyy-MM-dd') : '',
+                });
+              }}
+              style={{ padding: '6px 14px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
+            >
+              {language === 'ja' ? '試験情報を編集' : 'Edit Info Ujian'}
+            </button>
+          </div>
+
+          {/* JFT-A2 Section */}
+          <div style={{ background: '#fff', borderRadius: 10, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginBottom: 16 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 12px 0', color: '#CC0000' }}>JFT-A2</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <InfoRow label={t.jft_planned} value={student.jftPlannedDate ? format(student.jftPlannedDate, 'dd/MM/yyyy') : undefined} />
+              <InfoRow label={t.jft_passed_date} value={student.jftPassedDate ? <Badge color="#166534" bg="#dcfce7">{format(student.jftPassedDate, 'dd/MM/yyyy')}</Badge> : undefined} />
+            </div>
+          </div>
+
+          {/* SSW Section */}
+          <div style={{ background: '#fff', borderRadius: 10, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginBottom: 16 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 12px 0', color: '#CC0000' }}>SSW (Tokutei Ginou)</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <InfoRow label={t.ssw_category} value={student.sswCategory} />
+              <div />
+              <InfoRow label={t.ssw_planned} value={student.sswPlannedDate ? format(student.sswPlannedDate, 'dd/MM/yyyy') : undefined} />
+              <InfoRow label={t.ssw_passed_date} value={student.sswPassedDate ? <Badge color="#166534" bg="#dcfce7">{format(student.sswPassedDate, 'dd/MM/yyyy')}</Badge> : undefined} />
+            </div>
+          </div>
+
+          {/* Interviews Section */}
+          <div style={{ background: '#fff', borderRadius: 10, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#CC0000' }}>{t.interview_info}</h3>
+              <button
+                onClick={() => {
+                  setEditModal('interviews');
+                  setEditData({ interviews: student.interviews || [] });
+                }}
+                style={{ padding: '6px 14px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
+              >
+                {language === 'ja' ? '面接を追加・編集' : 'Tambah/Edit Wawancara'}
+              </button>
+            </div>
+            {student.interviews && student.interviews.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {student.interviews.map((iv, idx) => (
+                  <div key={idx} style={{ padding: 12, borderLeft: '3px solid #CC0000', background: '#f9fafb', borderRadius: '0 8px 8px 0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{language === 'ja' ? `第${idx + 1}回 面接` : `Wawancara Ke-${idx + 1}`}</div>
+                      <div style={{ fontSize: 12, color: '#666' }}>📅 {format(iv.date, 'yyyy/MM/dd HH:mm')}</div>
+                    </div>
+                    {iv.notes && (
+                      <div style={{ fontSize: 12, color: '#333', whiteSpace: 'pre-wrap', background: '#fff', padding: 8, borderRadius: 4, marginTop: 4 }}>
+                        <strong>{t.interview_notes}:</strong><br />
+                        {iv.notes}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: 20, color: '#aaa', fontSize: 13 }}>
+                {language === 'ja' ? '面接記録がありません' : 'Belum ada catatan wawancara'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Edit Modal: basic */}
       {editModal === 'basic' && (
         <Modal title="基本情報を編集" onClose={() => setEditModal(null)}>
@@ -990,6 +1091,129 @@ export default function StudentDetail() {
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
               {t.save}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Modal: exams */}
+      {editModal === 'exams' && (
+        <Modal title={language === 'ja' ? '試験情報を編集' : 'Edit Info Ujian'} onClose={() => setEditModal(null)}>
+          <div style={{ marginBottom: 16, borderBottom: '1px solid #eee', paddingBottom: 10 }}>
+            <h4 style={{ margin: '0 0 10px 0', fontSize: 14 }}>JFT-A2</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>{t.jft_planned}</label>
+                <input type="date" value={String(editData.jftPlannedDate || '')} onChange={(e) => setEditData(p => ({ ...p, jftPlannedDate: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>{t.jft_passed_date}</label>
+                <input type="date" value={String(editData.jftPassedDate || '')} onChange={(e) => setEditData(p => ({ ...p, jftPassedDate: e.target.value }))} style={inputStyle} />
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <h4 style={{ margin: '0 0 10px 0', fontSize: 14 }}>SSW</h4>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>{t.ssw_category}</label>
+              <select value={String(editData.sswCategory || '')} onChange={(e) => setEditData(p => ({ ...p, sswCategory: e.target.value }))} style={inputStyle}>
+                <option value="">未選択</option>
+                {SSW_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>{t.ssw_planned}</label>
+                <input type="date" value={String(editData.sswPlannedDate || '')} onChange={(e) => setEditData(p => ({ ...p, sswPlannedDate: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>{t.ssw_passed_date}</label>
+                <input type="date" value={String(editData.sswPassedDate || '')} onChange={(e) => setEditData(p => ({ ...p, sswPassedDate: e.target.value }))} style={inputStyle} />
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
+            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button
+              onClick={() => {
+                const data: any = { ...editData };
+                if (data.jftPlannedDate) data.jftPlannedDate = new Date(data.jftPlannedDate);
+                if (data.jftPassedDate) data.jftPassedDate = new Date(data.jftPassedDate);
+                if (data.sswPlannedDate) data.sswPlannedDate = new Date(data.sswPlannedDate);
+                if (data.sswPassedDate) data.sswPassedDate = new Date(data.sswPassedDate);
+                updateMutation.mutate(data);
+              }}
+              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+            >
+              保存
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Modal: interviews */}
+      {editModal === 'interviews' && (
+        <Modal title={t.interview_info} onClose={() => setEditModal(null)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[0, 1, 2].map(idx => {
+              const current = (editData.interviews as any[])?.[idx] || { date: '', notes: '' };
+              let dateVal = '';
+              if (current.date) {
+                const d = new Date(current.date);
+                if (!isNaN(d.getTime())) {
+                  dateVal = format(d, "yyyy-MM-dd'T'HH:mm");
+                }
+              }
+              
+              return (
+                <div key={idx} style={{ border: '1px solid #eee', padding: 12, borderRadius: 8 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 8 }}>{language === 'ja' ? `第${idx + 1}回 面接` : `Wawancara Ke-${idx + 1}`}</div>
+                  <div style={{ marginBottom: 8 }}>
+                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>{t.interview_date}</label>
+                    <input
+                      type="datetime-local"
+                      value={dateVal}
+                      onChange={(e) => {
+                        const newIv = [...(editData.interviews as any[] || [])];
+                        newIv[idx] = { ...current, date: e.target.value };
+                        setEditData(p => ({ ...p, interviews: newIv }));
+                      }}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>{t.interview_notes}</label>
+                    <textarea
+                      value={current.notes || ''}
+                      onChange={(e) => {
+                        const newIv = [...(editData.interviews as any[] || [])];
+                        newIv[idx] = { ...current, notes: e.target.value };
+                        setEditData(p => ({ ...p, interviews: newIv }));
+                      }}
+                      style={{ ...inputStyle, height: 60, resize: 'vertical' }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
+            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button
+              onClick={() => {
+                const ivs = (editData.interviews as any[])
+                  .filter(iv => iv && iv.date)
+                  .map(iv => ({
+                    ...iv,
+                    date: new Date(iv.date)
+                  }))
+                  .sort((a, b) => a.date.getTime() - b.date.getTime());
+                
+                updateMutation.mutate({ interviews: ivs });
+              }}
+              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+            >
+              保存
             </button>
           </div>
         </Modal>
