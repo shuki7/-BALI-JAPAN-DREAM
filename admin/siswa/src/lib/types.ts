@@ -247,12 +247,30 @@ export interface StaffMember {
   fullName: string;
   fullNameKana?: string;
   role: 'teacher' | 'staff' | 'management' | 'other';
-  specialty?: string; // For teachers, e.g. "Japanese Language"
+  specialty?: string;
   phone: string;
   whatsapp?: string;
   email?: string;
   address?: string;
+  
+  // New fields
+  contractDate?: Date;
   joinedDate?: Date;
+  contractPeriod?: string; // e.g., "1 year", "Permanent"
+  salary?: number;
+  benefits?: string;
+  others?: string;
+  
+  // SNS
+  instagramAccount?: string;
+  tiktokAccount?: string;
+  facebookAccount?: string;
+  
+  // Media & Docs
+  photos?: { fileId: string; url: string; caption?: string }[];
+  contractFileId?: string;
+  contractFileUrl?: string;
+  
   isActive: boolean;
   notes?: string;
   createdAt: Date;

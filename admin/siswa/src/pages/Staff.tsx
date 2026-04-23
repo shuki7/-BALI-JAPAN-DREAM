@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getStaffMembers, addStaffMember, updateStaffMember, deleteStaffMember } from '../lib/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations';
+import { useAuth } from '../context/AuthContext';
+import { GDriveService } from '../lib/gdrive';
+import { convertPhotoToWebP } from '../lib/imageUtils';
 import type { StaffMember } from '../lib/types';
 
 const inputStyle = {
@@ -41,7 +44,15 @@ const emptyForm = {
   whatsapp: '',
   email: '',
   address: '',
+  contractDate: '',
   joinedDate: '',
+  contractPeriod: '',
+  salary: 0,
+  benefits: '',
+  others: '',
+  instagramAccount: '',
+  tiktokAccount: '',
+  facebookAccount: '',
   isActive: true,
   notes: '',
 };
@@ -50,11 +61,18 @@ export default function Staff() {
   const { language } = useLanguage();
   const t = translations[language];
   const queryClient = useQueryClient();
+  const { googleToken } = useAuth();
   const { data: staff = [], isLoading } = useQuery({ queryKey: ['staffMembers'], queryFn: getStaffMembers });
 
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState<StaffMember | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
+
+  // Files state
+  const [photos, setPhotos] = useState<{ blob: Blob; previewUrl: string; caption: string }[]>([]);
+  const [contractFile, setContractFile] = useState<File | null>(null);
 
   const addMutation = useMutation({
     mutationFn: (data: Omit<StaffMember, 'id'>) => addStaffMember(data),
@@ -74,6 +92,8 @@ export default function Staff() {
   const openAdd = () => {
     setEditTarget(null);
     setForm(emptyForm);
+    setPhotos([]);
+    setContractFile(null);
     setShowModal(true);
   };
 
@@ -88,33 +108,124 @@ export default function Staff() {
       whatsapp: s.whatsapp || '',
       email: s.email || '',
       address: s.address || '',
+      contractDate: s.contractDate ? new Date(s.contractDate).toISOString().split('T')[0] : '',
       joinedDate: s.joinedDate ? new Date(s.joinedDate).toISOString().split('T')[0] : '',
+      contractPeriod: s.contractPeriod || '',
+      salary: s.salary || 0,
+      benefits: s.benefits || '',
+      others: s.others || '',
+      instagramAccount: s.instagramAccount || '',
+      tiktokAccount: s.tiktokAccount || '',
+      facebookAccount: s.facebookAccount || '',
       isActive: s.isActive,
       notes: s.notes || '',
     });
+    setPhotos([]); // Reset local photos (we show existing ones from s.photos separately if needed)
+    setContractFile(null);
     setShowModal(true);
   };
 
-  const handleSave = () => {
-    const data: Omit<StaffMember, 'id'> = {
-      fullName: form.fullName,
-      fullNameKana: form.fullNameKana || undefined,
-      role: form.role,
-      specialty: form.specialty || undefined,
-      phone: form.phone,
-      whatsapp: form.whatsapp || undefined,
-      email: form.email || undefined,
-      address: form.address || undefined,
-      joinedDate: form.joinedDate ? new Date(form.joinedDate) : undefined,
-      isActive: form.isActive,
-      notes: form.notes || undefined,
-      createdAt: editTarget?.createdAt || new Date(),
-      updatedAt: new Date(),
-    };
-    if (editTarget) {
-      updateMutation.mutate({ id: editTarget.id, data });
-    } else {
-      addMutation.mutate(data);
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const availableSlots = 5 - (editTarget?.photos?.length || 0) - photos.length;
+    if (availableSlots <= 0) {
+      alert(language === 'ja' ? '写真は最大5枚までです。' : 'Maksimal 5 foto.');
+      return;
+    }
+
+    for (const file of files.slice(0, availableSlots)) {
+      try {
+        const webpBlob = await convertPhotoToWebP(file);
+        const previewUrl = URL.createObjectURL(webpBlob);
+        setPhotos(prev => [...prev, { blob: webpBlob, previewUrl, caption: '' }]);
+      } catch (err) {
+        console.error('Failed to convert photo', err);
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    setSubmitting(true);
+    setUploadProgress(language === 'ja' ? '準備中...' : 'Menyiapkan...');
+    
+    try {
+      let finalPhotos = editTarget?.photos || [];
+      let finalContractFileId = editTarget?.contractFileId;
+      let finalContractFileUrl = editTarget?.contractFileUrl;
+
+      // Upload new photos to GDrive if token exists
+      if (googleToken && photos.length > 0) {
+        setUploadProgress(language === 'ja' ? '写真をアップロード中...' : 'Mengunggah foto...');
+        const drive = new GDriveService(googleToken);
+        const rootId = import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID;
+        
+        // Staff folder (one folder per staff)
+        const staffFolderId = await drive.createFolder(`Staff_${form.fullName || 'New'}_${Date.now()}`, rootId);
+        
+        for (let i = 0; i < photos.length; i++) {
+          const p = photos[i];
+          const file = new File([p.blob], `staff_photo_${i + 1}_${Date.now()}.webp`, { type: 'image/webp' });
+          const fileId = await drive.uploadFile(file, staffFolderId);
+          await drive.makePublic(fileId);
+          const url = drive.getViewUrl(fileId);
+          finalPhotos = [...finalPhotos, { fileId, url, caption: p.caption }];
+        }
+      }
+
+      // Upload contract if changed
+      if (googleToken && contractFile) {
+        setUploadProgress(language === 'ja' ? '契約書をアップロード中...' : 'Mengunggah kontrak...');
+        const drive = new GDriveService(googleToken);
+        const rootId = import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID;
+        
+        const staffFolderId = await drive.createFolder(`Staff_Docs_${form.fullName || 'New'}_${Date.now()}`, rootId);
+        const fileId = await drive.uploadFile(contractFile, staffFolderId);
+        await drive.makePublic(fileId);
+        finalContractFileId = fileId;
+        finalContractFileUrl = drive.getViewUrl(fileId);
+      }
+
+      const data: Omit<StaffMember, 'id'> = {
+        fullName: form.fullName,
+        fullNameKana: form.fullNameKana || undefined,
+        role: form.role,
+        specialty: form.specialty || undefined,
+        phone: form.phone,
+        whatsapp: form.whatsapp || undefined,
+        email: form.email || undefined,
+        address: form.address || undefined,
+        contractDate: form.contractDate ? new Date(form.contractDate) : undefined,
+        joinedDate: form.joinedDate ? new Date(form.joinedDate) : undefined,
+        contractPeriod: form.contractPeriod || undefined,
+        salary: Number(form.salary) || undefined,
+        benefits: form.benefits || undefined,
+        others: form.others || undefined,
+        instagramAccount: form.instagramAccount || undefined,
+        tiktokAccount: form.tiktokAccount || undefined,
+        facebookAccount: form.facebookAccount || undefined,
+        photos: finalPhotos,
+        contractFileId: finalContractFileId,
+        contractFileUrl: finalContractFileUrl,
+        isActive: form.isActive,
+        notes: form.notes || undefined,
+        createdAt: editTarget?.createdAt || new Date(),
+        updatedAt: new Date(),
+      };
+
+      if (editTarget) {
+        await updateMutation.mutateAsync({ id: editTarget.id, data });
+      } else {
+        await addMutation.mutateAsync(data);
+      }
+      
+      setPhotos([]);
+      setContractFile(null);
+    } catch (err) {
+      console.error('Save failed', err);
+      alert('Failed to save staff member');
+    } finally {
+      setSubmitting(false);
+      setUploadProgress('');
     }
   };
 
@@ -210,7 +321,7 @@ export default function Staff() {
       {showModal && (
         <Modal title={editTarget ? (language === 'ja' ? 'スタッフを編集' : 'Edit Staf') : (language === 'ja' ? 'スタッフを追加' : 'Tambah Staf')} onClose={() => setShowModal(false)}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
+            <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '氏名 *' : 'Nama Lengkap *'}</label>
               <input type="text" value={form.fullName} onChange={(e) => setForm(p => ({ ...p, fullName: e.target.value }))} style={inputStyle} />
             </div>
@@ -239,30 +350,119 @@ export default function Staff() {
               <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>WhatsApp</label>
               <input type="text" value={form.whatsapp} onChange={(e) => setForm(p => ({ ...p, whatsapp: e.target.value }))} style={inputStyle} />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
+            <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? 'メール' : 'Email'}</label>
               <input type="email" value={form.email} onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '住所' : 'Alamat'}</label>
-              <input type="text" value={form.address} onChange={(e) => setForm(p => ({ ...p, address: e.target.value }))} style={inputStyle} />
+
+            <div style={{ gridColumn: '1 / -1', height: 1, background: '#eee', margin: '8px 0' }} />
+
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.contract_date}</label>
+              <input type="date" value={form.contractDate} onChange={(e) => setForm(p => ({ ...p, contractDate: e.target.value }))} style={inputStyle} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '入社日' : 'Tanggal Masuk'}</label>
               <input type="date" value={form.joinedDate} onChange={(e) => setForm(p => ({ ...p, joinedDate: e.target.value }))} style={inputStyle} />
             </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.contract_period}</label>
+              <input type="text" value={form.contractPeriod} placeholder="例: 1年" onChange={(e) => setForm(p => ({ ...p, contractPeriod: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.salary} (IDR)</label>
+              <input type="number" value={form.salary} onChange={(e) => setForm(p => ({ ...p, salary: Number(e.target.value) }))} style={inputStyle} />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.benefits}</label>
+              <textarea value={form.benefits} onChange={(e) => setForm(p => ({ ...p, benefits: e.target.value }))} style={{ ...inputStyle, height: 40, resize: 'vertical' }} />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1', height: 1, background: '#eee', margin: '8px 0' }} />
+
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>Instagram</label>
+              <input type="text" value={form.instagramAccount} placeholder="@username" onChange={(e) => setForm(p => ({ ...p, instagramAccount: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>TikTok</label>
+              <input type="text" value={form.tiktokAccount} placeholder="@username" onChange={(e) => setForm(p => ({ ...p, tiktokAccount: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>Facebook</label>
+              <input type="text" value={form.facebookAccount} placeholder="profile link" onChange={(e) => setForm(p => ({ ...p, facebookAccount: e.target.value }))} style={inputStyle} />
+            </div>
+            
+            <div style={{ gridColumn: '1 / -1', height: 1, background: '#eee', margin: '8px 0' }} />
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 8 }}>{t.staff_photos} (Max 5)</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+                {/* Existing Photos */}
+                {editTarget?.photos?.map((p, idx) => (
+                  <div key={idx} style={{ position: 'relative' }}>
+                    <img src={p.url} alt="existing" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }} />
+                    <button type="button" onClick={() => {
+                      if (confirm('Delete this photo?')) {
+                        const newPhotos = editTarget.photos?.filter((_, i) => i !== idx);
+                        updateMutation.mutate({ id: editTarget.id, data: { photos: newPhotos } });
+                      }
+                    }} style={{ position: 'absolute', top: -4, right: -4, background: '#CC0000', color: '#fff', border: 'none', borderRadius: '50%', width: 16, height: 16, fontSize: 10, cursor: 'pointer' }}>✕</button>
+                  </div>
+                ))}
+                {/* New Photo Selection */}
+                {photos.map((p, idx) => (
+                  <div key={idx} style={{ position: 'relative' }}>
+                    <img src={p.previewUrl} alt="new" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, border: '2px solid #CC0000' }} />
+                    <button type="button" onClick={() => setPhotos(prev => prev.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: -4, right: -4, background: '#666', color: '#fff', border: 'none', borderRadius: '50%', width: 16, height: 16, fontSize: 10, cursor: 'pointer' }}>✕</button>
+                  </div>
+                ))}
+                {photos.length + (editTarget?.photos?.length || 0) < 5 && (
+                  <label style={{ width: 60, height: 60, border: '2px dashed #ddd', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#888', fontSize: 20 }}>
+                    +
+                    <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} style={{ display: 'none' }} />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.contract_upload}</label>
+              {editTarget?.contractFileUrl && (
+                <div style={{ marginBottom: 8, fontSize: 12 }}>
+                  <a href={editTarget.contractFileUrl} target="_blank" rel="noreferrer" style={{ color: '#CC0000', textDecoration: 'underline' }}>
+                    📄 {language === 'ja' ? '現在の契約書を表示' : 'Lihat kontrak saat ini'}
+                  </a>
+                </div>
+              )}
+              <input type="file" onChange={(e) => setContractFile(e.target.files?.[0] || null)} style={{ fontSize: 12 }} />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1', height: 1, background: '#eee', margin: '8px 0' }} />
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.others}</label>
+              <textarea value={form.others} onChange={(e) => setForm(p => ({ ...p, others: e.target.value }))} style={{ ...inputStyle, height: 40, resize: 'vertical' }} />
+            </div>
+            
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? 'メモ' : 'Catatan'}</label>
+              <textarea value={form.notes} onChange={(e) => setForm(p => ({ ...p, notes: e.target.value }))} style={{ ...inputStyle, height: 60, resize: 'vertical' }} />
+            </div>
           </div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16 }}>
             <input type="checkbox" id="staffActive" checked={form.isActive} onChange={(e) => setForm(p => ({ ...p, isActive: e.target.checked }))} />
             <label htmlFor="staffActive" style={{ fontSize: 13 }}>{language === 'ja' ? 'アクティブ' : 'Aktif'}</label>
           </div>
-          <div style={{ marginTop: 12 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? 'メモ' : 'Catatan'}</label>
-            <textarea value={form.notes} onChange={(e) => setForm(p => ({ ...p, notes: e.target.value }))} style={{ ...inputStyle, height: 60, resize: 'vertical' }} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowModal(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
-            <button onClick={handleSave} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>{t.save}</button>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 24 }}>
+            {uploadProgress && <span style={{ fontSize: 12, color: '#666' }}>{uploadProgress}</span>}
+            <button onClick={() => setShowModal(false)} disabled={submitting} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button onClick={handleSave} disabled={submitting} style={{ padding: '8px 24px', background: submitting ? '#aaa' : '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer' }}>
+              {submitting ? (language === 'ja' ? '保存中...' : 'Menyimpan...') : t.save}
+            </button>
           </div>
         </Modal>
       )}

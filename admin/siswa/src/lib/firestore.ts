@@ -134,6 +134,7 @@ function convertStaffMember(id: string, data: any): StaffMember {
   return {
     ...data,
     id,
+    contractDate: toDateOpt(data.contractDate),
     joinedDate: toDateOpt(data.joinedDate),
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),

@@ -68,6 +68,14 @@ export const translations = {
     edu_docs: '学歴証明書',
     add_doc: '書類を追加',
     
+    contract_date: '契約日',
+    contract_period: '契約期間',
+    salary: '給料',
+    benefits: '待遇',
+    others: 'その他',
+    contract_upload: '契約書のアップロード',
+    staff_photos: 'スタッフ写真',
+    
     guarantor_info: '保証人基本情報',
     required_fields: '※ 全項目必須です',
     contact_info: '保証人連絡先',
@@ -169,6 +177,14 @@ export const translations = {
     graduation_year: 'Tahun Lulus',
     edu_docs: 'Dokumen Pendidikan',
     add_doc: 'Tambah Dokumen',
+    
+    contract_date: 'Tanggal Kontrak',
+    contract_period: 'Masa Kontrak',
+    salary: 'Gaji',
+    benefits: 'Tunjangan/Fasilitas',
+    others: 'Lain-lain',
+    contract_upload: 'Unggah Kontrak',
+    staff_photos: 'Foto Staf',
     
     guarantor_info: 'Informasi Dasar Penjamin',
     required_fields: '※ Semua kolom wajib diisi',
