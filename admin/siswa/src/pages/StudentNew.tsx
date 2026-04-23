@@ -947,6 +947,8 @@ export default function StudentNew() {
                   <div><strong>バッチ:</strong> Batch {step1Data.batchNumber}</div>
                   <div><strong>プログラム:</strong> {step1Data.programType}</div>
                   <div><strong>入学日:</strong> {step1Data.enrollmentDate}</div>
+                  <div><strong>学歴:</strong> {step1Data.educationLevel.toUpperCase()} ({step1Data.schoolName})</div>
+                  <div><strong>卒業年度:</strong> {step1Data.graduationYear || '—'}</div>
                   <div><strong>WhatsApp:</strong> <a href={`https://wa.me/${step1Data.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step1Data.whatsapp}</a></div>
                   {step1Data.instagramAccount && <div><strong>Instagram:</strong> <a href={`https://instagram.com/${step1Data.instagramAccount.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>@{step1Data.instagramAccount.replace(/^@/, '')}</a></div>}
                   {step1Data.tiktokAccount && <div><strong>TikTok:</strong> <a href={`https://tiktok.com/@${step1Data.tiktokAccount.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>@{step1Data.tiktokAccount.replace(/^@/, '')}</a></div>}
@@ -956,6 +958,28 @@ export default function StudentNew() {
                   <div><strong>KTP:</strong> {step2Data.parentNik}</div>
                   <div><strong>保証人WhatsApp:</strong> <a href={`https://wa.me/${step2Data.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step2Data.parentWhatsapp}</a></div>
                   <div><strong>保証人住所:</strong> {step2Data.parentAddress}, {step2Data.parentCity}</div>
+                  
+                  <div style={{ gridColumn: '1/-1', borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 4 }}>
+                    <strong>支払い設定 (教育費):</strong> {step3Data.educationPaymentMethod === 'lump_sum' ? '一括払い' : '分割払い'}
+                  </div>
+                  <div><strong>合計金額:</strong> Rp {step3Data.educationAmount.toLocaleString('id-ID')}</div>
+                  {step3Data.educationPaymentMethod === 'installment' && (
+                    <div style={{ gridColumn: '1/-1', background: '#fff', padding: '8px 12px', borderRadius: 6, border: '1px solid #eee', marginTop: 4 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginBottom: 4 }}>支払い予定スケジュール ({step3Data.educationInstallments}回)</div>
+                      {step3Data.educationSchedules.slice(0, step3Data.educationInstallments).map((s, idx) => (
+                        <div key={idx} style={{ fontSize: 12, display: 'flex', gap: 12, borderBottom: idx === step3Data.educationInstallments - 1 ? 'none' : '1px solid #f5f5f5', padding: '2px 0' }}>
+                          <span style={{ width: 45, fontWeight: 600 }}>{idx + 1}回目:</span>
+                          <span style={{ width: 85 }}>{s.dueDate || '日付未定'}</span>
+                          <span style={{ flex: 1 }}>Rp {s.amount.toLocaleString('id-ID')}</span>
+                          {s.isPaid && <span style={{ color: '#166534', fontWeight: 700 }}>[済]</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ gridColumn: '1/-1', borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 4 }}>
+                    <strong>その他設定:</strong> {step3Data.hasDorm ? `寮入居あり (Rp ${step3Data.dormAmount.toLocaleString('id-ID')}/月)` : '寮入居なし'} / {step3Data.hasJM ? 'JM費あり' : 'JM費なし'}
+                  </div>
                   <div><strong>写真枚数:</strong> {photos.length}枚 {photos.length > 0 ? '(Google Driveへアップロード)' : ''}</div>
                   {!googleToken && photos.length > 0 && <div style={{ gridColumn: '1/-1', color: '#CC0000', fontSize: 12 }}>⚠ Googleトークンが期限切れです。再ログインしてください。</div>}
                 </div>
