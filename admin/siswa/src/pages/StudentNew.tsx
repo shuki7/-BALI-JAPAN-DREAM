@@ -20,7 +20,6 @@ const step1Schema = z.object({
   address: z.string().min(1, '住所を入力してください'),
   city: z.string().min(1, '市を入力してください'),
   province: z.string().min(1, '州を入力してください'),
-  phone: z.string().min(1, '電話番号を入力してください'),
   whatsapp: z.string().min(1, 'WhatsApp番号を入力してください'),
   email: z.string().email().optional().or(z.literal('')),
   nik: z.string().optional(),
@@ -47,7 +46,6 @@ const step2Schema = z.object({
   parentDateOfBirth: z.string().optional(),
   parentGender: z.enum(['male', 'female']).optional(),
   parentNik: z.string().min(1, '保証人のKTP番号を入力してください'),
-  parentPhone: z.string().min(1, '保証人の電話番号を入力してください'),
   parentWhatsapp: z.string().min(1, '保証人のWhatsAppを入力してください'),
   parentAddress: z.string().min(1, '保証人の住所を入力してください'),
   parentCity: z.string().min(1, '保証人の市を入力してください'),
@@ -253,7 +251,7 @@ export default function StudentNew() {
         address: step1Data.address,
         city: step1Data.city,
         province: step1Data.province,
-        phone: step1Data.phone,
+        phone: step1Data.whatsapp, // 電話番号はWhatsAppと同じものを保存
         whatsapp: step1Data.whatsapp,
         email: step1Data.email || undefined,
         nik: step1Data.nik || undefined,
@@ -273,7 +271,7 @@ export default function StudentNew() {
         parentDateOfBirth: step2Data.parentDateOfBirth ? new Date(step2Data.parentDateOfBirth) : undefined,
         parentGender: step2Data.parentGender as GenderType | undefined,
         parentNik: step2Data.parentNik,
-        parentPhone: step2Data.parentPhone,
+        parentPhone: step2Data.parentWhatsapp, // 保証人の電話番号もWhatsAppと同じものを保存
         parentWhatsapp: step2Data.parentWhatsapp,
         parentAddress: step2Data.parentAddress,
         parentCity: step2Data.parentCity,
@@ -467,9 +465,6 @@ export default function StudentNew() {
               <FormGroup label="州 (Provinsi)" required>
                 <input {...form1.register('province')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="電話番号" required>
-                <input {...form1.register('phone')} style={inputStyle} placeholder="+62..." />
-              </FormGroup>
               <FormGroup label="WhatsApp" required>
                 <input {...form1.register('whatsapp')} style={inputStyle} placeholder="+62..." />
               </FormGroup>
@@ -623,9 +618,6 @@ export default function StudentNew() {
 
             <SectionTitle>保証人連絡先</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormGroup label="電話番号" required error={form2.formState.errors.parentPhone?.message}>
-                <input {...form2.register('parentPhone')} style={inputStyle} placeholder="+62..." />
-              </FormGroup>
               <FormGroup label="WhatsApp" required error={form2.formState.errors.parentWhatsapp?.message}>
                 <input {...form2.register('parentWhatsapp')} style={inputStyle} placeholder="+62..." />
               </FormGroup>
@@ -743,15 +735,14 @@ export default function StudentNew() {
                   <div><strong>バッチ:</strong> Batch {step1Data.batchNumber}</div>
                   <div><strong>プログラム:</strong> {step1Data.programType}</div>
                   <div><strong>入学日:</strong> {step1Data.enrollmentDate}</div>
-                  <div><strong>電話:</strong> {step1Data.phone}</div>
-                  <div><strong>WhatsApp:</strong> {step1Data.whatsapp}</div>
-                  {step1Data.instagramAccount && <div><strong>Instagram:</strong> @{step1Data.instagramAccount}</div>}
-                  {step1Data.tiktokAccount && <div><strong>TikTok:</strong> @{step1Data.tiktokAccount}</div>}
+                  <div><strong>WhatsApp:</strong> <a href={`https://wa.me/${step1Data.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step1Data.whatsapp}</a></div>
+                  {step1Data.instagramAccount && <div><strong>Instagram:</strong> <a href={`https://instagram.com/${step1Data.instagramAccount.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>@{step1Data.instagramAccount.replace(/^@/, '')}</a></div>}
+                  {step1Data.tiktokAccount && <div><strong>TikTok:</strong> <a href={`https://tiktok.com/@${step1Data.tiktokAccount.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>@{step1Data.tiktokAccount.replace(/^@/, '')}</a></div>}
                   <div style={{ gridColumn: '1/-1', borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 4 }}>
                     <strong>保証人:</strong> {step2Data.parentName} ({step2Data.parentRelationship === 'father' ? '父' : step2Data.parentRelationship === 'mother' ? '母' : '後見人'})
                   </div>
                   <div><strong>KTP:</strong> {step2Data.parentNik}</div>
-                  <div><strong>保証人電話:</strong> {step2Data.parentPhone}</div>
+                  <div><strong>保証人WhatsApp:</strong> <a href={`https://wa.me/${step2Data.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step2Data.parentWhatsapp}</a></div>
                   <div><strong>保証人住所:</strong> {step2Data.parentAddress}, {step2Data.parentCity}</div>
                   <div><strong>写真枚数:</strong> {photos.length}枚 {photos.length > 0 ? '(Google Driveへアップロード)' : ''}</div>
                   {!googleToken && photos.length > 0 && <div style={{ gridColumn: '1/-1', color: '#CC0000', fontSize: 12 }}>⚠ Googleトークンが期限切れです。再ログインしてください。</div>}

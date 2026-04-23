@@ -49,7 +49,7 @@ function StatusBadge({ status }: { status: StudentStatus }) {
   return <Badge color={color} bg={bg}>{label}</Badge>;
 }
 
-function InfoRow({ label, value }: { label: string; value?: string | null }) {
+function InfoRow({ label, value }: { label: string; value?: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', padding: '8px 0', borderBottom: '1px solid #f5f5f5' }}>
       <div style={{ width: 160, fontSize: 12, color: '#888', flexShrink: 0 }}>{label}</div>
@@ -259,8 +259,7 @@ export default function StudentDetail() {
               <InfoRow label="出生地" value={student.birthPlace} />
               <InfoRow label="宗教" value={student.religion} />
               <InfoRow label="NIK" value={student.nik} />
-              <InfoRow label="電話番号" value={student.phone} />
-              <InfoRow label="WhatsApp" value={student.whatsapp} />
+              <InfoRow label="WhatsApp" value={student.whatsapp ? <a href={`https://wa.me/${student.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{student.whatsapp}</a> : null} />
               <InfoRow label="メール" value={student.email} />
               <InfoRow label="住所" value={`${student.address}, ${student.city}, ${student.province}`} />
             </div>
@@ -272,20 +271,20 @@ export default function StudentDetail() {
               <h3 style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#888', width: '100%' }}>SNS アカウント</h3>
               {student.instagramAccount && (
                 <a
-                  href={`https://www.instagram.com/${student.instagramAccount}`}
+                  href={`https://www.instagram.com/${student.instagramAccount.replace(/^@/, '')}`}
                   target="_blank" rel="noopener noreferrer"
                   style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#E1306C', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
                 >
-                  <span style={{ fontSize: 20 }}>📸</span> @{student.instagramAccount}
+                  <span style={{ fontSize: 20 }}>📸</span> @{student.instagramAccount.replace(/^@/, '')}
                 </a>
               )}
               {student.tiktokAccount && (
                 <a
-                  href={`https://www.tiktok.com/@${student.tiktokAccount}`}
+                  href={`https://www.tiktok.com/@${student.tiktokAccount.replace(/^@/, '')}`}
                   target="_blank" rel="noopener noreferrer"
                   style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#000', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
                 >
-                  <span style={{ fontSize: 20 }}>🎵</span> @{student.tiktokAccount}
+                  <span style={{ fontSize: 20 }}>🎵</span> @{student.tiktokAccount.replace(/^@/, '')}
                 </a>
               )}
             </div>
@@ -370,8 +369,7 @@ export default function StudentDetail() {
               </div>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#CC0000', borderBottom: '1px solid #fecaca', paddingBottom: 4, marginBottom: 10, textTransform: 'uppercase' }}>連絡先・住所</div>
-                <InfoRow label="電話番号" value={student.parentPhone} />
-                <InfoRow label="WhatsApp" value={student.parentWhatsapp} />
+                <InfoRow label="WhatsApp" value={student.parentWhatsapp ? <a href={`https://wa.me/${student.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{student.parentWhatsapp}</a> : null} />
                 <InfoRow label="メール" value={(student as any).parentEmail} />
                 <InfoRow label="住所" value={student.parentAddress} />
                 <InfoRow label="市 (Kota)" value={(student as any).parentCity} />
@@ -667,7 +665,7 @@ export default function StudentDetail() {
       {/* Edit Modal: family */}
       {editModal === 'family' && (
         <Modal title="家族情報を編集" onClose={() => setEditModal(null)}>
-          {(['parentName', 'parentPhone', 'parentWhatsapp', 'parentAddress', 'parentOccupation', 'emergencyContact', 'emergencyPhone'] as const).map((field) => (
+          {(['parentName', 'parentWhatsapp', 'parentAddress', 'parentOccupation', 'emergencyContact', 'emergencyPhone'] as const).map((field) => (
             <div key={field} style={{ marginBottom: 12 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{field}</label>
               <input value={String(editData[field] || '')} onChange={(e) => setEditData(p => ({ ...p, [field]: e.target.value }))} style={inputStyle} />
