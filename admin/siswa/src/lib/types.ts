@@ -101,6 +101,7 @@ export interface Installment {
   paidDate?: Date;
   isPaid: boolean;
   receiptFileId?: string;
+  notes?: string;
 }
 
 export interface Payment {

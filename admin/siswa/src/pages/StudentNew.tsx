@@ -4,11 +4,11 @@ import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { addStudent, updateStudent, getPartners, getScouters, addStudentDocument } from '../lib/firestore';
+import { addStudent, updateStudent, getPartners, getScouters, addStudentDocument, addPayment } from '../lib/firestore';
 import { convertPhotoToWebP } from '../lib/imageUtils';
 import { GDriveService } from '../lib/gdrive';
 import { useAuth } from '../context/AuthContext';
-import type { StudentStatus, ProgramType, StudentSource, GenderType, ParentRelationship, EducationLevel, JLPTLevel, DocumentType } from '../lib/types';
+import type { StudentStatus, ProgramType, StudentSource, GenderType, ParentRelationship, EducationLevel, JLPTLevel, DocumentType, PaymentStatus } from '../lib/types';
 
 const step1Schema = z.object({
   fullName: z.string().min(2, '氏名を入力してください'),
@@ -61,10 +61,18 @@ const step2Schema = z.object({
 type Step1Data = z.infer<typeof step1Schema>;
 type Step2Data = z.infer<typeof step2Schema>;
 
+interface ScheduleItem {
+  dueDate: string;
+  amount: number;
+  isPaid: boolean;
+  notes: string;
+}
+
 interface Step3Data {
   educationPaymentMethod: 'lump_sum' | 'installment';
   educationAmount: number;
   educationInstallments: number;
+  educationSchedules: ScheduleItem[];
   hasDorm: boolean;
   dormAmount: number;
   hasJM: boolean;
@@ -129,6 +137,7 @@ export default function StudentNew() {
     educationPaymentMethod: 'lump_sum',
     educationAmount: 0,
     educationInstallments: 3,
+    educationSchedules: Array(5).fill({ dueDate: '', amount: 0, isPaid: false, notes: '' }),
     hasDorm: false,
     dormAmount: 500000,
     hasJM: false,
@@ -282,9 +291,56 @@ export default function StudentNew() {
         emergencyPhone: step2Data.emergencyPhone || undefined,
         emergencyRelationship: step2Data.emergencyRelationship || undefined,
         dormResident: step3Data.hasDorm,
+        dormCheckOutDate: undefined,
+        departureDate: undefined,
+        destinationCompany: undefined,
+        destinationPrefecture: undefined,
+        visaType: undefined,
+        coeIssueDate: undefined,
+        coeCancellationDate: undefined,
+        driveFolderId: undefined,
+        notes: undefined,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+
+      // 教育費の支払いレコードを作成
+      if (step3Data.educationAmount > 0) {
+        const totalAmount = step3Data.educationAmount;
+        let paidAmount = 0;
+        let status: PaymentStatus = 'unpaid';
+        let installments: any[] = [];
+        
+        if (step3Data.educationPaymentMethod === 'installment') {
+          installments = step3Data.educationSchedules.slice(0, step3Data.educationInstallments).map((s, idx) => {
+            if (s.isPaid) paidAmount += s.amount;
+            return {
+              installmentNumber: idx + 1,
+              dueDate: s.dueDate ? new Date(s.dueDate) : new Date(),
+              amount: s.amount,
+              isPaid: s.isPaid,
+              paidDate: s.isPaid ? new Date() : undefined,
+              notes: s.notes || undefined,
+            };
+          });
+          status = paidAmount >= totalAmount ? 'paid' : paidAmount > 0 ? 'partial' : 'unpaid';
+        } else {
+          status = 'unpaid';
+        }
+
+        await addPayment({
+          studentId,
+          paymentType: 'education',
+          paymentMethod: step3Data.educationPaymentMethod,
+          totalAmount,
+          paidAmount,
+          remainingAmount: totalAmount - paidAmount,
+          paymentStatus: status,
+          installments: installments.length > 0 ? installments : undefined,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
 
       // Google Drive に写真をアップロード
       if (photos.length > 0 && googleToken) {
@@ -681,11 +737,86 @@ export default function StudentNew() {
                   <input type="number" value={step3Data.educationAmount} onChange={(e) => setStep3Data(p => ({ ...p, educationAmount: Number(e.target.value) }))} style={inputStyle} />
                 </FormGroup>
                 {step3Data.educationPaymentMethod === 'installment' && (
-                  <FormGroup label="分割回数">
-                    <input type="number" value={step3Data.educationInstallments} onChange={(e) => setStep3Data(p => ({ ...p, educationInstallments: Number(e.target.value) }))} style={inputStyle} />
+                  <FormGroup label="分割回数 (最大5回)">
+                    <select 
+                      value={step3Data.educationInstallments} 
+                      onChange={(e) => setStep3Data(p => ({ ...p, educationInstallments: Number(e.target.value) }))} 
+                      style={inputStyle}
+                    >
+                      {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}回</option>)}
+                    </select>
                   </FormGroup>
                 )}
               </div>
+              
+              {step3Data.educationPaymentMethod === 'installment' && (
+                <div style={{ marginTop: 16 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 700, color: '#555', marginBottom: 12 }}>分割支払いスケジュール</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {Array.from({ length: step3Data.educationInstallments }).map((_, idx) => {
+                      const s = step3Data.educationSchedules[idx] || { dueDate: '', amount: 0, isPaid: false, notes: '' };
+                      return (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: '12px 16px', border: '1px solid #ddd', borderRadius: 8 }}>
+                          <div style={{ width: 40, fontWeight: 700, color: '#CC0000', fontSize: 13 }}>{idx + 1}回目</div>
+                          <div style={{ flex: 1 }}>
+                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>予定日</label>
+                            <input 
+                              type="date" 
+                              value={s.dueDate} 
+                              onChange={(e) => {
+                                const newScheds = [...step3Data.educationSchedules];
+                                newScheds[idx] = { ...newScheds[idx], dueDate: e.target.value };
+                                setStep3Data(p => ({ ...p, educationSchedules: newScheds }));
+                              }} 
+                              style={{ ...inputStyle, padding: '6px 10px' }} 
+                            />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>金額 (IDR)</label>
+                            <input 
+                              type="number" 
+                              value={s.amount} 
+                              onChange={(e) => {
+                                const newScheds = [...step3Data.educationSchedules];
+                                newScheds[idx] = { ...newScheds[idx], amount: Number(e.target.value) };
+                                setStep3Data(p => ({ ...p, educationSchedules: newScheds }));
+                              }} 
+                              style={{ ...inputStyle, padding: '6px 10px' }} 
+                            />
+                          </div>
+                          <div style={{ flex: 1.5 }}>
+                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>メモ</label>
+                            <input 
+                              type="text" 
+                              value={s.notes} 
+                              placeholder="メモ..."
+                              onChange={(e) => {
+                                const newScheds = [...step3Data.educationSchedules];
+                                newScheds[idx] = { ...newScheds[idx], notes: e.target.value };
+                                setStep3Data(p => ({ ...p, educationSchedules: newScheds }));
+                              }} 
+                              style={{ ...inputStyle, padding: '6px 10px' }} 
+                            />
+                          </div>
+                          <div style={{ width: 80, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 6 }}>支払済</label>
+                            <input 
+                              type="checkbox" 
+                              checked={s.isPaid} 
+                              onChange={(e) => {
+                                const newScheds = [...step3Data.educationSchedules];
+                                newScheds[idx] = { ...newScheds[idx], isPaid: e.target.checked };
+                                setStep3Data(p => ({ ...p, educationSchedules: newScheds }));
+                              }} 
+                              style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#CC0000' }} 
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             <SectionTitle>寮費</SectionTitle>
