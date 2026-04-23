@@ -76,6 +76,11 @@ export const translations = {
     contract_upload: '契約書のアップロード',
     staff_photos: 'スタッフ写真',
     
+    daily_log: '活動日誌',
+    add_log: '日誌を追加',
+    log_content: '内容',
+    staff_name: '担当スタッフ',
+    
     guarantor_info: '保証人基本情報',
     required_fields: '※ 全項目必須です',
     contact_info: '保証人連絡先',
@@ -185,6 +190,11 @@ export const translations = {
     others: 'Lain-lain',
     contract_upload: 'Unggah Kontrak',
     staff_photos: 'Foto Staf',
+    
+    daily_log: 'Buku Harian Siswa',
+    add_log: 'Tambah Catatan',
+    log_content: 'Isi Catatan',
+    staff_name: 'Staf Penanggung Jawab',
     
     guarantor_info: 'Informasi Dasar Penjamin',
     required_fields: '※ Semua kolom wajib diisi',

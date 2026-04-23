@@ -13,11 +13,15 @@ import {
   getBankAccounts,
   addBankAccount,
   deleteBankAccount,
+  getStudentLogs,
+  addStudentLog,
 } from '../lib/firestore';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
 import { useAuth } from '../context/AuthContext';
 import type { StudentStatus, DocumentType, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
 
-const TABS = ['基本情報', '家族情報', '支払い', '銀行口座', '書類管理', '渡航情報', '備考'];
+const TABS_KEYS = ['basic', 'family', 'payment', 'bank', 'documents', 'departure', 'notes', 'logs'];
 
 const inputStyle = {
   width: '100%',
@@ -78,7 +82,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 export default function StudentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(0);
   const [editModal, setEditModal] = useState<string | null>(null);
@@ -105,6 +109,12 @@ export default function StudentDetail() {
   const { data: bankAccounts = [] } = useQuery({
     queryKey: ['bankAccounts', id],
     queryFn: () => getBankAccounts(id!),
+    enabled: !!id,
+  });
+
+  const { data: logs = [] } = useQuery({
+    queryKey: ['studentLogs', id],
+    queryFn: () => getStudentLogs(id!),
     enabled: !!id,
   });
 
@@ -143,12 +153,33 @@ export default function StudentDetail() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bankAccounts', id] }),
   });
 
+  const addLogMutation = useMutation({
+    mutationFn: (data: Parameters<typeof addStudentLog>[1]) => addStudentLog(id!, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['studentLogs', id] }),
+  });
+
   const [addPaymentData, setAddPaymentData] = useState({ paymentType: 'education', totalAmount: 0, paidAmount: 0, paymentMethod: 'lump_sum', notes: '' });
   const [showAddPayment, setShowAddPayment] = useState(false);
   const [showAddDoc, setShowAddDoc] = useState(false);
   const [addDocData, setAddDocData] = useState({ documentType: 'diploma_high_school', title: '', fileId: '', isHeld: false, notes: '' });
   const [showAddBank, setShowAddBank] = useState(false);
   const [addBankData, setAddBankData] = useState({ bankName: '', accountNumber: '', accountHolder: '', accountType: 'savings', isPrimary: false });
+  const [showAddLog, setShowAddLog] = useState(false);
+  const [addLogData, setAddLogData] = useState({ content: '', date: format(new Date(), 'yyyy-MM-dd') });
+
+  const { language } = useLanguage();
+  const t = translations[language];
+
+  const tabLabels: Record<string, string> = {
+    basic: t.personal_info,
+    family: t.guarantor_info,
+    payment: t.payments,
+    bank: language === 'ja' ? '銀行口座' : 'Rekening Bank',
+    documents: t.documents,
+    departure: language === 'ja' ? '渡航情報' : 'Informasi Keberangkatan',
+    notes: t.memo,
+    logs: t.daily_log,
+  };
 
   if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>読み込み中...</div>;
   if (!student) return <div style={{ padding: 40, textAlign: 'center', color: '#CC0000' }}>生徒が見つかりません</div>;
@@ -171,14 +202,13 @@ export default function StudentDetail() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: 24, overflowX: 'auto' }}>
-        {TABS.map((tab, i) => {
-          if (i === 3 && !isAdmin) return null;
+        {TABS_KEYS.map((key, i) => {
+          if (key === 'bank' && !isAdmin) return null;
           const active = activeTab === i;
           return (
             <button
-              key={tab}
+              key={key}
               onClick={() => setActiveTab(i)}
               style={{
                 padding: '10px 18px',
@@ -193,7 +223,7 @@ export default function StudentDetail() {
                 marginBottom: -2,
               }}
             >
-              {tab}
+              {tabLabels[key]}
             </button>
           );
         })}
@@ -611,6 +641,44 @@ export default function StudentDetail() {
         </div>
       )}
 
+      {/* Tab 7: 日誌 */}
+      {activeTab === TABS_KEYS.indexOf('logs') && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+            <button
+              onClick={() => setShowAddLog(true)}
+              style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+            >
+              + {t.add_log}
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {logs.map((log) => (
+              <div key={log.id} style={{ background: '#fff', borderRadius: 10, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <div style={{ fontWeight: 700, color: '#CC0000', fontSize: 14 }}>
+                    📅 {format(log.date, 'yyyy/MM/dd')}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#888' }}>
+                    ✍️ {log.staffName}
+                  </div>
+                </div>
+                <div style={{ fontSize: 13, color: '#333', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                  {log.content}
+                </div>
+              </div>
+            ))}
+            {logs.length === 0 && (
+              <div style={{ padding: 40, textAlign: 'center', color: '#aaa', fontSize: 13 }}>
+                {language === 'ja' ? '日誌がありません' : 'Belum ada catatan buku harian'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+
       {/* Edit Modal: basic */}
       {editModal === 'basic' && (
         <Modal title="基本情報を編集" onClose={() => setEditModal(null)}>
@@ -882,6 +950,46 @@ export default function StudentDetail() {
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
               保存
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Add Log Modal */}
+      {showAddLog && (
+        <Modal title={t.add_log} onClose={() => setShowAddLog(false)}>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{language === 'ja' ? '日付' : 'Tanggal'}</label>
+            <input type="date" value={addLogData.date} onChange={(e) => setAddLogData(p => ({ ...p, date: e.target.value }))} style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.log_content}</label>
+            <textarea
+              value={addLogData.content}
+              onChange={(e) => setAddLogData(p => ({ ...p, content: e.target.value }))}
+              style={{ ...inputStyle, height: 150, resize: 'vertical' }}
+              placeholder={language === 'ja' ? '生徒の様子などを記入してください...' : 'Tuliskan perkembangan siswa...'}
+            />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+            <button onClick={() => setShowAddLog(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button
+              onClick={() => {
+                addLogMutation.mutate({
+                  studentId: id!,
+                  staffId: user?.uid || 'unknown',
+                  staffName: user?.displayName || user?.email || 'Staff', 
+                  content: addLogData.content,
+                  date: new Date(addLogData.date),
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                });
+                setShowAddLog(false);
+                setAddLogData({ content: '', date: format(new Date(), 'yyyy-MM-dd') });
+              }}
+              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+            >
+              {t.save}
             </button>
           </div>
         </Modal>

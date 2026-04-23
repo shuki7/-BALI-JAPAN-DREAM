@@ -24,6 +24,7 @@ import type {
   AppUser,
   BankAccount,
   StaffMember,
+  StudentLog,
 } from './types';
 
 // Firestoreのタイムスタンプ/数値をDateに変換
@@ -139,6 +140,17 @@ function convertStaffMember(id: string, data: any): StaffMember {
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
   } as StaffMember;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertStudentLog(id: string, data: any): StudentLog {
+  return {
+    ...data,
+    id,
+    date: toDate(data.date),
+    createdAt: toDate(data.createdAt),
+    updatedAt: toDate(data.updatedAt),
+  } as StudentLog;
 }
 
 // =================== Students ===================
@@ -396,4 +408,32 @@ export async function updateStaffMember(id: string, data: Partial<StaffMember>):
 
 export async function deleteStaffMember(id: string): Promise<void> {
   await deleteDoc(doc(db, 'staffMembers', id));
+}
+
+// =================== Student Logs ===================
+
+export async function getStudentLogs(studentId: string): Promise<StudentLog[]> {
+  const q = query(
+    collection(db, 'students', studentId, 'logs'),
+    orderBy('date', 'desc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertStudentLog(d.id, d.data()));
+}
+
+export async function addStudentLog(studentId: string, data: Omit<StudentLog, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'students', studentId, 'logs'), {
+    ...data,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updateStudentLog(studentId: string, logId: string, data: Partial<StudentLog>): Promise<void> {
+  await updateDoc(doc(db, 'students', studentId, 'logs', logId), { ...data, updatedAt: new Date() });
+}
+
+export async function deleteStudentLog(studentId: string, logId: string): Promise<void> {
+  await deleteDoc(doc(db, 'students', studentId, 'logs', logId));
 }

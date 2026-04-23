@@ -276,3 +276,14 @@ export interface StaffMember {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface StudentLog {
+  id: string;
+  studentId: string;
+  staffId: string;
+  staffName: string;
+  content: string;
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
