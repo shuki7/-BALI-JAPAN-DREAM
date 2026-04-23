@@ -8,6 +8,8 @@ import { addStudent, updateStudent, getPartners, getScouters, addStudentDocument
 import { convertPhotoToWebP } from '../lib/imageUtils';
 import { GDriveService } from '../lib/gdrive';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
 import type { StudentStatus, ProgramType, StudentSource, GenderType, ParentRelationship, EducationLevel, JLPTLevel, DocumentType, PaymentStatus } from '../lib/types';
 
 const step1Schema = z.object({
@@ -130,6 +132,8 @@ function generateRegistrationNumber(batchNumber: number): string {
 
 export default function StudentNew() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = translations[language];
   const [step, setStep] = useState(1);
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null);
   const [step2Data, setStep2Data] = useState<Step2Data | null>(null);
@@ -484,20 +488,20 @@ export default function StudentNew() {
     }
   };
 
-  const STEPS = ['基本情報', '保証人情報', '支払い設定', '写真・確認'];
+  const STEPS = [t.step1, t.step2, t.step3, t.step4];
 
   return (
     <div style={{ maxWidth: 760, margin: '0 auto' }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 24 }}>新規生徒登録</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 24 }}>{t.new_student_reg}</h1>
 
       {hasDraft && (
         <div style={{ background: '#e0f2fe', borderLeft: '4px solid #0284c7', padding: '12px 16px', borderRadius: '0 8px 8px 0', marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#0369a1' }}>前回の下書きを復元しました</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#0369a1' }}>{t.draft_restored}</div>
             <div style={{ fontSize: 12, color: '#0284c7', marginTop: 4 }}>※写真や書類は復元されないため、再アップロードしてください。</div>
           </div>
           <button type="button" onClick={clearDraft} style={{ background: '#fff', border: '1px solid #bae6fd', color: '#0369a1', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-            下書きをクリアして最初から
+            {t.clear_draft}
           </button>
         </div>
       )}
@@ -527,25 +531,25 @@ export default function StudentNew() {
         {/* ── Step 1: 基本情報 ── */}
         {step === 1 && (
           <form onSubmit={form1.handleSubmit(onStep1Submit as SubmitHandler<Step1Data>)}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#CC0000' }}>Step 1 — 基本情報</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#CC0000' }}>Step 1 — {t.step1}</h2>
 
-            <SectionTitle>個人情報</SectionTitle>
+            <SectionTitle>{t.personal_info}</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormGroup label="氏名" required error={form1.formState.errors.fullName?.message}>
+              <FormGroup label={t.full_name} required error={form1.formState.errors.fullName?.message}>
                 <input {...form1.register('fullName')} style={inputStyle} placeholder="例: Budi Santoso" />
               </FormGroup>
-              <FormGroup label="フリガナ (Kana)">
+              <FormGroup label={t.kana}>
                 <input {...form1.register('fullNameKana')} style={inputStyle} placeholder="ブディ・サントソ" />
               </FormGroup>
 
               <div style={{ gridColumn: '1 / -1', marginBottom: 8, marginTop: 8 }}>
-                <FormGroup label="本人写真（最大5枚・任意）">
+                <FormGroup label={t.photo_upload}>
                   <div style={{ marginBottom: 10 }}>
                     <label style={{ display: 'inline-block', padding: '8px 16px', background: photos.length >= 5 ? '#ccc' : '#CC0000', color: '#fff', borderRadius: 6, cursor: photos.length >= 5 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
-                      📷 写真を追加
+                      📷 {t.add_photo}
                       <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} disabled={photos.length >= 5} style={{ display: 'none' }} />
                     </label>
-                    <span style={{ marginLeft: 10, fontSize: 12, color: '#888' }}>WebP自動変換 · 複数選択可</span>
+                    <span style={{ marginLeft: 10, fontSize: 12, color: '#888' }}>{language === 'ja' ? 'WebP自動変換 · 複数選択可' : 'Konversi WebP otomatis · Bisa pilih banyak'}</span>
                   </div>
 
                   {photos.length > 0 && (
@@ -553,13 +557,13 @@ export default function StudentNew() {
                       {photos.map((photo, idx) => (
                         <div key={idx} style={{ position: 'relative', width: 120 }}>
                           <img src={photo.previewUrl} alt={`photo-${idx}`} style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, border: idx === 0 ? '3px solid #CC0000' : '2px solid #ddd' }} />
-                          {idx === 0 && <span style={{ position: 'absolute', top: 4, left: 4, background: '#CC0000', color: '#fff', fontSize: 9, padding: '2px 5px', borderRadius: 4 }}>メイン</span>}
+                          {idx === 0 && <span style={{ position: 'absolute', top: 4, left: 4, background: '#CC0000', color: '#fff', fontSize: 9, padding: '2px 5px', borderRadius: 4 }}>{t.main}</span>}
                           <button type="button" onClick={() => removePhoto(idx)} style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', fontSize: 11 }}>✕</button>
                           <input
                             type="text"
                             value={photo.caption}
                             onChange={(e) => updateCaption(idx, e.target.value)}
-                            placeholder="キャプション"
+                            placeholder={t.caption}
                             style={{ width: '100%', fontSize: 11, padding: '3px 6px', border: '1px solid #ddd', borderRadius: 4, marginTop: 4, boxSizing: 'border-box' }}
                           />
                         </div>
@@ -568,49 +572,49 @@ export default function StudentNew() {
                   )}
                 </FormGroup>
               </div>
-              <FormGroup label="生年月日" required>
+              <FormGroup label={t.birth_date} required>
                 <input type="date" {...form1.register('dateOfBirth')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="性別" required>
+              <FormGroup label={t.gender} required>
                 <select {...form1.register('gender')} style={inputStyle}>
-                  <option value="male">男性 (Laki-laki)</option>
-                  <option value="female">女性 (Perempuan)</option>
+                  <option value="male">{t.male}</option>
+                  <option value="female">{t.female}</option>
                 </select>
               </FormGroup>
-              <FormGroup label="国籍" required>
+              <FormGroup label={t.nationality} required>
                 <input {...form1.register('nationality')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="出生地" required>
+              <FormGroup label={t.birth_place} required>
                 <input {...form1.register('birthPlace')} style={inputStyle} placeholder="例: Denpasar" />
               </FormGroup>
-              <FormGroup label="宗教">
+              <FormGroup label={t.religion}>
                 <input {...form1.register('religion')} style={inputStyle} placeholder="例: Islam" />
               </FormGroup>
-              <FormGroup label="NIK (KTP番号)">
-                <input {...form1.register('nik')} style={inputStyle} placeholder="16桁" />
+              <FormGroup label={t.nik}>
+                <input {...form1.register('nik')} style={inputStyle} placeholder={language === 'ja' ? '16桁' : '16 digit'} />
               </FormGroup>
             </div>
 
-            <SectionTitle>住所・連絡先</SectionTitle>
-            <FormGroup label="住所" required>
+            <SectionTitle>{t.address_contact}</SectionTitle>
+            <FormGroup label={t.address} required>
               <input {...form1.register('address')} style={inputStyle} placeholder="Jl. ..." />
             </FormGroup>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormGroup label="市 (Kota/Kabupaten)" required>
+              <FormGroup label={t.city} required>
                 <input {...form1.register('city')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="州 (Provinsi)" required>
+              <FormGroup label={t.province} required>
                 <input {...form1.register('province')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="WhatsApp" required>
+              <FormGroup label={t.whatsapp} required>
                 <input {...form1.register('whatsapp')} style={inputStyle} placeholder="+62..." />
               </FormGroup>
-              <FormGroup label="メールアドレス">
+              <FormGroup label={t.email}>
                 <input type="email" {...form1.register('email')} style={inputStyle} />
               </FormGroup>
             </div>
 
-            <SectionTitle>SNS アカウント</SectionTitle>
+            <SectionTitle>{t.sns_accounts}</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <FormGroup label="Instagram">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -626,42 +630,42 @@ export default function StudentNew() {
               </FormGroup>
             </div>
 
-            <SectionTitle>入学情報</SectionTitle>
+            <SectionTitle>{t.enrollment_info}</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-              <FormGroup label="プログラム" required>
+              <FormGroup label={t.program} required>
                 <select {...form1.register('programType')} style={inputStyle}>
                   <option value="tokutei_ginou">特定技能</option>
                   <option value="gijinkoku">技人国</option>
                   <option value="job_matching_only">JMのみ</option>
                 </select>
               </FormGroup>
-              <FormGroup label="バッチ番号" required>
+              <FormGroup label={t.batch} required>
                 <input type="number" {...form1.register('batchNumber')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="入学日" required>
+              <FormGroup label={t.enroll_date} required>
                 <input type="date" {...form1.register('enrollmentDate')} style={inputStyle} />
               </FormGroup>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormGroup label="入学ルート" required>
+              <FormGroup label={t.enroll_route} required>
                 <select {...form1.register('source')} style={inputStyle}>
                   <option value="direct">直接入学</option>
                   <option value="partner_school">提携校経由</option>
                 </select>
               </FormGroup>
               {watchSource === 'partner_school' && (
-                <FormGroup label="提携校">
+                <FormGroup label={t.partner_school}>
                   <select {...form1.register('partnerSchoolId')} style={inputStyle}>
-                    <option value="">選択してください</option>
+                    <option value="">{language === 'ja' ? '選択してください' : 'Silakan pilih'}</option>
                     {partners.filter(p => p.partnerType === 'school' || p.partnerType === 'university').map(p => (
                       <option key={p.id} value={p.id}>{p.partnerName}</option>
                     ))}
                   </select>
                 </FormGroup>
               )}
-              <FormGroup label="スカウター (任意)">
+              <FormGroup label={t.scouter}>
                 <select {...form1.register('scouterId')} style={inputStyle}>
-                  <option value="">選択なし</option>
+                  <option value="">{language === 'ja' ? '選択なし' : 'Tidak ada'}</option>
                   {scouters.map(s => (
                     <option key={s.id} value={s.id}>{s.fullName}</option>
                   ))}
@@ -669,9 +673,9 @@ export default function StudentNew() {
               </FormGroup>
             </div>
 
-            <SectionTitle>学歴・証明書</SectionTitle>
+            <SectionTitle>{t.education_info}</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-              <FormGroup label="最終学歴" required>
+              <FormGroup label={t.education_level} required>
                 <select {...form1.register('educationLevel')} style={inputStyle}>
                   <option value="sma">SMA (高校)</option>
                   <option value="smk">SMK (職業高校)</option>
@@ -679,22 +683,22 @@ export default function StudentNew() {
                   <option value="s1">S1 (大学)</option>
                 </select>
               </FormGroup>
-              <FormGroup label="学校名" required error={form1.formState.errors.schoolName?.message}>
+              <FormGroup label={t.school_name} required error={form1.formState.errors.schoolName?.message}>
                 <input {...form1.register('schoolName')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="卒業年度">
+              <FormGroup label={t.graduation_year}>
                 <input type="number" {...form1.register('graduationYear')} style={inputStyle} placeholder="2023" />
               </FormGroup>
             </div>
             
             <div style={{ gridColumn: '1 / -1', marginBottom: 8, marginTop: 8 }}>
-              <FormGroup label="学歴証明書（最大5枚・任意）">
+              <FormGroup label={t.edu_docs}>
                 <div style={{ marginBottom: 10 }}>
                   <label style={{ display: 'inline-block', padding: '8px 16px', background: eduDocs.length >= 5 ? '#ccc' : '#CC0000', color: '#fff', borderRadius: 6, cursor: eduDocs.length >= 5 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
-                    📄 書類を追加
+                    📄 {t.add_doc}
                     <input type="file" accept="image/*,.pdf" multiple onChange={handleEduDocUpload} disabled={eduDocs.length >= 5} style={{ display: 'none' }} />
                   </label>
-                  <span style={{ marginLeft: 10, fontSize: 12, color: '#888' }}>PDF・画像可（最大5枚まで）</span>
+                  <span style={{ marginLeft: 10, fontSize: 12, color: '#888' }}>{language === 'ja' ? 'PDF・画像可（最大5枚まで）' : 'PDF/Gambar (Maks 5)'}</span>
                 </div>
                 {eduDocs.length > 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
@@ -702,7 +706,7 @@ export default function StudentNew() {
                       <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', background: '#f5f5f5', borderRadius: 6, border: '1px solid #ddd' }}>
                         <span style={{ fontSize: 16 }}>📄</span>
                         <span style={{ flex: 1, fontSize: 13, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</span>
-                        <button type="button" onClick={() => removeEduDoc(idx)} style={{ background: 'transparent', color: '#CC0000', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>✕ 削除</button>
+                        <button type="button" onClick={() => removeEduDoc(idx)} style={{ background: 'transparent', color: '#CC0000', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>✕ {t.delete}</button>
                       </div>
                     ))}
                   </div>
@@ -712,7 +716,7 @@ export default function StudentNew() {
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
               <button type="submit" style={{ padding: '10px 28px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 7, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
-                次へ →
+                {t.next} →
               </button>
             </div>
           </form>
@@ -721,80 +725,80 @@ export default function StudentNew() {
         {/* ── Step 2: 保証人情報 ── */}
         {step === 2 && (
           <form onSubmit={form2.handleSubmit(onStep2Submit as SubmitHandler<Step2Data>)}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#CC0000' }}>Step 2 — 保証人・保護者情報</h2>
-            <p style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>※ 全項目必須です / Semua wajib diisi</p>
+            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#CC0000' }}>Step 2 — {t.step2}</h2>
+            <p style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>{t.required_fields}</p>
 
-            <SectionTitle>保証人基本情報</SectionTitle>
+            <SectionTitle>{t.guarantor_info}</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormGroup label="保証人氏名" required error={form2.formState.errors.parentName?.message}>
+              <FormGroup label={t.full_name} required error={form2.formState.errors.parentName?.message}>
                 <input {...form2.register('parentName')} style={inputStyle} placeholder="例: Wayan Santosa" />
               </FormGroup>
-              <FormGroup label="続柄" required>
+              <FormGroup label={t.relationship} required>
                 <select {...form2.register('parentRelationship')} style={inputStyle}>
-                  <option value="father">父 (Ayah)</option>
-                  <option value="mother">母 (Ibu)</option>
-                  <option value="guardian">後見人 (Wali)</option>
+                  <option value="father">{t.father}</option>
+                  <option value="mother">{t.mother}</option>
+                  <option value="guardian">{t.guardian}</option>
                 </select>
               </FormGroup>
-              <FormGroup label="生年月日">
+              <FormGroup label={t.birth_date}>
                 <input type="date" {...form2.register('parentDateOfBirth')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="性別">
+              <FormGroup label={t.gender}>
                 <select {...form2.register('parentGender')} style={inputStyle}>
-                  <option value="male">男性</option>
-                  <option value="female">女性</option>
+                  <option value="male">{t.male}</option>
+                  <option value="female">{t.female}</option>
                 </select>
               </FormGroup>
-              <FormGroup label="KTP番号 (NIK)" required error={form2.formState.errors.parentNik?.message}>
+              <FormGroup label={t.nik} required error={form2.formState.errors.parentNik?.message}>
                 <input {...form2.register('parentNik')} style={inputStyle} placeholder="16桁のNIK番号" />
               </FormGroup>
-              <FormGroup label="職業" required error={form2.formState.errors.parentOccupation?.message}>
+              <FormGroup label={t.occupation} required error={form2.formState.errors.parentOccupation?.message}>
                 <input {...form2.register('parentOccupation')} style={inputStyle} placeholder="例: Petani, PNS, Swasta" />
               </FormGroup>
             </div>
 
-            <SectionTitle>保証人連絡先</SectionTitle>
+            <SectionTitle>{t.contact_info}</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormGroup label="WhatsApp" required error={form2.formState.errors.parentWhatsapp?.message}>
+              <FormGroup label={t.whatsapp} required error={form2.formState.errors.parentWhatsapp?.message}>
                 <input {...form2.register('parentWhatsapp')} style={inputStyle} placeholder="+62..." />
               </FormGroup>
-              <FormGroup label="メールアドレス">
+              <FormGroup label={t.email}>
                 <input type="email" {...form2.register('parentEmail')} style={inputStyle} />
               </FormGroup>
             </div>
 
-            <SectionTitle>保証人住所</SectionTitle>
-            <FormGroup label="住所" required error={form2.formState.errors.parentAddress?.message}>
+            <SectionTitle>{t.address}</SectionTitle>
+            <FormGroup label={t.address} required error={form2.formState.errors.parentAddress?.message}>
               <input {...form2.register('parentAddress')} style={inputStyle} placeholder="Jl. ..." />
             </FormGroup>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <FormGroup label="市 (Kota/Kabupaten)" required error={form2.formState.errors.parentCity?.message}>
+              <FormGroup label={t.city} required error={form2.formState.errors.parentCity?.message}>
                 <input {...form2.register('parentCity')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="州 (Provinsi)" required error={form2.formState.errors.parentProvince?.message}>
+              <FormGroup label={t.province} required error={form2.formState.errors.parentProvince?.message}>
                 <input {...form2.register('parentProvince')} style={inputStyle} />
               </FormGroup>
             </div>
 
-            <SectionTitle>緊急連絡先（保証人と異なる場合）</SectionTitle>
+            <SectionTitle>{t.emergency_contact}</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-              <FormGroup label="氏名">
+              <FormGroup label={t.full_name}>
                 <input {...form2.register('emergencyContact')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="電話番号">
+              <FormGroup label={t.phone}>
                 <input {...form2.register('emergencyPhone')} style={inputStyle} />
               </FormGroup>
-              <FormGroup label="続柄">
+              <FormGroup label={t.relationship}>
                 <input {...form2.register('emergencyRelationship')} style={inputStyle} placeholder="例: Saudara" />
               </FormGroup>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
               <button type="button" onClick={() => setStep(1)} style={{ padding: '10px 20px', background: '#f5f5f5', color: '#333', border: '1px solid #ddd', borderRadius: 7, fontWeight: 600, cursor: 'pointer' }}>
-                ← 戻る
+                ← {t.back}
               </button>
               <button type="submit" style={{ padding: '10px 28px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 7, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
-                次へ →
+                {t.next} →
               </button>
             </div>
           </form>
@@ -803,22 +807,22 @@ export default function StudentNew() {
         {/* ── Step 3: 支払い設定 ── */}
         {step === 3 && (
           <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, color: '#CC0000' }}>Step 3 — 支払い設定</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, color: '#CC0000' }}>Step 3 — {t.step3}</h2>
 
-            <SectionTitle>教育費</SectionTitle>
+            <SectionTitle>{t.education_fee}</SectionTitle>
             <div style={{ padding: 16, background: '#f9fafb', borderRadius: 8, border: '1px solid #e5e7eb', marginBottom: 16 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <FormGroup label="支払方法">
+                <FormGroup label={t.payment_method}>
                   <select value={step3Data.educationPaymentMethod} onChange={(e) => setStep3Data(p => ({ ...p, educationPaymentMethod: e.target.value as 'lump_sum' | 'installment' }))} style={inputStyle}>
-                    <option value="lump_sum">一括払い (Rp 20,000,000)</option>
-                    <option value="installment">分割払い (Rp 25,000,000)</option>
+                    <option value="lump_sum">{t.lump_sum} (Rp 20,000,000)</option>
+                    <option value="installment">{t.installment} (Rp 25,000,000)</option>
                   </select>
                 </FormGroup>
-                <FormGroup label="金額 (IDR)">
+                <FormGroup label={t.amount + ' (IDR)'}>
                   <input type="number" value={step3Data.educationAmount} onChange={(e) => setStep3Data(p => ({ ...p, educationAmount: Number(e.target.value) }))} style={inputStyle} />
                 </FormGroup>
                 {step3Data.educationPaymentMethod === 'installment' && (
-                  <FormGroup label="分割回数 (最大5回)">
+                  <FormGroup label={t.installment_count + ' (最大5回)'}>
                     <select 
                       value={step3Data.educationInstallments} 
                       onChange={(e) => setStep3Data(p => ({ ...p, educationInstallments: Number(e.target.value) }))} 
@@ -832,7 +836,7 @@ export default function StudentNew() {
               
               {step3Data.educationPaymentMethod === 'installment' && (
                 <div style={{ marginTop: 16 }}>
-                  <h4 style={{ fontSize: 13, fontWeight: 700, color: '#555', marginBottom: 12 }}>分割支払いスケジュール</h4>
+                  <h4 style={{ fontSize: 13, fontWeight: 700, color: '#555', marginBottom: 12 }}>{t.payment_schedule}</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {Array.from({ length: step3Data.educationInstallments }).map((_, idx) => {
                       const s = step3Data.educationSchedules[idx] || { dueDate: '', amount: 0, isPaid: false, notes: '' };
@@ -840,7 +844,7 @@ export default function StudentNew() {
                         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: '12px 16px', border: '1px solid #ddd', borderRadius: 8 }}>
                           <div style={{ width: 40, fontWeight: 700, color: '#CC0000', fontSize: 13 }}>{idx + 1}回目</div>
                           <div style={{ flex: 1 }}>
-                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>予定日</label>
+                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>{t.due_date}</label>
                             <input 
                               type="date" 
                               value={s.dueDate} 
@@ -853,7 +857,7 @@ export default function StudentNew() {
                             />
                           </div>
                           <div style={{ flex: 1 }}>
-                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>金額 (IDR)</label>
+                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>{t.amount} (IDR)</label>
                             <input 
                               type="number" 
                               value={s.amount} 
@@ -866,7 +870,7 @@ export default function StudentNew() {
                             />
                           </div>
                           <div style={{ flex: 1.5 }}>
-                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>メモ</label>
+                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>{t.memo}</label>
                             <input 
                               type="text" 
                               value={s.notes} 
@@ -880,7 +884,7 @@ export default function StudentNew() {
                             />
                           </div>
                           <div style={{ width: 80, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 6 }}>支払済</label>
+                            <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 6 }}>{t.is_paid}</label>
                             <input 
                               type="checkbox" 
                               checked={s.isPaid} 
@@ -900,33 +904,33 @@ export default function StudentNew() {
               )}
             </div>
 
-            <SectionTitle>寮費</SectionTitle>
+            <SectionTitle>{t.dorm_info}</SectionTitle>
             <div style={{ padding: 16, background: '#f9fafb', borderRadius: 8, border: '1px solid #e5e7eb', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                 <input type="checkbox" id="hasDorm" checked={step3Data.hasDorm} onChange={(e) => setStep3Data(p => ({ ...p, hasDorm: e.target.checked }))} />
-                <label htmlFor="hasDorm" style={{ fontWeight: 600, fontSize: 14 }}>寮入居あり</label>
+                <label htmlFor="hasDorm" style={{ fontWeight: 600, fontSize: 14 }}>{t.dorm_resident}</label>
               </div>
               {step3Data.hasDorm && (
-                <FormGroup label="月額寮費 (IDR)">
+                <FormGroup label={t.monthly_dorm_fee + ' (IDR)'}>
                   <input type="number" value={step3Data.dormAmount} onChange={(e) => setStep3Data(p => ({ ...p, dormAmount: Number(e.target.value) }))} style={{ ...inputStyle, maxWidth: 200 }} />
                 </FormGroup>
               )}
             </div>
 
-            <SectionTitle>ジョブマッチング費</SectionTitle>
+            <SectionTitle>{t.jm_fee}</SectionTitle>
             <div style={{ padding: 16, background: '#f9fafb', borderRadius: 8, border: '1px solid #e5e7eb', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                 <input type="checkbox" id="hasJM" checked={step3Data.hasJM} onChange={(e) => setStep3Data(p => ({ ...p, hasJM: e.target.checked }))} />
-                <label htmlFor="hasJM" style={{ fontWeight: 600, fontSize: 14 }}>ジョブマッチング費あり (合計 Rp 20,000,000)</label>
+                <label htmlFor="hasJM" style={{ fontWeight: 600, fontSize: 14 }}>{t.has_jm} (合計 Rp 20,000,000)</label>
               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
               <button type="button" onClick={() => setStep(2)} style={{ padding: '10px 20px', background: '#f5f5f5', color: '#333', border: '1px solid #ddd', borderRadius: 7, fontWeight: 600, cursor: 'pointer' }}>
-                ← 戻る
+                ← {t.back}
               </button>
               <button type="button" onClick={() => setStep(4)} style={{ padding: '10px 28px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 7, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
-                次へ →
+                {t.next} →
               </button>
             </div>
           </div>
@@ -935,60 +939,58 @@ export default function StudentNew() {
         {/* ── Step 4: 写真・確認 ── */}
         {step === 4 && (
           <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#CC0000' }}>Step 4 — 写真・確認</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#CC0000' }}>Step 4 — {t.step4}</h2>
 
-
-
-            <SectionTitle>登録内容確認</SectionTitle>
+            <SectionTitle>{t.confirm_reg}</SectionTitle>
             {step1Data && step2Data && (
               <div style={{ fontSize: 13, color: '#555', lineHeight: 2, background: '#f9fafb', padding: 16, borderRadius: 8 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
-                  <div><strong>氏名:</strong> {step1Data.fullName}</div>
-                  <div><strong>バッチ:</strong> Batch {step1Data.batchNumber}</div>
-                  <div><strong>プログラム:</strong> {step1Data.programType}</div>
-                  <div><strong>入学日:</strong> {step1Data.enrollmentDate}</div>
-                  <div><strong>学歴:</strong> {step1Data.educationLevel.toUpperCase()} ({step1Data.schoolName})</div>
-                  <div><strong>卒業年度:</strong> {step1Data.graduationYear || '—'}</div>
-                  <div><strong>WhatsApp:</strong> <a href={`https://wa.me/${step1Data.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step1Data.whatsapp}</a></div>
+                  <div><strong>{t.full_name}:</strong> {step1Data.fullName}</div>
+                  <div><strong>{t.batch}:</strong> Batch {step1Data.batchNumber}</div>
+                  <div><strong>{t.program}:</strong> {step1Data.programType}</div>
+                  <div><strong>{t.enroll_date}:</strong> {step1Data.enrollmentDate}</div>
+                  <div><strong>{t.education_level}:</strong> {step1Data.educationLevel.toUpperCase()} ({step1Data.schoolName})</div>
+                  <div><strong>{t.graduation_year}:</strong> {step1Data.graduationYear || '—'}</div>
+                  <div><strong>{t.whatsapp}:</strong> <a href={`https://wa.me/${step1Data.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step1Data.whatsapp}</a></div>
                   {step1Data.instagramAccount && <div><strong>Instagram:</strong> <a href={`https://instagram.com/${step1Data.instagramAccount.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>@{step1Data.instagramAccount.replace(/^@/, '')}</a></div>}
                   {step1Data.tiktokAccount && <div><strong>TikTok:</strong> <a href={`https://tiktok.com/@${step1Data.tiktokAccount.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>@{step1Data.tiktokAccount.replace(/^@/, '')}</a></div>}
                   <div style={{ gridColumn: '1/-1', borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 4 }}>
-                    <strong>保証人:</strong> {step2Data.parentName} ({step2Data.parentRelationship === 'father' ? '父' : step2Data.parentRelationship === 'mother' ? '母' : '後見人'})
+                    <strong>{t.guarantor_info}:</strong> {step2Data.parentName} ({step2Data.parentRelationship === 'father' ? (t.male === '男性' ? '父' : 'Ayah') : step2Data.parentRelationship === 'mother' ? (t.male === '男性' ? '母' : 'Ibu') : (t.male === '男性' ? '後見人' : 'Wali')})
                   </div>
                   <div><strong>KTP:</strong> {step2Data.parentNik}</div>
-                  <div><strong>保証人WhatsApp:</strong> <a href={`https://wa.me/${step2Data.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step2Data.parentWhatsapp}</a></div>
-                  <div><strong>保証人住所:</strong> {step2Data.parentAddress}, {step2Data.parentCity}</div>
+                  <div><strong>{t.whatsapp}:</strong> <a href={`https://wa.me/${step2Data.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step2Data.parentWhatsapp}</a></div>
+                  <div><strong>{t.address}:</strong> {step2Data.parentAddress}, {step2Data.parentCity}</div>
                   
                   <div style={{ gridColumn: '1/-1', borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 4 }}>
-                    <strong>支払い設定 (教育費):</strong> {step3Data.educationPaymentMethod === 'lump_sum' ? '一括払い' : '分割払い'}
+                    <strong>{t.payment_settings} ({t.education_fee}):</strong> {step3Data.educationPaymentMethod === 'lump_sum' ? t.lump_sum : t.installment}
                   </div>
-                  <div><strong>合計金額:</strong> Rp {step3Data.educationAmount.toLocaleString('id-ID')}</div>
+                  <div><strong>{t.amount}:</strong> Rp {step3Data.educationAmount.toLocaleString('id-ID')}</div>
                   {step3Data.educationPaymentMethod === 'installment' && (
                     <div style={{ gridColumn: '1/-1', background: '#fff', padding: '8px 12px', borderRadius: 6, border: '1px solid #eee', marginTop: 4 }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginBottom: 4 }}>支払い予定スケジュール ({step3Data.educationInstallments}回)</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginBottom: 4 }}>{t.payment_schedule} ({step3Data.educationInstallments}回)</div>
                       {step3Data.educationSchedules.slice(0, step3Data.educationInstallments).map((s, idx) => (
                         <div key={idx} style={{ fontSize: 12, display: 'flex', gap: 12, borderBottom: idx === step3Data.educationInstallments - 1 ? 'none' : '1px solid #f5f5f5', padding: '2px 0' }}>
-                          <span style={{ width: 45, fontWeight: 600 }}>{idx + 1}回目:</span>
-                          <span style={{ width: 85 }}>{s.dueDate || '日付未定'}</span>
+                          <span style={{ width: 45, fontWeight: 600 }}>{idx + 1}{language === 'ja' ? '回目' : ''}:</span>
+                          <span style={{ width: 85 }}>{s.dueDate || (language === 'ja' ? '日付未定' : 'Tgl belum ditentukan')}</span>
                           <span style={{ flex: 1 }}>Rp {s.amount.toLocaleString('id-ID')}</span>
-                          {s.isPaid && <span style={{ color: '#166534', fontWeight: 700 }}>[済]</span>}
+                          {s.isPaid && <span style={{ color: '#166534', fontWeight: 700 }}>[{t.is_paid}]</span>}
                         </div>
                       ))}
                     </div>
                   )}
 
                   <div style={{ gridColumn: '1/-1', borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 4 }}>
-                    <strong>その他設定:</strong> {step3Data.hasDorm ? `寮入居あり (Rp ${step3Data.dormAmount.toLocaleString('id-ID')}/月)` : '寮入居なし'} / {step3Data.hasJM ? 'JM費あり' : 'JM費なし'}
+                    <strong>{language === 'ja' ? 'その他設定' : 'Pengaturan Lainnya'}:</strong> {step3Data.hasDorm ? `${t.dorm_resident} (Rp ${step3Data.dormAmount.toLocaleString('id-ID')}/月)` : (language === 'ja' ? '寮入居なし' : 'Tidak ada asrama')} / {step3Data.hasJM ? t.has_jm : (language === 'ja' ? 'JM費なし' : 'Tidak ada JM')}
                   </div>
-                  <div><strong>写真枚数:</strong> {photos.length}枚 {photos.length > 0 ? '(Google Driveへアップロード)' : ''}</div>
-                  {!googleToken && photos.length > 0 && <div style={{ gridColumn: '1/-1', color: '#CC0000', fontSize: 12 }}>⚠ Googleトークンが期限切れです。再ログインしてください。</div>}
+                  <div><strong>{language === 'ja' ? '写真枚数' : 'Jumlah Foto'}:</strong> {photos.length}{language === 'ja' ? '枚' : ''} {photos.length > 0 ? `(Google Drive ${language === 'ja' ? 'へアップロード' : 'diunggah'})` : ''}</div>
+                  {!googleToken && photos.length > 0 && <div style={{ gridColumn: '1/-1', color: '#CC0000', fontSize: 12 }}>⚠ {language === 'ja' ? 'Googleトークンが期限切れです。再ログインしてください。' : 'Token Google kedaluwarsa. Silakan login kembali.'}</div>}
                 </div>
               </div>
             )}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
               <button type="button" onClick={() => setStep(3)} style={{ padding: '10px 20px', background: '#f5f5f5', color: '#333', border: '1px solid #ddd', borderRadius: 7, fontWeight: 600, cursor: 'pointer' }}>
-                ← 戻る
+                ← {t.back}
               </button>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
                 {uploadProgress && (
@@ -996,7 +998,7 @@ export default function StudentNew() {
                 )}
                 <button type="button" onClick={handleFinalSubmit} disabled={submitting}
                   style={{ padding: '10px 28px', background: submitting ? '#aaa' : '#CC0000', color: '#fff', border: 'none', borderRadius: 7, fontWeight: 700, fontSize: 14, cursor: submitting ? 'not-allowed' : 'pointer' }}>
-                  {submitting ? '登録中...' : '✓ 登録する'}
+                  {submitting ? t.editing : `✓ ${t.register}`}
                 </button>
               </div>
             </div>

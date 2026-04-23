@@ -1,6 +1,8 @@
 import { type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { translations } from '../../translations';
 
 const SIDEBAR_WIDTH = 240;
 const SIDEBAR_BG = '#1a1a2e';
@@ -29,10 +31,22 @@ const NAV_ITEMS: NavItem[] = [
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { appUser, logout, isAdmin } = useAuth();
+  const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+  const t = translations[language];
 
-  const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
+  // Translate nav items based on current language
+  const translatedNavItems = NAV_ITEMS.map(item => {
+    const key = item.path.split('/')[1] as keyof typeof t;
+    return {
+      ...item,
+      label: (t[key] as string) || item.label,
+      // sublabel remains the Indonesian text for visual consistency or we can flip it
+    };
+  });
+
+  const visibleItems = translatedNavItems.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f5f5f5' }}>
@@ -135,7 +149,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               fontWeight: 600,
             }}
           >
-            ログアウト
+            {t.logout}
           </button>
         </div>
       </div>
@@ -162,8 +176,31 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               {visibleItems.find((i) => location.pathname.startsWith(i.path))?.label || 'BJD管理'}
             </span>
           </div>
-          <div style={{ fontSize: 12, color: '#666' }}>
-            {appUser?.displayName || appUser?.email}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Language Toggle */}
+            <button
+              onClick={toggleLanguage}
+              style={{
+                background: '#f0f0f0',
+                border: '1px solid #ddd',
+                borderRadius: 20,
+                padding: '4px 12px',
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                color: '#555'
+              }}
+            >
+              <span>{language === 'ja' ? '🇯🇵 日本語' : '🇮🇩 Indonesia'}</span>
+              <span style={{ fontSize: 10, color: '#999' }}>⇄</span>
+            </button>
+
+            <div style={{ fontSize: 12, color: '#666', fontWeight: 500 }}>
+              {appUser?.displayName || appUser?.email}
+            </div>
           </div>
         </div>
 
