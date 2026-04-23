@@ -91,6 +91,10 @@ export const translations = {
     interview_date: '面接日時',
     interview_notes: '考察・メモ',
     
+    message_board: '運営からのメッセージ',
+    edit_message: 'メッセージを編集',
+    message_placeholder: 'スタッフへの指示や共有事項を入力してください...',
+    
     guarantor_info: '保証人基本情報',
     required_fields: '※ 全項目必須です',
     contact_info: '保証人連絡先',
@@ -215,6 +219,10 @@ export const translations = {
     interview_info: 'Informasi Wawancara',
     interview_date: 'Tanggal Wawancara',
     interview_notes: 'Catatan/Evaluasi',
+    
+    message_board: 'Pesan dari Manajemen',
+    edit_message: 'Edit Pesan',
+    message_placeholder: 'Masukkan instruksi atau informasi untuk staf...',
     
     guarantor_info: 'Informasi Dasar Penjamin',
     required_fields: '※ Semua kolom wajib diisi',

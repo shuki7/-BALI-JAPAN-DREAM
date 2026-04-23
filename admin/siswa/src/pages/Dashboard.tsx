@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getStudents, getPayments, getCommissionPayments } from '../lib/firestore';
+import { getStudents, getPayments, getCommissionPayments, getAnnouncement, updateAnnouncement } from '../lib/firestore';
 import { useAuth } from '../context/AuthContext';
-import { addDays } from 'date-fns';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
+import { addDays, format } from 'date-fns';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 
 const CARD_STYLE = {
   background: '#fff',
@@ -54,9 +58,12 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>ダッシュボード</h1>
-        <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>BJD生徒管理システム概要</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, gap: 20 }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>ダッシュボード</h1>
+          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>BJD生徒管理システム概要</p>
+        </div>
+        <AnnouncementBoard />
       </div>
 
       {/* Cards grid */}
@@ -247,5 +254,106 @@ function StatusBadge({ status }: { status: string }) {
     >
       {s.label}
     </span>
+  );
+}
+
+function AnnouncementBoard() {
+  const { isAdmin } = useAuth();
+  const { language } = useLanguage();
+  const t = translations[language];
+  const queryClient = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState('');
+
+  const { data: announcement } = useQuery({
+    queryKey: ['announcement'],
+    queryFn: getAnnouncement,
+  });
+
+  const mutation = useMutation({
+    mutationFn: updateAnnouncement,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['announcement'] });
+      setIsEditing(false);
+    },
+  });
+
+  if (!announcement && !isAdmin) return null;
+
+  return (
+    <div
+      style={{
+        flex: 1,
+        maxWidth: 600,
+        background: '#fff9e6',
+        border: '1px solid #ffe699',
+        borderRadius: 12,
+        padding: '16px 20px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        position: 'relative',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#856404', display: 'flex', alignItems: 'center', gap: 6 }}>
+          📢 {t.message_board}
+        </div>
+        {isAdmin && !isEditing && (
+          <button
+            onClick={() => {
+              setEditContent(announcement?.content || '');
+              setIsEditing(true);
+            }}
+            style={{ fontSize: 11, background: 'none', border: 'none', color: '#0066cc', cursor: 'pointer', padding: 0 }}
+          >
+            [{t.edit_message}]
+          </button>
+        )}
+      </div>
+
+      {isEditing ? (
+        <div>
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            placeholder={t.message_placeholder}
+            style={{
+              width: '100%',
+              height: 100,
+              padding: 10,
+              borderRadius: 6,
+              border: '1px solid #ddd',
+              fontSize: 13,
+              fontFamily: 'inherit',
+              marginBottom: 8,
+            }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <button
+              onClick={() => setIsEditing(false)}
+              style={{ padding: '4px 12px', fontSize: 12, borderRadius: 4, border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
+            >
+              {language === 'ja' ? 'キャンセル' : 'Batal'}
+            </button>
+            <button
+              onClick={() => mutation.mutate(editContent)}
+              style={{ padding: '4px 12px', fontSize: 12, borderRadius: 4, border: 'none', background: '#CC0000', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+            >
+              {language === 'ja' ? '保存' : 'Simpan'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div style={{ fontSize: 14, color: '#333', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+            {announcement?.content || (language === 'ja' ? 'まだメッセージはありません。' : 'Belum ada pesan.')}
+          </div>
+          {announcement?.updatedAt && (
+            <div style={{ fontSize: 10, color: '#999', marginTop: 10, textAlign: 'right' }}>
+              Updated: {format(announcement.updatedAt, 'yyyy/MM/dd HH:mm')}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

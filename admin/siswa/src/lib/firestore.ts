@@ -445,3 +445,25 @@ export async function updateStudentLog(studentId: string, logId: string, data: P
 export async function deleteStudentLog(studentId: string, logId: string): Promise<void> {
   await deleteDoc(doc(db, 'students', studentId, 'logs', logId));
 }
+
+// =================== Announcements ===================
+
+export async function getAnnouncement(): Promise<{ content: string; updatedAt: Date }> {
+  const docRef = doc(db, 'settings', 'announcement');
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    const data = snap.data();
+    return {
+      content: data.content || '',
+      updatedAt: toDate(data.updatedAt),
+    };
+  }
+  return { content: '', updatedAt: new Date() };
+}
+
+export async function updateAnnouncement(content: string): Promise<void> {
+  await setDoc(doc(db, 'settings', 'announcement'), {
+    content,
+    updatedAt: new Date(),
+  }, { merge: true });
+}
