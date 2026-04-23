@@ -153,7 +153,7 @@ export default function StudentNew() {
   const [eduDocs, setEduDocs] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
-  const { googleToken } = useAuth();
+  const { googleToken, refreshGoogleToken } = useAuth();
 
   const { data: partners = [] } = useQuery({ queryKey: ['partners'], queryFn: getPartners });
   const { data: scouters = [] } = useQuery({ queryKey: ['scouters'], queryFn: getScouters });
@@ -983,7 +983,19 @@ export default function StudentNew() {
                     <strong>{language === 'ja' ? 'その他設定' : 'Pengaturan Lainnya'}:</strong> {step3Data.hasDorm ? `${t.dorm_resident} (Rp ${step3Data.dormAmount.toLocaleString('id-ID')}/月)` : (language === 'ja' ? '寮入居なし' : 'Tidak ada asrama')} / {step3Data.hasJM ? t.has_jm : (language === 'ja' ? 'JM費なし' : 'Tidak ada JM')}
                   </div>
                   <div><strong>{language === 'ja' ? '写真枚数' : 'Jumlah Foto'}:</strong> {photos.length}{language === 'ja' ? '枚' : ''} {photos.length > 0 ? `(Google Drive ${language === 'ja' ? 'へアップロード' : 'diunggah'})` : ''}</div>
-                  {!googleToken && photos.length > 0 && <div style={{ gridColumn: '1/-1', color: '#CC0000', fontSize: 12 }}>⚠ {language === 'ja' ? 'Googleトークンが期限切れです。再ログインしてください。' : 'Token Google kedaluwarsa. Silakan login kembali.'}</div>}
+                  {!googleToken && photos.length > 0 && (
+                     <div style={{ gridColumn: '1/-1', color: '#CC0000', fontSize: 12, background: '#fff1f2', padding: 12, borderRadius: 8, marginTop: 8, border: '1px solid #fecaca' }}>
+                       <div style={{ fontWeight: 700, marginBottom: 4 }}>⚠ {language === 'ja' ? 'Googleトークンが期限切れです' : 'Token Google kedaluwarsa'}</div>
+                       <p style={{ margin: '0 0 10px 0' }}>{language === 'ja' ? '写真をアップロードするには、Google Driveへのアクセス許可を再取得する必要があります。' : 'Untuk mengunggah foto, Anda perlu mendapatkan kembali izin akses ke Google Drive.'}</p>
+                       <button
+                         type="button"
+                         onClick={refreshGoogleToken}
+                         style={{ padding: '6px 12px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                       >
+                         {language === 'ja' ? '再ログイン (Google認証)' : 'Login Ulang (Otentikasi Google)'}
+                       </button>
+                     </div>
+                   )}
                 </div>
               </div>
             )}

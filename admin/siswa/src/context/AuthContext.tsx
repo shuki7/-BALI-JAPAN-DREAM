@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { type User, onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { auth, signInWithGoogle } from '../lib/firebase';
 import { getUser, setUser as setFsUser } from '../lib/firestore';
 import type { AppUser } from '../lib/types';
 
@@ -12,6 +12,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isStaff: boolean;
   googleToken: string | null;
+  refreshGoogleToken: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -69,11 +70,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('google_access_token_ts');
     signOut(auth);
   };
+
+  const refreshGoogleToken = async () => {
+    const token = await signInWithGoogle();
+    if (token) {
+      setGoogleToken(token);
+    }
+  };
+
   const isAdmin = appUser?.role === 'admin';
   const isStaff = appUser?.role === 'admin' || appUser?.role === 'staff';
 
   return (
-    <AuthContext.Provider value={{ user, appUser, loading, logout, isAdmin, isStaff, googleToken }}>
+    <AuthContext.Provider value={{ user, appUser, loading, logout, isAdmin, isStaff, googleToken, refreshGoogleToken }}>
       {children}
     </AuthContext.Provider>
   );
