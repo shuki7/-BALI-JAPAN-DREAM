@@ -24,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: '書類・担保', sublabel: 'Dokumen', path: '/documents' },
   { label: '提携校・機関', sublabel: 'Mitra', path: '/partners' },
   { label: 'スカウター', sublabel: 'Scouter', path: '/scouters' },
+  { label: 'スタッフ・先生管理', sublabel: 'Staff & Teachers', path: '/staff' },
   { label: 'コミッション', sublabel: 'Komisi', path: '/commissions', adminOnly: true },
   { label: '関連機関', sublabel: 'Organisasi', path: '/organizations' },
   { label: '設定', sublabel: 'Settings', path: '/settings', adminOnly: true },

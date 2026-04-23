@@ -18,6 +18,7 @@ export const translations = {
     partners: '提携校・機関',
     scouters: 'スカウター',
     commissions: 'コミッション',
+    staff_management: 'スタッフ・先生管理',
     organizations: '関連機関',
     settings: '設定',
 
@@ -119,6 +120,7 @@ export const translations = {
     partners: 'Mitra Sekolah',
     scouters: 'Scouter',
     commissions: 'Komisi',
+    staff_management: 'Manajemen Staf & Guru',
     organizations: 'Organisasi',
     settings: 'Pengaturan',
 

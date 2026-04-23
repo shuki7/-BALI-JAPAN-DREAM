@@ -242,3 +242,19 @@ export interface AppUser {
   role: UserRole;
   createdAt: Date;
 }
+export interface StaffMember {
+  id: string;
+  fullName: string;
+  fullNameKana?: string;
+  role: 'teacher' | 'staff' | 'management' | 'other';
+  specialty?: string; // For teachers, e.g. "Japanese Language"
+  phone: string;
+  whatsapp?: string;
+  email?: string;
+  address?: string;
+  joinedDate?: Date;
+  isActive: boolean;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

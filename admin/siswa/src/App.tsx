@@ -15,6 +15,7 @@ import Commissions from './pages/Commissions';
 import Documents from './pages/Documents';
 import Organizations from './pages/Organizations';
 import Settings from './pages/Settings';
+import Staff from './pages/Staff';
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ function ProtectedRoutes() {
         <Route path="/commissions" element={<Commissions />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/organizations" element={<Organizations />} />
+        <Route path="/staff" element={<Staff />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>

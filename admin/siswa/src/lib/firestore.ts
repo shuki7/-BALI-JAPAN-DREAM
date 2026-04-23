@@ -23,6 +23,7 @@ import type {
   StudentDocument,
   AppUser,
   BankAccount,
+  StaffMember,
 } from './types';
 
 // Firestoreのタイムスタンプ/数値をDateに変換
@@ -126,6 +127,17 @@ function convertStudentDocument(id: string, data: any): StudentDocument {
     heldDate: toDateOpt(data.heldDate),
     returnedDate: toDateOpt(data.returnedDate),
   } as StudentDocument;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertStaffMember(id: string, data: any): StaffMember {
+  return {
+    ...data,
+    id,
+    joinedDate: toDateOpt(data.joinedDate),
+    createdAt: toDate(data.createdAt),
+    updatedAt: toDate(data.updatedAt),
+  } as StaffMember;
 }
 
 // =================== Students ===================
@@ -358,4 +370,29 @@ export async function getUsers(): Promise<AppUser[]> {
   const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ ...d.data(), createdAt: toDate(d.data().createdAt) } as AppUser));
+}
+
+// =================== Staff Members ===================
+
+export async function getStaffMembers(): Promise<StaffMember[]> {
+  const q = query(collection(db, 'staffMembers'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertStaffMember(d.id, d.data()));
+}
+
+export async function addStaffMember(data: Omit<StaffMember, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'staffMembers'), {
+    ...data,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updateStaffMember(id: string, data: Partial<StaffMember>): Promise<void> {
+  await updateDoc(doc(db, 'staffMembers', id), { ...data, updatedAt: new Date() });
+}
+
+export async function deleteStaffMember(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'staffMembers', id));
 }
