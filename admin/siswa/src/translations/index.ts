@@ -10,6 +10,13 @@ export const translations = {
     register: '登録する',
     editing: '登録中...',
     
+    login_title: 'Bali Japan Dream',
+    login_subtitle: '生徒管理システム',
+    login_google: 'Googleでログイン',
+    login_footer: 'BJD管理者・スタッフのみアクセス可能',
+    login_failed: 'ログインに失敗しました。再度お試しください。',
+    loading: '読み込み中...',
+    
     // Sidebar
     dashboard: 'ダッシュボード',
     students: '生徒管理',
@@ -138,6 +145,13 @@ export const translations = {
     next: 'Lanjut',
     register: 'Daftar',
     editing: 'Mendaftar...',
+    
+    login_title: 'Bali Japan Dream',
+    login_subtitle: 'Sistem Manajemen Siswa',
+    login_google: 'Masuk dengan Google',
+    login_footer: 'Hanya dapat diakses oleh Admin & Staf BJD',
+    login_failed: 'Gagal masuk. Silakan coba lagi.',
+    loading: 'Memuat...',
     
     // Sidebar
     dashboard: 'Dashboard',

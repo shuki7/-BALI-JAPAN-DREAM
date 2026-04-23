@@ -2,10 +2,14 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
 
 export default function Login() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { language, setLanguage } = useLanguage();
+  const t = translations[language];
 
   useEffect(() => {
     if (!loading && user) {
@@ -18,14 +22,14 @@ export default function Login() {
       await signInWithGoogle();
     } catch (error) {
       console.error('Login failed:', error);
-      alert('ログインに失敗しました。再度お試しください。');
+      alert(t.login_failed);
     }
   };
 
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-        <div style={{ color: '#CC0000', fontWeight: 600 }}>Loading...</div>
+        <div style={{ color: '#CC0000', fontWeight: 600 }}>{t.loading}</div>
       </div>
     );
   }
@@ -48,8 +52,42 @@ export default function Login() {
           width: 380,
           boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
           textAlign: 'center',
+          position: 'relative',
         }}
       >
+        {/* Language Switcher */}
+        <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 6 }}>
+          <button
+            onClick={() => setLanguage('id')}
+            style={{
+              padding: '4px 8px',
+              fontSize: 10,
+              background: language === 'id' ? '#CC0000' : '#f5f5f5',
+              color: language === 'id' ? '#fff' : '#666',
+              border: '1px solid #ddd',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontWeight: 700,
+            }}
+          >
+            ID
+          </button>
+          <button
+            onClick={() => setLanguage('ja')}
+            style={{
+              padding: '4px 8px',
+              fontSize: 10,
+              background: language === 'ja' ? '#CC0000' : '#f5f5f5',
+              color: language === 'ja' ? '#fff' : '#666',
+              border: '1px solid #ddd',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontWeight: 700,
+            }}
+          >
+            JA
+          </button>
+        </div>
         {/* Logo */}
         <div style={{ fontSize: 40, marginBottom: 8 }}>🇮🇩 BJD 🇯🇵</div>
         <div
@@ -60,10 +98,10 @@ export default function Login() {
             marginBottom: 4,
           }}
         >
-          Bali Japan Dream
+          {t.login_title}
         </div>
         <div style={{ fontSize: 13, color: '#666', marginBottom: 32 }}>
-          生徒管理システム / Sistem Manajemen Siswa
+          {t.login_subtitle}
         </div>
 
         <div
@@ -106,11 +144,11 @@ export default function Login() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-          Googleでログイン
+          {t.login_google}
         </button>
 
         <div style={{ marginTop: 20, fontSize: 11, color: '#999' }}>
-          BJD管理者・スタッフのみアクセス可能
+          {t.login_footer}
         </div>
       </div>
     </div>
