@@ -4,11 +4,11 @@ import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { addStudent, updateStudent, getPartners, getScouters } from '../lib/firestore';
+import { addStudent, updateStudent, getPartners, getScouters, addStudentDocument } from '../lib/firestore';
 import { convertPhotoToWebP } from '../lib/imageUtils';
 import { GDriveService } from '../lib/gdrive';
 import { useAuth } from '../context/AuthContext';
-import type { StudentStatus, ProgramType, StudentSource, GenderType, ParentRelationship, EducationLevel, JLPTLevel } from '../lib/types';
+import type { StudentStatus, ProgramType, StudentSource, GenderType, ParentRelationship, EducationLevel, JLPTLevel, DocumentType } from '../lib/types';
 
 const step1Schema = z.object({
   fullName: z.string().min(2, '氏名を入力してください'),
@@ -33,6 +33,10 @@ const step1Schema = z.object({
   partnerSchoolId: z.string().optional(),
   scouterId: z.string().optional(),
   enrollmentDate: z.string().min(1, '入学日を入力してください'),
+  // 学歴
+  educationLevel: z.enum(['sma', 'smk', 'd3', 's1']),
+  schoolName: z.string().min(1, '学校名を入力してください'),
+  graduationYear: z.coerce.number().optional(),
 });
 
 // 保証人情報は全て必須
@@ -54,10 +58,6 @@ const step2Schema = z.object({
   emergencyContact: z.string().optional(),
   emergencyPhone: z.string().optional(),
   emergencyRelationship: z.string().optional(),
-  // 学歴
-  educationLevel: z.enum(['sma', 'smk', 'd3', 's1']),
-  schoolName: z.string().min(1, '学校名を入力してください'),
-  graduationYear: z.coerce.number().optional(),
 });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -138,6 +138,8 @@ export default function StudentNew() {
   });
   // 複数写真 (blob + preview URL + caption)
   const [photos, setPhotos] = useState<{ blob: Blob; previewUrl: string; caption: string }[]>([]);
+  // 学歴証明書 (最大5枚)
+  const [eduDocs, setEduDocs] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const { googleToken } = useAuth();
@@ -146,9 +148,9 @@ export default function StudentNew() {
   const { data: scouters = [] } = useQuery({ queryKey: ['scouters'], queryFn: getScouters });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const form1 = useForm<Step1Data>({ resolver: zodResolver(step1Schema) as any, defaultValues: { nationality: 'Indonesia', gender: 'male', programType: 'tokutei_ginou', source: 'direct', batchNumber: 5 } });
+  const form1 = useForm<Step1Data>({ resolver: zodResolver(step1Schema) as any, defaultValues: { nationality: 'Indonesia', gender: 'male', programType: 'tokutei_ginou', source: 'direct', batchNumber: 5, educationLevel: 'smk' } });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const form2 = useForm<Step2Data>({ resolver: zodResolver(step2Schema) as any, defaultValues: { parentRelationship: 'father', parentGender: 'male', educationLevel: 'smk' } });
+  const form2 = useForm<Step2Data>({ resolver: zodResolver(step2Schema) as any, defaultValues: { parentRelationship: 'father', parentGender: 'male' } });
 
   const watchSource = form1.watch('source');
 
@@ -195,10 +197,30 @@ export default function StudentNew() {
     e.target.value = '';
   };
 
+  const handleEduDocUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const availableSlots = 5 - eduDocs.length;
+    if (availableSlots <= 0) {
+      alert('書類は最大5枚までです。');
+      e.target.value = '';
+      return;
+    }
+    const filesToAdd = files.slice(0, availableSlots);
+    if (files.length > availableSlots) {
+      alert(`書類は最大5枚までです。最初の${availableSlots}枚のみ追加されます。`);
+    }
+    setEduDocs(prev => [...prev, ...filesToAdd]);
+    e.target.value = '';
+  };
+
   const removePhoto = (idx: number) => {
     const photo = photos[idx];
     URL.revokeObjectURL(photo.previewUrl);
     setPhotos(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const removeEduDoc = (idx: number) => {
+    setEduDocs(prev => prev.filter((_, i) => i !== idx));
   };
 
   const updateCaption = (idx: number, caption: string) => {
@@ -238,9 +260,9 @@ export default function StudentNew() {
         instagramAccount: step1Data.instagramAccount || undefined,
         tiktokAccount: step1Data.tiktokAccount || undefined,
         photos: [],
-        educationLevel: step2Data.educationLevel as EducationLevel,
-        schoolName: step2Data.schoolName,
-        graduationYear: step2Data.graduationYear || undefined,
+        educationLevel: step1Data.educationLevel as EducationLevel,
+        schoolName: step1Data.schoolName,
+        graduationYear: step1Data.graduationYear || undefined,
         jlptLevel: 'none' as JLPTLevel,
         jftPassed: false,
         sswPassed: false,
@@ -295,6 +317,35 @@ export default function StudentNew() {
           photoUrl: uploadedPhotos[0] ? drive.getViewUrl(uploadedPhotos[0].fileId) : undefined,
           updatedAt: new Date(),
         });
+
+        // 学歴証明書のアップロード
+        if (eduDocs.length > 0) {
+          setUploadProgress('学歴証明書をアップロード中...');
+          const docsFolderId = await drive.createFolder('Documents', studentFolderId);
+          
+          for (let i = 0; i < eduDocs.length; i++) {
+            setUploadProgress(`学歴証明書をアップロード中 (${i + 1}/${eduDocs.length})...`);
+            const file = eduDocs[i];
+            const fileId = await drive.uploadFile(file, docsFolderId);
+            await drive.makePublic(fileId);
+            const fileUrl = drive.getViewUrl(fileId);
+            
+            let docType: DocumentType = 'other';
+            if (step1Data.educationLevel === 'sma') docType = 'diploma_high_school';
+            else if (step1Data.educationLevel === 'smk') docType = 'diploma_vocational';
+            else if (step1Data.educationLevel === 'd3' || step1Data.educationLevel === 's1') docType = 'diploma_university';
+            
+            await addStudentDocument(studentId, {
+              studentId,
+              documentType: docType,
+              title: `学歴証明書 ${i + 1} (${file.name})`,
+              fileId,
+              fileUrl,
+              uploadDate: new Date(),
+              isHeld: false,
+            });
+          }
+        }
       } else if (photos.length > 0 && !googleToken) {
         alert('Googleトークンが期限切れです。再ログインして写真をアップロードしてください。');
       }
@@ -486,6 +537,47 @@ export default function StudentNew() {
               </FormGroup>
             </div>
 
+            <SectionTitle>学歴・証明書</SectionTitle>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+              <FormGroup label="最終学歴" required>
+                <select {...form1.register('educationLevel')} style={inputStyle}>
+                  <option value="sma">SMA (高校)</option>
+                  <option value="smk">SMK (職業高校)</option>
+                  <option value="d3">D3 (短大)</option>
+                  <option value="s1">S1 (大学)</option>
+                </select>
+              </FormGroup>
+              <FormGroup label="学校名" required error={form1.formState.errors.schoolName?.message}>
+                <input {...form1.register('schoolName')} style={inputStyle} />
+              </FormGroup>
+              <FormGroup label="卒業年度">
+                <input type="number" {...form1.register('graduationYear')} style={inputStyle} placeholder="2023" />
+              </FormGroup>
+            </div>
+            
+            <div style={{ gridColumn: '1 / -1', marginBottom: 8, marginTop: 8 }}>
+              <FormGroup label="学歴証明書（最大5枚・任意）">
+                <div style={{ marginBottom: 10 }}>
+                  <label style={{ display: 'inline-block', padding: '8px 16px', background: eduDocs.length >= 5 ? '#ccc' : '#CC0000', color: '#fff', borderRadius: 6, cursor: eduDocs.length >= 5 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
+                    📄 書類を追加
+                    <input type="file" accept="image/*,.pdf" multiple onChange={handleEduDocUpload} disabled={eduDocs.length >= 5} style={{ display: 'none' }} />
+                  </label>
+                  <span style={{ marginLeft: 10, fontSize: 12, color: '#888' }}>PDF・画像可（最大5枚まで）</span>
+                </div>
+                {eduDocs.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
+                    {eduDocs.map((doc, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', background: '#f5f5f5', borderRadius: 6, border: '1px solid #ddd' }}>
+                        <span style={{ fontSize: 16 }}>📄</span>
+                        <span style={{ flex: 1, fontSize: 13, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</span>
+                        <button type="button" onClick={() => removeEduDoc(idx)} style={{ background: 'transparent', color: '#CC0000', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>✕ 削除</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </FormGroup>
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
               <button type="submit" style={{ padding: '10px 28px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 7, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
                 次へ →
@@ -565,24 +657,6 @@ export default function StudentNew() {
               </FormGroup>
               <FormGroup label="続柄">
                 <input {...form2.register('emergencyRelationship')} style={inputStyle} placeholder="例: Saudara" />
-              </FormGroup>
-            </div>
-
-            <SectionTitle>学歴</SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-              <FormGroup label="最終学歴" required>
-                <select {...form2.register('educationLevel')} style={inputStyle}>
-                  <option value="sma">SMA (高校)</option>
-                  <option value="smk">SMK (職業高校)</option>
-                  <option value="d3">D3 (短大)</option>
-                  <option value="s1">S1 (大学)</option>
-                </select>
-              </FormGroup>
-              <FormGroup label="学校名" required error={form2.formState.errors.schoolName?.message}>
-                <input {...form2.register('schoolName')} style={inputStyle} />
-              </FormGroup>
-              <FormGroup label="卒業年度">
-                <input type="number" {...form2.register('graduationYear')} style={inputStyle} placeholder="2023" />
               </FormGroup>
             </div>
 
