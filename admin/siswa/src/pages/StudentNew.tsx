@@ -350,6 +350,37 @@ export default function StudentNew() {
               <FormGroup label="フリガナ (Kana)">
                 <input {...form1.register('fullNameKana')} style={inputStyle} placeholder="ブディ・サントソ" />
               </FormGroup>
+
+              <div style={{ gridColumn: '1 / -1', marginBottom: 8, marginTop: 8 }}>
+                <FormGroup label="本人写真（最大5枚・任意）">
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ display: 'inline-block', padding: '8px 16px', background: photos.length >= 5 ? '#ccc' : '#CC0000', color: '#fff', borderRadius: 6, cursor: photos.length >= 5 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
+                      📷 写真を追加
+                      <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} disabled={photos.length >= 5} style={{ display: 'none' }} />
+                    </label>
+                    <span style={{ marginLeft: 10, fontSize: 12, color: '#888' }}>WebP自動変換 · 複数選択可</span>
+                  </div>
+
+                  {photos.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 12 }}>
+                      {photos.map((photo, idx) => (
+                        <div key={idx} style={{ position: 'relative', width: 120 }}>
+                          <img src={photo.previewUrl} alt={`photo-${idx}`} style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, border: idx === 0 ? '3px solid #CC0000' : '2px solid #ddd' }} />
+                          {idx === 0 && <span style={{ position: 'absolute', top: 4, left: 4, background: '#CC0000', color: '#fff', fontSize: 9, padding: '2px 5px', borderRadius: 4 }}>メイン</span>}
+                          <button type="button" onClick={() => removePhoto(idx)} style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', fontSize: 11 }}>✕</button>
+                          <input
+                            type="text"
+                            value={photo.caption}
+                            onChange={(e) => updateCaption(idx, e.target.value)}
+                            placeholder="キャプション"
+                            style={{ width: '100%', fontSize: 11, padding: '3px 6px', border: '1px solid #ddd', borderRadius: 4, marginTop: 4, boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </FormGroup>
+              </div>
               <FormGroup label="生年月日" required>
                 <input type="date" {...form1.register('dateOfBirth')} style={inputStyle} />
               </FormGroup>
@@ -627,38 +658,7 @@ export default function StudentNew() {
           <div>
             <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#CC0000' }}>Step 4 — 写真・確認</h2>
 
-            <SectionTitle>本人写真（複数枚可）</SectionTitle>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'inline-block', padding: '8px 16px', background: photos.length >= 5 ? '#ccc' : '#CC0000', color: '#fff', borderRadius: 6, cursor: photos.length >= 5 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600 }}>
-                📷 写真を追加
-                <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} disabled={photos.length >= 5} style={{ display: 'none' }} />
-              </label>
-              <span style={{ marginLeft: 10, fontSize: 12, color: '#888' }}>WebP自動変換 · 複数選択可（最大5枚まで）</span>
 
-              {photos.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 16 }}>
-                  {photos.map((photo, idx) => (
-                    <div key={idx} style={{ position: 'relative', width: 120 }}>
-                      <img src={photo.previewUrl} alt={`photo-${idx}`} style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, border: idx === 0 ? '3px solid #CC0000' : '2px solid #ddd' }} />
-                      {idx === 0 && <span style={{ position: 'absolute', top: 4, left: 4, background: '#CC0000', color: '#fff', fontSize: 9, padding: '2px 5px', borderRadius: 4 }}>メイン</span>}
-                      <button onClick={() => removePhoto(idx)} style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, cursor: 'pointer', fontSize: 11 }}>✕</button>
-                      <input
-                        type="text"
-                        value={photo.caption}
-                        onChange={(e) => updateCaption(idx, e.target.value)}
-                        placeholder="キャプション"
-                        style={{ width: '100%', fontSize: 11, padding: '3px 6px', border: '1px solid #ddd', borderRadius: 4, marginTop: 4, boxSizing: 'border-box' }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-              {photos.length === 0 && (
-                <div style={{ marginTop: 12, padding: 20, border: '2px dashed #ddd', borderRadius: 8, textAlign: 'center', color: '#aaa', fontSize: 13 }}>
-                  写真がまだありません
-                </div>
-              )}
-            </div>
 
             <SectionTitle>登録内容確認</SectionTitle>
             {step1Data && step2Data && (
