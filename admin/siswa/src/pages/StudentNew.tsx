@@ -302,7 +302,8 @@ export default function StudentNew() {
       navigate('/students');
     } catch (err) {
       console.error(err);
-      alert('登録に失敗しました。再度お試しください。');
+      const errMsg = err instanceof Error ? err.message : String(err);
+      alert(`登録に失敗しました。再度お試しください。\n詳細: ${errMsg}`);
     } finally {
       setSubmitting(false);
       setUploadProgress('');
