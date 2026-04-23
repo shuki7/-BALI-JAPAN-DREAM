@@ -1,0 +1,361 @@
+import {
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  where,
+  setDoc,
+  Timestamp,
+} from 'firebase/firestore';
+import { db } from './firebase';
+import type {
+  Student,
+  Payment,
+  Partner,
+  Scouter,
+  CommissionPayment,
+  Organization,
+  StudentDocument,
+  AppUser,
+  BankAccount,
+} from './types';
+
+// Firestoreのタイムスタンプ/数値をDateに変換
+function toDate(val: unknown): Date {
+  if (!val) return new Date();
+  if (val instanceof Timestamp) return val.toDate();
+  if (val instanceof Date) return val;
+  if (typeof val === 'number') return new Date(val);
+  if (typeof val === 'string') return new Date(val);
+  return new Date();
+}
+
+function toDateOpt(val: unknown): Date | undefined {
+  if (!val) return undefined;
+  return toDate(val);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertStudent(id: string, data: any): Student {
+  return {
+    ...data,
+    id,
+    enrollmentDate: toDate(data.enrollmentDate),
+    dateOfBirth: toDate(data.dateOfBirth),
+    jlptPassDate: toDateOpt(data.jlptPassDate),
+    jftPassDate: toDateOpt(data.jftPassDate),
+    sswPassDate: toDateOpt(data.sswPassDate),
+    dormCheckInDate: toDateOpt(data.dormCheckInDate),
+    dormCheckOutDate: toDateOpt(data.dormCheckOutDate),
+    departureDate: toDateOpt(data.departureDate),
+    coeIssueDate: toDateOpt(data.coeIssueDate),
+    coeCancellationDate: toDateOpt(data.coeCancellationDate),
+    createdAt: toDate(data.createdAt),
+    updatedAt: toDate(data.updatedAt),
+  } as Student;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertPayment(id: string, data: any): Payment {
+  return {
+    ...data,
+    id,
+    jmStage1PaidDate: toDateOpt(data.jmStage1PaidDate),
+    jmStage2PaidDate: toDateOpt(data.jmStage2PaidDate),
+    jmStage3PaidDate: toDateOpt(data.jmStage3PaidDate),
+    installments: data.installments?.map((inst: any) => ({
+      ...inst,
+      dueDate: toDate(inst.dueDate),
+      paidDate: toDateOpt(inst.paidDate),
+    })),
+    createdAt: toDate(data.createdAt),
+    updatedAt: toDate(data.updatedAt),
+  } as Payment;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertPartner(id: string, data: any): Partner {
+  return {
+    ...data,
+    id,
+    contractStartDate: toDateOpt(data.contractStartDate),
+    contractEndDate: toDateOpt(data.contractEndDate),
+    createdAt: toDate(data.createdAt),
+  } as Partner;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertScouter(id: string, data: any): Scouter {
+  return {
+    ...data,
+    id,
+    createdAt: toDate(data.createdAt),
+  } as Scouter;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertCommissionPayment(id: string, data: any): CommissionPayment {
+  return {
+    ...data,
+    id,
+    paymentDate: toDateOpt(data.paymentDate),
+    createdAt: toDate(data.createdAt),
+  } as CommissionPayment;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertOrganization(id: string, data: any): Organization {
+  return {
+    ...data,
+    id,
+    createdAt: toDate(data.createdAt),
+  } as Organization;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertStudentDocument(id: string, data: any): StudentDocument {
+  return {
+    ...data,
+    id,
+    uploadDate: toDate(data.uploadDate),
+    heldDate: toDateOpt(data.heldDate),
+    returnedDate: toDateOpt(data.returnedDate),
+  } as StudentDocument;
+}
+
+// =================== Students ===================
+
+export async function getStudents(): Promise<Student[]> {
+  const q = query(collection(db, 'students'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertStudent(d.id, d.data()));
+}
+
+export async function getStudent(id: string): Promise<Student> {
+  const snap = await getDoc(doc(db, 'students', id));
+  if (!snap.exists()) throw new Error('Student not found');
+  return convertStudent(snap.id, snap.data());
+}
+
+export async function addStudent(data: Omit<Student, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'students'), {
+    ...data,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updateStudent(id: string, data: Partial<Student>): Promise<void> {
+  await updateDoc(doc(db, 'students', id), { ...data, updatedAt: new Date() });
+}
+
+export async function deleteStudent(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'students', id));
+}
+
+// =================== Payments ===================
+
+export async function getPayments(studentId?: string): Promise<Payment[]> {
+  let q;
+  if (studentId) {
+    q = query(
+      collection(db, 'payments'),
+      where('studentId', '==', studentId),
+      orderBy('createdAt', 'desc')
+    );
+  } else {
+    q = query(collection(db, 'payments'), orderBy('createdAt', 'desc'));
+  }
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertPayment(d.id, d.data()));
+}
+
+export async function addPayment(data: Omit<Payment, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'payments'), {
+    ...data,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updatePayment(id: string, data: Partial<Payment>): Promise<void> {
+  await updateDoc(doc(db, 'payments', id), { ...data, updatedAt: new Date() });
+}
+
+// =================== Partners ===================
+
+export async function getPartners(): Promise<Partner[]> {
+  const q = query(collection(db, 'partners'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertPartner(d.id, d.data()));
+}
+
+export async function addPartner(data: Omit<Partner, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'partners'), {
+    ...data,
+    createdAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updatePartner(id: string, data: Partial<Partner>): Promise<void> {
+  await updateDoc(doc(db, 'partners', id), data);
+}
+
+export async function deletePartner(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'partners', id));
+}
+
+// =================== Scouters ===================
+
+export async function getScouters(): Promise<Scouter[]> {
+  const q = query(collection(db, 'scouters'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertScouter(d.id, d.data()));
+}
+
+export async function addScouter(data: Omit<Scouter, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'scouters'), {
+    ...data,
+    createdAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updateScouter(id: string, data: Partial<Scouter>): Promise<void> {
+  await updateDoc(doc(db, 'scouters', id), data);
+}
+
+export async function deleteScouter(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'scouters', id));
+}
+
+// =================== Commission Payments ===================
+
+export async function getCommissionPayments(): Promise<CommissionPayment[]> {
+  const q = query(collection(db, 'commissionPayments'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertCommissionPayment(d.id, d.data()));
+}
+
+export async function addCommissionPayment(data: Omit<CommissionPayment, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'commissionPayments'), {
+    ...data,
+    createdAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updateCommissionPayment(id: string, data: Partial<CommissionPayment>): Promise<void> {
+  await updateDoc(doc(db, 'commissionPayments', id), data);
+}
+
+// =================== Organizations ===================
+
+export async function getOrganizations(): Promise<Organization[]> {
+  const q = query(collection(db, 'organizations'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertOrganization(d.id, d.data()));
+}
+
+export async function addOrganization(data: Omit<Organization, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'organizations'), {
+    ...data,
+    createdAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updateOrganization(id: string, data: Partial<Organization>): Promise<void> {
+  await updateDoc(doc(db, 'organizations', id), data);
+}
+
+export async function deleteOrganization(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'organizations', id));
+}
+
+// =================== Student Documents ===================
+
+export async function getStudentDocuments(studentId: string): Promise<StudentDocument[]> {
+  const q = query(
+    collection(db, 'students', studentId, 'documents'),
+    orderBy('uploadDate', 'desc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertStudentDocument(d.id, d.data()));
+}
+
+export async function addStudentDocument(
+  studentId: string,
+  data: Omit<StudentDocument, 'id'>
+): Promise<string> {
+  const ref = await addDoc(collection(db, 'students', studentId, 'documents'), {
+    ...data,
+    uploadDate: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updateStudentDocument(
+  studentId: string,
+  docId: string,
+  data: Partial<StudentDocument>
+): Promise<void> {
+  await updateDoc(doc(db, 'students', studentId, 'documents', docId), data);
+}
+
+export async function deleteStudentDocument(studentId: string, docId: string): Promise<void> {
+  await deleteDoc(doc(db, 'students', studentId, 'documents', docId));
+}
+
+// =================== Bank Accounts ===================
+
+export async function getBankAccounts(studentId: string): Promise<BankAccount[]> {
+  const q = query(
+    collection(db, 'students', studentId, 'bankAccounts'),
+    orderBy('createdAt', 'desc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data(), createdAt: toDate(d.data().createdAt) } as BankAccount));
+}
+
+export async function addBankAccount(studentId: string, data: Omit<BankAccount, 'id'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'students', studentId, 'bankAccounts'), {
+    ...data,
+    createdAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function deleteBankAccount(studentId: string, accountId: string): Promise<void> {
+  await deleteDoc(doc(db, 'students', studentId, 'bankAccounts', accountId));
+}
+
+// =================== Users ===================
+
+export async function getUser(uid: string): Promise<AppUser | null> {
+  const snap = await getDoc(doc(db, 'users', uid));
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  return {
+    ...data,
+    createdAt: toDate(data.createdAt),
+  } as AppUser;
+}
+
+export async function setUser(uid: string, data: AppUser): Promise<void> {
+  await setDoc(doc(db, 'users', uid), data);
+}
+
+export async function getUsers(): Promise<AppUser[]> {
+  const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ ...d.data(), createdAt: toDate(d.data().createdAt) } as AppUser));
+}
