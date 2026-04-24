@@ -178,6 +178,17 @@ export default function StudentDetail() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payments', id] }),
   });
 
+  const updatePaymentMutation = useMutation({
+    mutationFn: ({ paymentId, data }: { paymentId: string; data: Partial<Payment> }) =>
+      updatePayment(paymentId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payments', id] }),
+  });
+
+  const deletePaymentMutation = useMutation({
+    mutationFn: deletePayment,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payments', id] }),
+  });
+
   const addDocMutation = useMutation({
     mutationFn: ({ data }: { data: Parameters<typeof addStudentDocument>[1] }) =>
       addStudentDocument(id!, data),
@@ -207,6 +218,7 @@ export default function StudentDetail() {
 
   const [addPaymentData, setAddPaymentData] = useState({ paymentType: 'education', totalAmount: 0, paidAmount: 0, paymentMethod: 'lump_sum', notes: '' });
   const [showAddPayment, setShowAddPayment] = useState(false);
+  const [showEditPayment, setShowEditPayment] = useState<Payment | null>(null);
   const [showAddDoc, setShowAddDoc] = useState(false);
   const [addDocData, setAddDocData] = useState({ documentType: 'diploma_high_school', title: '', fileId: '', isHeld: false, notes: '' });
   const [showAddBank, setShowAddBank] = useState(false);
@@ -596,12 +608,34 @@ export default function StudentDetail() {
                   </span>
                   <span style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>{p.paymentMethod === 'lump_sum' ? t.lump_sum_short : t.installment_short}</span>
                 </div>
-                <Badge
-                  color={p.paymentStatus === 'paid' ? '#166534' : p.paymentStatus === 'partial' ? '#92400e' : '#991b1b'}
-                  bg={p.paymentStatus === 'paid' ? '#dcfce7' : p.paymentStatus === 'partial' ? '#fef3c7' : '#fee2e2'}
-                >
-                  {p.paymentStatus === 'paid' ? t.paid : p.paymentStatus === 'partial' ? t.partial : t.unpaid}
-                </Badge>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Badge
+                    color={p.paymentStatus === 'paid' ? '#166534' : p.paymentStatus === 'partial' ? '#92400e' : '#991b1b'}
+                    bg={p.paymentStatus === 'paid' ? '#dcfce7' : p.paymentStatus === 'partial' ? '#fef3c7' : '#fee2e2'}
+                  >
+                    {p.paymentStatus === 'paid' ? t.paid : p.paymentStatus === 'partial' ? t.partial : t.unpaid}
+                  </Badge>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <button
+                      onClick={() => setShowEditPayment(p)}
+                      style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 4, fontSize: 16 }}
+                      title={t.edit}
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm(language === 'ja' ? 'この支払い記録を削除してもよろしいですか？' : 'Apakah Anda yakin ingin menghapus catatan pembayaran ini?')) {
+                          deletePaymentMutation.mutate(p.id);
+                        }
+                      }}
+                      style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 4, fontSize: 16 }}
+                      title={t.delete}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
               </div>
               <div style={{ display: 'flex', gap: 24, fontSize: 13 }}>
                 <div><span style={{ color: '#888' }}>{t.total_amount}: </span><strong>Rp {p.totalAmount.toLocaleString('id-ID')}</strong></div>
@@ -1326,6 +1360,93 @@ export default function StudentDetail() {
                   {t.saving}...
                 </>
               ) : t.save}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Payment Modal */}
+      {showEditPayment && (
+        <Modal title={t.edit_payment} onClose={() => setShowEditPayment(null)}>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_type}</label>
+            <select value={showEditPayment.paymentType} onChange={(e) => setShowEditPayment(p => p ? ({ ...p, paymentType: e.target.value as PaymentType }) : null)} style={inputStyle}>
+              <option value="education">{t.education_fee}</option>
+              <option value="job_matching">{t.jm_fee}</option>
+              <option value="dormitory">{t.dorm_fee}</option>
+              <option value="other">{t.other}</option>
+            </select>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_method}</label>
+            <select value={showEditPayment.paymentMethod} onChange={(e) => setShowEditPayment(p => p ? ({ ...p, paymentMethod: e.target.value as PaymentMethod }) : null)} style={inputStyle}>
+              <option value="lump_sum">{t.lump_sum}</option>
+              <option value="installment">{t.installment}</option>
+            </select>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.total_amount}</label>
+            <CurrencyInput 
+              value={showEditPayment.totalAmount} 
+              onChange={(val) => setShowEditPayment(p => p ? ({ ...p, totalAmount: val }) : null)} 
+              style={inputStyle}
+              suffix="IDR"
+            />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.paid_amount}</label>
+            <CurrencyInput 
+              value={showEditPayment.paidAmount} 
+              onChange={(val) => setShowEditPayment(p => p ? ({ ...p, paidAmount: val }) : null)} 
+              style={inputStyle}
+              suffix="IDR"
+            />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.memo}</label>
+            <input value={showEditPayment.notes || ''} onChange={(e) => setShowEditPayment(p => p ? ({ ...p, notes: e.target.value }) : null)} style={inputStyle} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+            <button onClick={() => setShowEditPayment(null)} disabled={updatePaymentMutation.isPending} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button
+              disabled={updatePaymentMutation.isPending}
+              onClick={() => {
+                const total = Number(showEditPayment.totalAmount) || 0;
+                const paid = Number(showEditPayment.paidAmount) || 0;
+                const status: PaymentStatus = paid >= total ? 'paid' : paid > 0 ? 'partial' : 'unpaid';
+                
+                updatePaymentMutation.mutate({
+                  paymentId: showEditPayment.id,
+                  data: {
+                    paymentType: showEditPayment.paymentType,
+                    paymentMethod: showEditPayment.paymentMethod,
+                    totalAmount: total,
+                    paidAmount: paid,
+                    remainingAmount: total - paid,
+                    paymentStatus: status,
+                    notes: showEditPayment.notes,
+                    updatedAt: new Date(),
+                  }
+                }, {
+                  onSuccess: () => setShowEditPayment(null),
+                  onError: (err) => alert('Error: ' + (err as Error).message)
+                });
+              }}
+              style={{ 
+                padding: '8px 20px', 
+                background: '#CC0000', 
+                color: '#fff', 
+                border: 'none', 
+                borderRadius: 6, 
+                fontWeight: 700, 
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                opacity: updatePaymentMutation.isPending ? 0.7 : 1
+              }}
+            >
+              {updatePaymentMutation.isPending ? t.saving + '...' : t.save}
             </button>
           </div>
         </Modal>
