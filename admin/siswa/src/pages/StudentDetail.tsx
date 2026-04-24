@@ -393,10 +393,13 @@ export default function StudentDetail() {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 6
+              gap: 8,
+              color: '#333',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
             }}
           >
-            📄 PDFレポート出力
+            <Printer size={16} />
+            {t.print_report}
           </button>
           <StatusBadge status={student.status} />
         </div>

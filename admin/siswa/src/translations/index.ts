@@ -287,6 +287,8 @@ export const translations = {
     email: 'メールアドレス',
     
     sns_accounts: 'SNS アカウント',
+    print_report: '印刷レポート作成',
+    student_report: '生徒レポート',
     enrollment_info: '入学情報',
     program: 'プログラム',
     batch: 'バッチ番号',
@@ -773,6 +775,8 @@ export const translations = {
     email: 'Alamat Email',
     
     sns_accounts: 'Akun SNS',
+    print_report: 'Buat Laporan Cetak',
+    student_report: 'Laporan Siswa',
     enrollment_info: 'Informasi Pendaftaran',
     program: 'Program',
     batch: 'Nomor Batch',
