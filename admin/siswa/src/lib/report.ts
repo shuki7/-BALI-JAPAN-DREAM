@@ -22,10 +22,10 @@ export const generateStudentReportPDF = async (
 
   // Load and add logo
   try {
-    const logoData = await loadImageToBase64('/balijapan_logo.webp');
-    doc.addImage(logoData, 'WEBP', 15, 5, 30, 30);
+    const logoBase64 = await loadImageToBase64('/admin/siswa/balijapan_logo.webp');
+    doc.addImage(logoBase64, 'WEBP', 15, 5, 30, 30);
   } catch (err) {
-    console.error('Failed to load logo', err);
+    console.warn('Failed to load logo', err);
   }
 
   doc.setFont('helvetica', 'bold');

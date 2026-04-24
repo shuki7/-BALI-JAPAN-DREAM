@@ -264,9 +264,10 @@ export default function Students() {
                           const [pmts] = await Promise.all([
                             getPayments(s.id)
                           ]);
-                          generateStudentReportPDF(s, pmts, language);
-                        } catch (err) {
-                          alert('Failed to generate report');
+                          await generateStudentReportPDF(s, pmts, language);
+                        } catch (err: any) {
+                          console.error(err);
+                          alert(`Failed to generate PDF: ${err.message || 'Unknown error'}`);
                         }
                       }}
                       style={{

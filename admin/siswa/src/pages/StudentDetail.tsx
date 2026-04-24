@@ -375,7 +375,14 @@ export default function StudentDetail() {
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
-            onClick={() => generateStudentReportPDF(student, payments, language)}
+            onClick={async () => {
+              try {
+                await generateStudentReportPDF(student, payments, language);
+              } catch (err: any) {
+                console.error(err);
+                alert(`Failed to generate PDF: ${err.message || 'Unknown error'}`);
+              }
+            }}
             style={{
               padding: '8px 16px',
               background: '#fff',
