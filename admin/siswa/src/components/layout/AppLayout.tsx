@@ -181,6 +181,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           >
             {t.logout}
           </button>
+          <div style={{ padding: '8px 0 0 0', fontSize: '10px', color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
+            v2.3 (Student Report & Thumbnail Fix)
+          </div>
         </div>
       </div>
 
