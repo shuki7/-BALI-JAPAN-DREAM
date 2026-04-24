@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { id as localeID, ja as localeJA } from 'date-fns/locale';
 import type { Student, Payment } from './types';
@@ -82,7 +82,7 @@ export const generateStudentReportPDF = async (
     [t.address as string, student.address, t.city as string, student.city]
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: currentY + 5,
     body: personalData,
     theme: 'plain',
