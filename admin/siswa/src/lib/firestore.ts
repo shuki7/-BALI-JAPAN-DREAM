@@ -212,14 +212,15 @@ export async function getPayments(studentId?: string): Promise<Payment[]> {
   if (studentId) {
     q = query(
       collection(db, 'payments'),
-      where('studentId', '==', studentId),
-      orderBy('createdAt', 'desc')
+      where('studentId', '==', studentId)
     );
   } else {
-    q = query(collection(db, 'payments'), orderBy('createdAt', 'desc'));
+    q = query(collection(db, 'payments'));
   }
   const snap = await getDocs(q);
-  return snap.docs.map((d) => convertPayment(d.id, d.data()));
+  const payments = snap.docs.map((d) => convertPayment(d.id, d.data()));
+  // Sort in frontend to avoid needing composite indexes
+  return payments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
 export async function addPayment(data: Omit<Payment, 'id'>): Promise<string> {
