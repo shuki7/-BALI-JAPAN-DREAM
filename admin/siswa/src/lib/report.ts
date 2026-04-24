@@ -95,7 +95,32 @@ export const generateStudentReportPDF = async (
     }
   });
 
-  currentY = (doc as any).lastAutoTable.finalY + 10;
+  currentY = (doc as any).lastAutoTable.finalY + 5;
+
+  // --- Social Media Section ---
+  if (student.instagramAccount || student.tiktokAccount) {
+    let snsX = 20;
+    if (student.instagramAccount) {
+      try {
+        const igLogo = await loadImageToBase64('https://cdn-icons-png.flaticon.com/512/174/174855.png');
+        doc.addImage(igLogo, 'PNG', snsX, currentY, 5, 5);
+        doc.setFontSize(9);
+        doc.text(`@${student.instagramAccount}`, snsX + 7, currentY + 4);
+        snsX += 45;
+      } catch (e) {}
+    }
+    if (student.tiktokAccount) {
+      try {
+        const ttLogo = await loadImageToBase64('https://cdn-icons-png.flaticon.com/512/3046/3046121.png');
+        doc.addImage(ttLogo, 'PNG', snsX, currentY, 5, 5);
+        doc.setFontSize(9);
+        doc.text(`@${student.tiktokAccount}`, snsX + 7, currentY + 4);
+      } catch (e) {}
+    }
+    currentY += 10;
+  } else {
+    currentY += 5;
+  }
 
   // --- Education & Exams ---
   doc.setFont('helvetica', 'bold');
