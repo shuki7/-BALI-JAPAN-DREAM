@@ -31,9 +31,17 @@ import type {
 function toDate(val: unknown): Date {
   if (!val) return new Date();
   if (val instanceof Timestamp) return val.toDate();
-  if (val instanceof Date) return val;
-  if (typeof val === 'number') return new Date(val);
-  if (typeof val === 'string') return new Date(val);
+  if (val instanceof Date) {
+    return isNaN(val.getTime()) ? new Date() : val;
+  }
+  if (typeof val === 'number') {
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? new Date() : d;
+  }
+  if (typeof val === 'string') {
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? new Date() : d;
+  }
   return new Date();
 }
 
@@ -52,6 +60,7 @@ function convertStudent(id: string, data: any): Student {
     jlptPassDate: toDateOpt(data.jlptPassDate),
     jftPassDate: toDateOpt(data.jftPassDate),
     sswPassDate: toDateOpt(data.sswPassDate),
+    parentDateOfBirth: toDateOpt(data.parentDateOfBirth),
     dormCheckInDate: toDateOpt(data.dormCheckInDate),
     dormCheckOutDate: toDateOpt(data.dormCheckOutDate),
     departureDate: toDateOpt(data.departureDate),
@@ -64,6 +73,10 @@ function convertStudent(id: string, data: any): Student {
     interviews: data.interviews?.map((i: any) => ({
       ...i,
       date: toDate(i.date),
+    })),
+    yellowCards: data.yellowCards?.map((c: any) => ({
+      ...c,
+      date: toDate(c.date),
     })),
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
@@ -222,6 +235,10 @@ export async function updatePayment(id: string, data: Partial<Payment>): Promise
   await updateDoc(doc(db, 'payments', id), { ...data, updatedAt: new Date() });
 }
 
+export async function deletePayment(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'payments', id));
+}
+
 // =================== Partners ===================
 
 export async function getPartners(): Promise<Partner[]> {
@@ -288,6 +305,10 @@ export async function addCommissionPayment(data: Omit<CommissionPayment, 'id'>):
 
 export async function updateCommissionPayment(id: string, data: Partial<CommissionPayment>): Promise<void> {
   await updateDoc(doc(db, 'commissionPayments', id), data);
+}
+
+export async function deleteCommissionPayment(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'commissionPayments', id));
 }
 
 // =================== Organizations ===================

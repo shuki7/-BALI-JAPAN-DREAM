@@ -211,12 +211,25 @@ export default function Discipline() {
                           )}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                             <div style={{ fontSize: 11, color: '#999' }}>{t.issuer}: {card.issuedBy}</div>
-                            <button 
-                              onClick={() => setShowInvoiceModal({ student: s, card })}
-                              style={{ padding: '4px 10px', background: '#fff', border: '1px solid #ddd', borderRadius: 4, fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-                            >
-                              <FileDown size={12} /> {language === 'ja' ? '請求書発行' : 'Invoice'}
-                            </button>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              <button 
+                                onClick={() => setShowInvoiceModal({ student: s, card })}
+                                style={{ padding: '4px 10px', background: '#fff', border: '1px solid #ddd', borderRadius: 4, fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                              >
+                                <FileDown size={12} /> {language === 'ja' ? '請求書発行' : 'Invoice'}
+                              </button>
+                              <button 
+                                onClick={async () => {
+                                  if (confirm(t.confirm_delete)) {
+                                    const updatedCards = s.yellowCards?.filter(c => c.id !== card.id) || [];
+                                    await updateMutation.mutateAsync({ id: s.id, data: { yellowCards: updatedCards } });
+                                  }
+                                }}
+                                style={{ padding: '4px 10px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#991b1b' }}
+                              >
+                                {t.delete}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}

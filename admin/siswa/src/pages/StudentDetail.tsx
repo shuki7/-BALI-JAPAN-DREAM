@@ -21,7 +21,7 @@ import { translations } from '../translations';
 import { useAuth } from '../context/AuthContext';
 import { GDriveService } from '../lib/gdrive';
 import { convertPhotoToWebP } from '../lib/imageUtils';
-import type { StudentStatus, DocumentType, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
+import type { Student, StudentStatus, DocumentType, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
 
 const SSW_CATEGORIES = [
   'SSW 介護',
@@ -134,7 +134,7 @@ export default function StudentDetail() {
     return () => { document.head.removeChild(style); };
   }, []);
 
-  const { data: student, isLoading } = useQuery({
+  const { data: student, isLoading } = useQuery<Student>({
     queryKey: ['student', id],
     queryFn: () => getStudent(id!),
     enabled: !!id,
@@ -525,18 +525,18 @@ export default function StudentDetail() {
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#CC0000', borderBottom: '1px solid #fecaca', paddingBottom: 4, marginBottom: 10, textTransform: 'uppercase' }}>{t.personal_info}</div>
                 <InfoRow label={t.full_name} value={student.parentName} />
                 <InfoRow label={t.relationship} value={student.parentRelationship === 'father' ? t.father : student.parentRelationship === 'mother' ? t.mother : t.guardian} />
-                <InfoRow label={t.gender} value={(student as any).parentGender === 'male' ? t.male : (student as any).parentGender === 'female' ? t.female : undefined} />
-                <InfoRow label={t.birth_date} value={(student as any).parentDateOfBirth ? format(new Date((student as any).parentDateOfBirth), 'dd/MM/yyyy') : undefined} />
+                <InfoRow label={t.gender} value={student.parentGender === 'male' ? t.male : student.parentGender === 'female' ? t.female : undefined} />
+                <InfoRow label={t.birth_date} value={student.parentDateOfBirth ? format(student.parentDateOfBirth, 'dd/MM/yyyy') : undefined} />
                 <InfoRow label={t.occupation} value={student.parentOccupation} />
-                <InfoRow label={t.nik} value={(student as any).parentNik} />
+                <InfoRow label={t.nik} value={student.parentNik} />
               </div>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#CC0000', borderBottom: '1px solid #fecaca', paddingBottom: 4, marginBottom: 10, textTransform: 'uppercase' }}>{t.contact_info}</div>
                 <InfoRow label={t.whatsapp} value={student.parentWhatsapp ? <a href={`https://wa.me/${student.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{student.parentWhatsapp}</a> : null} />
-                <InfoRow label={t.email} value={(student as any).parentEmail} />
+                <InfoRow label={t.email} value={student.parentEmail} />
                 <InfoRow label={t.address} value={student.parentAddress} />
-                <InfoRow label={t.city} value={(student as any).parentCity} />
-                <InfoRow label={t.province} value={(student as any).parentProvince} />
+                <InfoRow label={t.city} value={student.parentCity} />
+                <InfoRow label={t.province} value={student.parentProvince} />
                 <InfoRow label={language === 'ja' ? '入寮日' : 'Tanggal Masuk Asrama'} value={student.dormCheckInDate ? format(student.dormCheckInDate, 'dd/MM/yyyy') : undefined} />
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCommissionPayments, addCommissionPayment, updateCommissionPayment, getStudents, getScouters, getPartners } from '../lib/firestore';
+import { getCommissionPayments, addCommissionPayment, updateCommissionPayment, deleteCommissionPayment, getStudents, getScouters, getPartners } from '../lib/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations';
 import type { CommissionPaymentType } from '../lib/types';
@@ -37,28 +37,45 @@ export default function Commissions() {
   const queryClient = useQueryClient();
   const { language } = useLanguage();
   const t = translations[language];
+  const [filterType, setFilterType] = useState('');
+  const [filterPaid, setFilterPaid] = useState('');
+  const [showAdd, setShowAdd] = useState(false);
+  const [editTarget, setEditTarget] = useState<any | null>(null);
+  const [addData, setAddData] = useState({
+    commissionType: 'to_scouter' as CommissionPaymentType,
+    scouterId: '',
+    partnerId: '',
+    studentId: '',
+    amount: 0,
+    currency: 'IDR' as 'IDR' | 'JPY',
+    notes: '',
+  });
+
   const { data: commissions = [], isLoading } = useQuery({ queryKey: ['commissions'], queryFn: getCommissionPayments });
   const { data: students = [] } = useQuery({ queryKey: ['students'], queryFn: getStudents });
   const { data: scouters = [] } = useQuery({ queryKey: ['scouters'], queryFn: getScouters });
   const { data: partners = [] } = useQuery({ queryKey: ['partners'], queryFn: getPartners });
 
-  const [filterType, setFilterType] = useState('');
-  const [filterPaid, setFilterPaid] = useState('');
-  const [showAdd, setShowAdd] = useState(false);
-  const [addData, setAddData] = useState({
-    commissionType: 'to_scouter' as CommissionPaymentType,
-    recipientId: '',
-    recipientType: 'scouter' as 'scouter' | 'partner',
-    studentId: '',
-    amount: 0,
-    currency: 'IDR' as 'IDR' | 'JPY',
-    isPaid: false,
-    notes: '',
-  });
-
   const addMutation = useMutation({
     mutationFn: addCommissionPayment,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['commissions'] }); setShowAdd(false); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commissions'] });
+      setShowAdd(false);
+      setAddData({ commissionType: 'to_scouter', scouterId: '', partnerId: '', studentId: '', amount: 0, currency: 'IDR', notes: '' });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<any> }) => updateCommissionPayment(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commissions'] });
+      setEditTarget(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteCommissionPayment(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['commissions'] }),
   });
 
   const markPaidMutation = useMutation({
@@ -72,20 +89,8 @@ export default function Commissions() {
     return m;
   }, [students]);
 
-  const scouterMap = useMemo(() => {
-    const m: Record<string, string> = {};
-    scouters.forEach((s) => { m[s.id] = s.fullName; });
-    return m;
-  }, [scouters]);
-
-  const partnerMap = useMemo(() => {
-    const m: Record<string, string> = {};
-    partners.forEach((p) => { m[p.id] = p.partnerName; });
-    return m;
-  }, [partners]);
-
   const filtered = useMemo(() => {
-    return commissions.filter((c) => {
+    return commissions.filter((c: any) => {
       if (filterType && c.commissionType !== filterType) return false;
       if (filterPaid === 'paid' && !c.isPaid) return false;
       if (filterPaid === 'unpaid' && c.isPaid) return false;
@@ -93,9 +98,11 @@ export default function Commissions() {
     });
   }, [commissions, filterType, filterPaid]);
 
-  const getRecipientName = (c: typeof commissions[0]) => {
-    if (c.recipientType === 'scouter') return scouterMap[c.recipientId] || c.recipientId;
-    return partnerMap[c.recipientId] || c.recipientId;
+  const getRecipientName = (c: any) => {
+    if (c.commissionType === 'to_scouter') {
+      return scouters.find((s: any) => s.id === c.scouterId)?.fullName || c.scouterId || 'Unknown';
+    }
+    return partners.find((p: any) => p.id === c.partnerId)?.partnerName || c.partnerId || 'Unknown';
   };
 
   const typeLabel = (ty: CommissionPaymentType) => {
@@ -107,7 +114,32 @@ export default function Commissions() {
     return labels[ty] || ty;
   };
 
-  const totalUnpaid = filtered.filter((c) => !c.isPaid).reduce((a, c) => a + c.amount, 0);
+  const handleSave = () => {
+    const target = editTarget || addData;
+    const payload = {
+      commissionType: target.commissionType,
+      scouterId: target.scouterId || undefined,
+      partnerId: target.partnerId || undefined,
+      recipientId: target.commissionType === 'to_scouter' ? target.scouterId : target.partnerId,
+      recipientType: (target.commissionType === 'to_scouter' ? 'scouter' : 'partner') as 'scouter' | 'partner',
+      studentId: target.studentId,
+      amount: Number(target.amount),
+      currency: target.currency,
+      notes: target.notes || undefined,
+    };
+
+    if (editTarget) {
+      updateMutation.mutate({ id: editTarget.id, data: payload });
+    } else {
+      addMutation.mutate({
+        ...payload,
+        isPaid: false,
+        createdAt: new Date(),
+      });
+    }
+  };
+
+  const totalUnpaid = filtered.filter((c: any) => !c.isPaid).reduce((a, c) => a + c.amount, 0);
 
   return (
     <div>
@@ -116,12 +148,17 @@ export default function Commissions() {
           <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{language === 'ja' ? 'コミッション管理' : 'Manajemen Komisi'}</h1>
           <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>{language === 'ja' ? '未払い合計' : 'Total Belum Bayar'}: Rp {totalUnpaid.toLocaleString('id-ID')}</p>
         </div>
-        <button onClick={() => setShowAdd(true)} style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>
+        <button 
+          onClick={() => {
+            setAddData({ commissionType: 'to_scouter', scouterId: '', partnerId: '', studentId: '', amount: 0, currency: 'IDR', notes: '' });
+            setShowAdd(true);
+          }} 
+          style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+        >
           + {language === 'ja' ? 'コミッション追加' : 'Tambah Komisi'}
         </button>
       </div>
 
-      {/* Filters */}
       <div style={{ background: '#fff', borderRadius: 10, padding: '14px 20px', marginBottom: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', display: 'flex', gap: 12 }}>
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)} style={{ ...inputStyle, maxWidth: 200 }}>
           <option value="">{language === 'ja' ? '全種別' : 'Semua Tipe'}</option>
@@ -136,7 +173,6 @@ export default function Commissions() {
         </select>
       </div>
 
-      {/* Table */}
       <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
         {isLoading ? (
           <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>{t.loading}</div>
@@ -150,7 +186,7 @@ export default function Commissions() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c) => (
+              {filtered.map((c: any) => (
                 <tr
                   key={c.id}
                   style={{ borderBottom: '1px solid #f0f0f0', background: !c.isPaid ? '#fff8f8' : '#fff' }}
@@ -163,7 +199,7 @@ export default function Commissions() {
                   </td>
                   <td style={{ padding: '10px 16px', fontSize: 13 }}>{c.currency}</td>
                   <td style={{ padding: '10px 16px', fontSize: 13, color: '#888' }}>
-                    {c.paymentDate ? format(c.paymentDate, 'dd/MM/yyyy') : '—'}
+                    {c.paymentDate ? format(c.paymentDate instanceof Date ? c.paymentDate : new Date(c.paymentDate), 'dd/MM/yyyy') : '—'}
                   </td>
                   <td style={{ padding: '10px 16px' }}>
                     <span style={{
@@ -175,14 +211,28 @@ export default function Commissions() {
                     </span>
                   </td>
                   <td style={{ padding: '10px 16px' }}>
-                    {!c.isPaid && (
-                      <button
-                        onClick={() => markPaidMutation.mutate({ id: c.id })}
-                        style={{ padding: '4px 12px', background: '#dcfce7', border: '1px solid #86efac', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#166534', fontWeight: 600 }}
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {!c.isPaid && (
+                        <button
+                          onClick={() => markPaidMutation.mutate({ id: c.id })}
+                          style={{ padding: '4px 10px', background: '#dcfce7', border: '1px solid #86efac', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#166534', fontWeight: 600 }}
+                        >
+                          {language === 'ja' ? '支払済' : 'Lunas'}
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => setEditTarget(c)}
+                        style={{ padding: '4px 10px', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#374151' }}
                       >
-                        {language === 'ja' ? '支払済にする' : 'Tandai Lunas'}
+                        {t.edit}
                       </button>
-                    )}
+                      <button 
+                        onClick={() => { if(confirm(t.confirm_delete)) deleteMutation.mutate(c.id); }}
+                        style={{ padding: '4px 10px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#991b1b' }}
+                      >
+                        {t.delete}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -194,66 +244,109 @@ export default function Commissions() {
         )}
       </div>
 
-      {showAdd && (
-        <Modal title={language === 'ja' ? 'コミッション追加' : 'Tambah Komisi'} onClose={() => setShowAdd(false)}>
+      {(showAdd || editTarget) && (
+        <Modal title={editTarget ? t.edit : (language === 'ja' ? 'コミッション追加' : 'Tambah Komisi')} onClose={() => { setShowAdd(false); setEditTarget(null); }}>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '種別' : 'Tipe'}</label>
-            <select value={addData.commissionType} onChange={(e) => {
-              const t = e.target.value as CommissionPaymentType;
-              setAddData(p => ({ ...p, commissionType: t, recipientType: t === 'to_scouter' ? 'scouter' : 'partner' }));
-            }} style={inputStyle}>
-              <option value="to_scouter">スカウターへ</option>
-              <option value="to_partner">パートナーへ</option>
-              <option value="from_partner">パートナーから</option>
+            <select 
+              value={editTarget ? editTarget.commissionType : addData.commissionType} 
+              onChange={(e) => {
+                const val = e.target.value as CommissionPaymentType;
+                if (editTarget) setEditTarget({...editTarget, commissionType: val});
+                else setAddData(p => ({ ...p, commissionType: val }));
+              }} 
+              style={inputStyle}
+            >
+              <option value="to_scouter">{language === 'ja' ? 'スカウターへ' : 'Ke Scouter'}</option>
+              <option value="to_partner">{language === 'ja' ? 'パートナーへ' : 'Ke Mitra'}</option>
+              <option value="from_partner">{language === 'ja' ? 'パートナーから' : 'Dari Mitra'}</option>
             </select>
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>受取人</label>
-            <select value={addData.recipientId} onChange={(e) => setAddData(p => ({ ...p, recipientId: e.target.value }))} style={inputStyle}>
-              <option value="">選択してください</option>
-              {addData.recipientType === 'scouter'
-                ? scouters.map((s) => <option key={s.id} value={s.id}>{s.fullName}</option>)
-                : partners.map((p) => <option key={p.id} value={p.id}>{p.partnerName}</option>)
-              }
-            </select>
-          </div>
+          
+          {(editTarget ? editTarget.commissionType : addData.commissionType) === 'to_scouter' ? (
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>スカウター</label>
+              <select 
+                value={editTarget ? editTarget.scouterId : addData.scouterId} 
+                onChange={(e) => {
+                  if (editTarget) setEditTarget({...editTarget, scouterId: e.target.value});
+                  else setAddData(p => ({ ...p, scouterId: e.target.value }));
+                }} 
+                style={inputStyle}
+              >
+                <option value="">選択してください</option>
+                {scouters.map((s: any) => <option key={s.id} value={s.id}>{s.fullName}</option>)}
+              </select>
+            </div>
+          ) : (
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>パートナー</label>
+              <select 
+                value={editTarget ? editTarget.partnerId : addData.partnerId} 
+                onChange={(e) => {
+                  if (editTarget) setEditTarget({...editTarget, partnerId: e.target.value});
+                  else setAddData(p => ({ ...p, partnerId: e.target.value }));
+                }} 
+                style={inputStyle}
+              >
+                <option value="">選択してください</option>
+                {partners.map((p: any) => <option key={p.id} value={p.id}>{p.partnerName}</option>)}
+              </select>
+            </div>
+          )}
+
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>対象生徒</label>
-            <select value={addData.studentId} onChange={(e) => setAddData(p => ({ ...p, studentId: e.target.value }))} style={inputStyle}>
-              <option value="">選択してください</option>
-              {students.map((s) => <option key={s.id} value={s.id}>{s.fullName}</option>)}
-            </select>
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>金額</label>
-            <input type="number" value={addData.amount} onChange={(e) => setAddData(p => ({ ...p, amount: Number(e.target.value) }))} style={inputStyle} />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>通貨</label>
-            <select value={addData.currency} onChange={(e) => setAddData(p => ({ ...p, currency: e.target.value as 'IDR' | 'JPY' }))} style={inputStyle}>
-              <option value="IDR">IDR</option>
-              <option value="JPY">JPY</option>
-            </select>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowAdd(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
-            <button
-              onClick={() => {
-                addMutation.mutate({
-                  commissionType: addData.commissionType,
-                  recipientId: addData.recipientId,
-                  recipientType: addData.recipientType,
-                  studentId: addData.studentId,
-                  amount: addData.amount,
-                  currency: addData.currency,
-                  isPaid: addData.isPaid,
-                  notes: addData.notes || undefined,
-                  createdAt: new Date(),
-                });
-              }}
-              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+            <select 
+              value={editTarget ? editTarget.studentId : addData.studentId} 
+              onChange={(e) => {
+                if (editTarget) setEditTarget({...editTarget, studentId: e.target.value});
+                else setAddData(p => ({ ...p, studentId: e.target.value }));
+              }} 
+              style={inputStyle}
             >
-              保存
+              <option value="">選択してください</option>
+              {students.map((s: any) => <option key={s.id} value={s.id}>{s.fullName}</option>)}
+            </select>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>金額</label>
+              <input 
+                type="number" 
+                value={editTarget ? editTarget.amount : addData.amount} 
+                onChange={(e) => {
+                  if (editTarget) setEditTarget({...editTarget, amount: Number(e.target.value)});
+                  else setAddData(p => ({ ...p, amount: Number(e.target.value) }));
+                }} 
+                style={inputStyle} 
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>通貨</label>
+              <select 
+                value={editTarget ? editTarget.currency : addData.currency} 
+                onChange={(e) => {
+                  if (editTarget) setEditTarget({...editTarget, currency: e.target.value as 'IDR' | 'JPY'});
+                  else setAddData(p => ({ ...p, currency: e.target.value as 'IDR' | 'JPY' }));
+                }} 
+                style={inputStyle}
+              >
+                <option value="IDR">IDR</option>
+                <option value="JPY">JPY</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
+            <button onClick={() => { setShowAdd(false); setEditTarget(null); }} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button 
+              onClick={handleSave}
+              disabled={editTarget ? !editTarget.studentId : !addData.studentId}
+              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer', opacity: (editTarget ? editTarget.studentId : addData.studentId) ? 1 : 0.5 }}
+            >
+              {t.save}
             </button>
           </div>
         </Modal>

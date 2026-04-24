@@ -52,6 +52,7 @@ export default function Inventory() {
   const queryClient = useQueryClient();
   const [activeCategory, setActiveCategory] = useState<InventoryCategory | 'all'>('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<InventoryItem | null>(null);
   const [showStockModal, setShowStockModal] = useState<InventoryItem | null>(null);
   const [stockAdjustment, setStockAdjustment] = useState<number>(0);
   
@@ -62,6 +63,8 @@ export default function Inventory() {
     unit: 'pcs',
     minimumStock: 5,
   });
+
+  const [editItem, setEditItem] = useState<Partial<InventoryItem>>({});
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['inventory'],
@@ -82,6 +85,7 @@ export default function Inventory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       setShowStockModal(null);
+      setShowEditModal(null);
       setStockAdjustment(0);
     },
   });
@@ -177,6 +181,12 @@ export default function Inventory() {
                 </td>
                 <td style={{ padding: '16px 20px', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button
+                      onClick={() => { setEditItem(item); setShowEditModal(item); }}
+                      style={{ padding: '6px 12px', background: '#f3f4f6', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#374151' }}
+                    >
+                      {t.edit}
+                    </button>
                     <button
                       onClick={() => setShowStockModal(item)}
                       style={{ padding: '6px 12px', background: '#f0f0f0', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
@@ -308,6 +318,41 @@ export default function Inventory() {
               style={{ padding: '8px 24px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
               {t.update_stock}
+            </button>
+          </div>
+        </Modal>
+      )}
+      {showEditModal && (
+        <Modal title={language === 'ja' ? '在庫情報を編集' : 'Edit Info Stok'} onClose={() => setShowEditModal(null)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.item_name}</label>
+              <input value={editItem.name} onChange={e => setEditItem(p => ({ ...p, name: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>カテゴリー</label>
+              <select value={editItem.category} onChange={e => setEditItem(p => ({ ...p, category: e.target.value as any }))} style={inputStyle}>
+                <option value="textbook">{t.textbook}</option>
+                <option value="uniform">{t.uniform}</option>
+                <option value="other">{t.other}</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.unit}</label>
+              <input value={editItem.unit} onChange={e => setEditItem(p => ({ ...p, unit: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.min_stock}</label>
+              <input type="number" value={editItem.minimumStock} onChange={e => setEditItem(p => ({ ...p, minimumStock: Number(e.target.value) }))} style={inputStyle} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
+            <button onClick={() => setShowEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button 
+              onClick={() => updateMutation.mutate({ id: showEditModal.id, data: editItem })}
+              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+            >
+              {t.save}
             </button>
           </div>
         </Modal>

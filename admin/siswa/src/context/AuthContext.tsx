@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { type User, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, signInWithGoogle } from '../lib/firebase';
 import { getUser, setUser as setFsUser } from '../lib/firestore';
+import { useLanguage } from './LanguageContext';
 import type { AppUser } from '../lib/types';
 
 interface AuthContextType {
@@ -12,35 +13,41 @@ interface AuthContextType {
   isAdmin: boolean;
   isStaff: boolean;
   googleToken: string | null;
+  googleTokenStatus: 'connected' | 'expired' | 'none';
   refreshGoogleToken: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { language } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [googleToken, setGoogleToken] = useState<string | null>(() => {
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
+
+  const checkToken = () => {
     const token = localStorage.getItem('google_access_token');
     const ts = Number(localStorage.getItem('google_access_token_ts') || '0');
-    // Treat token as valid for 55 minutes (tokens expire in 60)
-    if (token && Date.now() - ts < 55 * 60 * 1000) return token;
-    return null;
-  });
+    if (token && Date.now() - ts < 55 * 60 * 1000) {
+      setGoogleToken(token);
+      return true;
+    }
+    setGoogleToken(null);
+    return false;
+  };
+
+  useEffect(() => {
+    checkToken();
+    const interval = setInterval(checkToken, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
-        // Re-check token validity on auth state change
-        const token = localStorage.getItem('google_access_token');
-        const ts = Number(localStorage.getItem('google_access_token_ts') || '0');
-        if (token && Date.now() - ts < 55 * 60 * 1000) {
-          setGoogleToken(token);
-        } else {
-          setGoogleToken(null);
-        }
+        checkToken();
         const au = await getUser(u.uid);
         if (!au) {
           const newUser: AppUser = {
@@ -72,17 +79,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshGoogleToken = async () => {
-    const token = await signInWithGoogle();
-    if (token) {
-      setGoogleToken(token);
+    try {
+      const token = await signInWithGoogle();
+      if (token) {
+        setGoogleToken(token);
+      }
+    } catch (err: any) {
+      if (err.code === 'auth/popup-blocked') {
+        alert(language === 'ja' ? 'ブラウザのポップアップがブロックされました。アドレスバーのアイコンから許可してください。' : 'Popup diblokir oleh browser. Harap izinkan melalui ikon di bilah alamat.');
+      }
+      throw err;
     }
   };
 
   const isAdmin = appUser?.role === 'admin';
   const isStaff = appUser?.role === 'admin' || appUser?.role === 'staff';
+  const googleTokenStatus = googleToken ? 'connected' : (localStorage.getItem('google_access_token') ? 'expired' : 'none');
 
   return (
-    <AuthContext.Provider value={{ user, appUser, loading, logout, isAdmin, isStaff, googleToken, refreshGoogleToken }}>
+    <AuthContext.Provider value={{ user, appUser, loading, logout, isAdmin, isStaff, googleToken, googleTokenStatus, refreshGoogleToken }}>
       {children}
     </AuthContext.Provider>
   );

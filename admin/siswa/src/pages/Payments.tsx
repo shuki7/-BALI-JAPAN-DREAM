@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPayments, getStudents, addPayment } from '../lib/firestore';
+import { getPayments, getStudents, addPayment, updatePayment, deletePayment } from '../lib/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations';
 import type { PaymentType, PaymentStatus, PaymentMethod } from '../lib/types';
@@ -53,6 +53,7 @@ export default function Payments() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterType, setFilterType] = useState('');
   const [showAdd, setShowAdd] = useState(false);
+  const [editTarget, setEditTarget] = useState<any | null>(null);
   const [addData, setAddData] = useState({
     studentId: '',
     paymentType: 'education',
@@ -67,7 +68,21 @@ export default function Payments() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       setShowAdd(false);
+      setAddData({ studentId: '', paymentType: 'education', paymentMethod: 'lump_sum', totalAmount: 0, paidAmount: 0, notes: '' });
     },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<any> }) => updatePayment(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      setEditTarget(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deletePayment(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payments'] }),
   });
 
   const studentMap = useMemo(() => {
@@ -94,6 +109,34 @@ export default function Payments() {
     return labels[ty] || ty;
   };
 
+  const handleSave = () => {
+    const target = editTarget || addData;
+    const total = Number(target.totalAmount);
+    const paid = Number(target.paidAmount);
+    const status: PaymentStatus = paid >= total ? 'paid' : paid > 0 ? 'partial' : 'unpaid';
+    
+    const payload = {
+      studentId: target.studentId,
+      paymentType: target.paymentType as PaymentType,
+      paymentMethod: target.paymentMethod as PaymentMethod,
+      totalAmount: total,
+      paidAmount: paid,
+      remainingAmount: total - paid,
+      paymentStatus: status,
+      notes: target.notes || undefined,
+    };
+
+    if (editTarget) {
+      updateMutation.mutate({ id: editTarget.id, data: payload });
+    } else {
+      addMutation.mutate({
+        ...payload,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -102,7 +145,10 @@ export default function Payments() {
           <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>{language === 'ja' ? '全生徒の支払い状況' : 'Status pembayaran semua siswa'} — {filtered.length} {language === 'ja' ? '件' : 'data'}</p>
         </div>
         <button
-          onClick={() => setShowAdd(true)}
+          onClick={() => {
+            setAddData({ studentId: '', paymentType: 'education', paymentMethod: 'lump_sum', totalAmount: 0, paidAmount: 0, notes: '' });
+            setShowAdd(true);
+          }}
           style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
         >
           + {t.add_payment_record}
@@ -134,7 +180,7 @@ export default function Payments() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-                {[t.full_name, language === 'ja' ? '項目' : 'Kategori', language === 'ja' ? '総額 (IDR)' : 'Total (IDR)', language === 'ja' ? '支払済' : 'Terbayar', language === 'ja' ? '残金' : 'Sisa', t.status].map((h) => (
+                {[t.full_name, language === 'ja' ? '項目' : 'Kategori', language === 'ja' ? '総額 (IDR)' : 'Total (IDR)', language === 'ja' ? '支払済' : 'Terbayar', language === 'ja' ? '残金' : 'Sisa', t.status, language === 'ja' ? '操作' : 'Aksi'].map((h) => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{h}</th>
                 ))}
               </tr>
@@ -158,10 +204,26 @@ export default function Payments() {
                   <td style={{ padding: '10px 16px' }}>
                     <StatusBadge status={p.paymentStatus} />
                   </td>
+                  <td style={{ padding: '10px 16px' }}>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button 
+                        onClick={() => setEditTarget(p)}
+                        style={{ padding: '4px 10px', background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#374151' }}
+                      >
+                        {t.edit}
+                      </button>
+                      <button 
+                        onClick={() => { if(confirm(t.confirm_delete)) deleteMutation.mutate(p.id); }}
+                        style={{ padding: '4px 10px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#991b1b' }}
+                      >
+                        {t.delete}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: '#aaa' }}>{language === 'ja' ? '支払いデータがありません' : 'Tidak ada data pembayaran'}</td></tr>
+                <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: '#aaa' }}>{language === 'ja' ? '支払いデータがありません' : 'Tidak ada data pembayaran'}</td></tr>
               )}
             </tbody>
           </table>
@@ -184,18 +246,32 @@ export default function Payments() {
         ))}
       </div>
 
-      {showAdd && (
-        <Modal title="支払い記録追加" onClose={() => setShowAdd(false)}>
+      {(showAdd || editTarget) && (
+        <Modal title={editTarget ? t.edit : t.add_payment_record} onClose={() => { setShowAdd(false); setEditTarget(null); }}>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '生徒' : 'Siswa'}</label>
-            <select value={addData.studentId} onChange={(e) => setAddData((p: any) => ({ ...p, studentId: e.target.value }))} style={inputStyle}>
+            <select 
+              value={editTarget ? editTarget.studentId : addData.studentId} 
+              onChange={(e) => {
+                if (editTarget) setEditTarget({...editTarget, studentId: e.target.value});
+                else setAddData(p => ({ ...p, studentId: e.target.value }));
+              }} 
+              style={inputStyle}
+            >
               <option value="">{language === 'ja' ? '選択してください' : 'Pilih Siswa'}</option>
               {students.map((s: any) => <option key={s.id} value={s.id}>{s.fullName}</option>)}
             </select>
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_type}</label>
-            <select value={addData.paymentType} onChange={(e) => setAddData((p: any) => ({ ...p, paymentType: e.target.value }))} style={inputStyle}>
+            <select 
+              value={editTarget ? editTarget.paymentType : addData.paymentType} 
+              onChange={(e) => {
+                if (editTarget) setEditTarget({...editTarget, paymentType: e.target.value});
+                else setAddData(p => ({ ...p, paymentType: e.target.value }));
+              }} 
+              style={inputStyle}
+            >
               <option value="education">{t.education_fee}</option>
               <option value="job_matching">{t.jm_fee}</option>
               <option value="dormitory">{t.dorm_fee}</option>
@@ -204,43 +280,50 @@ export default function Payments() {
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_method}</label>
-            <select value={addData.paymentMethod} onChange={(e) => setAddData((p: any) => ({ ...p, paymentMethod: e.target.value }))} style={inputStyle}>
+            <select 
+              value={editTarget ? editTarget.paymentMethod : addData.paymentMethod} 
+              onChange={(e) => {
+                if (editTarget) setEditTarget({...editTarget, paymentMethod: e.target.value});
+                else setAddData(p => ({ ...p, paymentMethod: e.target.value }));
+              }} 
+              style={inputStyle}
+            >
               <option value="lump_sum">{t.lump_sum}</option>
               <option value="installment">{t.installment}</option>
             </select>
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.total_amount} (IDR)</label>
-            <input type="number" value={addData.totalAmount} onChange={(e) => setAddData((p: any) => ({ ...p, totalAmount: Number(e.target.value) }))} style={inputStyle} />
+            <input 
+              type="number" 
+              value={editTarget ? editTarget.totalAmount : addData.totalAmount} 
+              onChange={(e) => {
+                if (editTarget) setEditTarget({...editTarget, totalAmount: Number(e.target.value)});
+                else setAddData(p => ({ ...p, totalAmount: Number(e.target.value) }));
+              }} 
+              style={inputStyle} 
+            />
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.paid_amount} (IDR)</label>
-            <input type="number" value={addData.paidAmount} onChange={(e) => setAddData((p: any) => ({ ...p, paidAmount: Number(e.target.value) }))} style={inputStyle} />
+            <input 
+              type="number" 
+              value={editTarget ? editTarget.paidAmount : addData.paidAmount} 
+              onChange={(e) => {
+                if (editTarget) setEditTarget({...editTarget, paidAmount: Number(e.target.value)});
+                else setAddData(p => ({ ...p, paidAmount: Number(e.target.value) }));
+              }} 
+              style={inputStyle} 
+            />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowAdd(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button onClick={() => { setShowAdd(false); setEditTarget(null); }} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button
-              onClick={() => {
-                const total = addData.totalAmount;
-                const paid = addData.paidAmount;
-                const status: PaymentStatus = paid >= total ? 'paid' : paid > 0 ? 'partial' : 'unpaid';
-                addMutation.mutate({
-                  studentId: addData.studentId,
-                  paymentType: addData.paymentType as PaymentType,
-                  paymentMethod: addData.paymentMethod as PaymentMethod,
-                  totalAmount: total,
-                  paidAmount: paid,
-                  remainingAmount: total - paid,
-                  paymentStatus: status,
-                  notes: addData.notes || undefined,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                });
-              }}
-              disabled={!addData.studentId}
-              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer', opacity: addData.studentId ? 1 : 0.5 }}
+              onClick={handleSave}
+              disabled={editTarget ? !editTarget.studentId : !addData.studentId}
+              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer', opacity: (editTarget ? editTarget.studentId : addData.studentId) ? 1 : 0.5 }}
             >
-              保存
+              {t.save}
             </button>
           </div>
         </Modal>
