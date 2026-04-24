@@ -65,21 +65,21 @@ export const generateStudentReportPDF = async (
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   doc.text(`ID: ${student.registrationNumber}`, 65, currentY + 18);
-  doc.text(`${t.batch}: ${student.batchNumber}`, 65, currentY + 24);
-  doc.text(`${t.status}: ${student.status.toUpperCase()}`, 65, currentY + 30);
-  doc.text(`${t.enroll_date}: ${format(student.enrollmentDate, dateFormat, { locale: dateLocale })}`, 65, currentY + 36);
+  doc.text(`Batch: ${student.batchNumber}`, 65, currentY + 24);
+  doc.text(`Status: ${student.status.toUpperCase()}`, 65, currentY + 30);
+  doc.text(`Enroll Date: ${format(student.enrollmentDate, dateFormat, { locale: dateLocale })}`, 65, currentY + 36);
 
   // --- Personal Information Table ---
   currentY += 55;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text(t.personal_info as string, 20, currentY);
+  doc.text('PERSONAL INFORMATION', 20, currentY);
   
   const personalData = [
-    [t.full_name as string, student.fullName, t.gender as string, student.gender === 'male' ? t.male : t.female],
-    [t.birth_date as string, format(student.dateOfBirth, dateFormat), t.religion as string, student.religion || '-'],
-    [t.whatsapp as string, student.whatsapp || '-', 'Email', student.email || '-'],
-    [t.address as string, student.address, t.city as string, student.city]
+    ['Full Name', student.fullName, 'Gender', student.gender === 'male' ? 'Male' : 'Female'],
+    ['Birth Date', format(student.dateOfBirth, dateFormat), 'Religion', student.religion || '-'],
+    ['WhatsApp', student.whatsapp || '-', 'Email', student.email || '-'],
+    ['Address', student.address, 'City', student.city]
   ];
 
   autoTable(doc, {
@@ -126,15 +126,15 @@ export const generateStudentReportPDF = async (
 
   // --- Education & Exams ---
   doc.setFont('helvetica', 'bold');
-  doc.text(t.edu_qualifications as string, 20, currentY);
+  doc.text('EDUCATION & EXAMS', 20, currentY);
   
   const eduData = [
-    [t.education_level as string, student.educationLevel.toUpperCase(), t.school_name as string, student.schoolName],
-    ['JLPT', student.jlptLevel.toUpperCase(), 'JFT-A2', student.jftPassed ? t.passed : t.not_passed],
-    ['SSW', student.sswPassed ? t.passed : t.not_passed, 'Psychotest', student.psychotestDone ? t.done : t.not_done]
+    ['Education Level', student.educationLevel.toUpperCase(), 'School Name', student.schoolName],
+    ['JLPT', student.jlptLevel.toUpperCase(), 'JFT-A2', student.jftPassed ? 'Passed' : 'Not Passed'],
+    ['SSW', student.sswPassed ? 'Passed' : 'Not Passed', 'Psychotest', student.psychotestDone ? 'Done' : 'Not Done']
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: currentY + 5,
     body: eduData,
     theme: 'grid',
@@ -146,18 +146,18 @@ export const generateStudentReportPDF = async (
 
   // --- Payment Summary ---
   doc.setFont('helvetica', 'bold');
-  doc.text(t.payments as string, 20, currentY);
+  doc.text('PAYMENT SUMMARY', 20, currentY);
   
   const totalDue = payments.reduce((acc, p) => acc + p.totalAmount, 0);
   const totalPaid = payments.reduce((acc, p) => acc + p.paidAmount, 0);
   
   const paymentData = [
-    [t.total_amount as string, `Rp ${totalDue.toLocaleString('id-ID')}`],
-    [t.paid_amount as string, `Rp ${totalPaid.toLocaleString('id-ID')}`],
-    [t.remaining_balance as string, `Rp ${(totalDue - totalPaid).toLocaleString('id-ID')}`]
+    ['Total Amount', `Rp ${totalDue.toLocaleString('id-ID')}`],
+    ['Paid Amount', `Rp ${totalPaid.toLocaleString('id-ID')}`],
+    ['Remaining Balance', `Rp ${(totalDue - totalPaid).toLocaleString('id-ID')}`]
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: currentY + 5,
     body: paymentData,
     theme: 'striped',
@@ -171,10 +171,9 @@ export const generateStudentReportPDF = async (
   // --- Discipline / Yellow Cards ---
   const ycCount = student.yellowCards?.length || 0;
   if (ycCount > 0) {
-    currentY = (doc as any).lastAutoTable.finalY + 10;
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-    doc.text(`${t.discipline} (${ycCount})`, 20, currentY);
+    doc.text(`DISCIPLINE / YELLOW CARDS (${ycCount})`, 20, currentY);
     
     const ycData = student.yellowCards!.map((card, i) => [
       `#${i+1}`,
@@ -182,9 +181,9 @@ export const generateStudentReportPDF = async (
       card.reason
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: currentY + 5,
-      head: [['#', t.date as string, t.reason as string]],
+      head: [['#', 'Date', 'Reason']],
       body: ycData,
       theme: 'grid',
       headStyles: { fillColor: [255, 200, 200], textColor: 0 },
