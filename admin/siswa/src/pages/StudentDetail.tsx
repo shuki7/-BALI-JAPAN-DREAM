@@ -21,6 +21,7 @@ import { translations } from '../translations';
 import { useAuth } from '../context/AuthContext';
 import { GDriveService } from '../lib/gdrive';
 import { convertPhotoToWebP } from '../lib/imageUtils';
+import { CurrencyInput } from '../components/CurrencyInput';
 import type { Student, StudentStatus, DocumentType, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
 
 const SSW_CATEGORIES = [
@@ -1248,12 +1249,22 @@ export default function StudentDetail() {
             </select>
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.total_amount} (IDR)</label>
-            <input type="number" value={addPaymentData.totalAmount} onChange={(e) => setAddPaymentData(p => ({ ...p, totalAmount: Number(e.target.value) }))} style={inputStyle} />
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.total_amount}</label>
+            <CurrencyInput 
+              value={addPaymentData.totalAmount} 
+              onChange={(val) => setAddPaymentData(p => ({ ...p, totalAmount: val }))} 
+              style={inputStyle}
+              suffix="IDR"
+            />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.paid_amount} (IDR)</label>
-            <input type="number" value={addPaymentData.paidAmount} onChange={(e) => setAddPaymentData(p => ({ ...p, paidAmount: Number(e.target.value) }))} style={inputStyle} />
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.paid_amount}</label>
+            <CurrencyInput 
+              value={addPaymentData.paidAmount} 
+              onChange={(val) => setAddPaymentData(p => ({ ...p, paidAmount: val }))} 
+              style={inputStyle}
+              suffix="IDR"
+            />
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.memo}</label>

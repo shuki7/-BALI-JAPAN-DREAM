@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCommissionPayments, addCommissionPayment, updateCommissionPayment, deleteCommissionPayment, getStudents, getScouters, getPartners } from '../lib/firestore';
 import { useLanguage } from '../context/LanguageContext';
+import { CurrencyInput } from '../components/CurrencyInput';
 import { translations } from '../translations';
 import type { CommissionPaymentType } from '../lib/types';
 
@@ -313,14 +314,14 @@ export default function Commissions() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: 12, marginBottom: 12 }}>
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>金額</label>
-              <input 
-                type="number" 
+              <CurrencyInput 
                 value={editTarget ? editTarget.amount : addData.amount} 
-                onChange={(e) => {
-                  if (editTarget) setEditTarget({...editTarget, amount: Number(e.target.value)});
-                  else setAddData(p => ({ ...p, amount: Number(e.target.value) }));
+                onChange={(val) => {
+                  if (editTarget) setEditTarget({...editTarget, amount: val});
+                  else setAddData(p => ({ ...p, amount: val }));
                 }} 
-                style={inputStyle} 
+                style={inputStyle}
+                suffix={editTarget ? editTarget.currency : addData.currency}
               />
             </div>
             <div>

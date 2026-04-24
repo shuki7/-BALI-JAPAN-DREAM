@@ -9,6 +9,7 @@ import {
 } from '../lib/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations';
+import { CurrencyInput } from '../components/CurrencyInput';
 import type { InventoryItem, InventoryCategory } from '../lib/types';
 
 const inputStyle = {
@@ -240,10 +241,9 @@ export default function Inventory() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 6 }}>{t.stock_count}</label>
-                <input 
-                  type="number" 
-                  value={newItem.stock} 
-                  onChange={e => setNewItem(p => ({ ...p, stock: Number(e.target.value) }))} 
+                <CurrencyInput 
+                  value={newItem.stock || 0} 
+                  onChange={val => setNewItem(p => ({ ...p, stock: val }))} 
                   style={inputStyle} 
                 />
               </div>
@@ -259,10 +259,9 @@ export default function Inventory() {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 6 }}>{t.min_stock} (⚠️)</label>
-              <input 
-                type="number" 
-                value={newItem.minimumStock} 
-                onChange={e => setNewItem(p => ({ ...p, minimumStock: Number(e.target.value) }))} 
+              <CurrencyInput 
+                value={newItem.minimumStock || 0} 
+                onChange={val => setNewItem(p => ({ ...p, minimumStock: val }))} 
                 style={inputStyle} 
               />
             </div>
