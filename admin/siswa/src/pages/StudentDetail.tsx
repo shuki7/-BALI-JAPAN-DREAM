@@ -7,6 +7,8 @@ import {
   updateStudent,
   getPayments,
   addPayment,
+  updatePayment,
+  deletePayment,
   getStudentDocuments,
   addStudentDocument,
   updateStudentDocument,
@@ -22,7 +24,7 @@ import { useAuth } from '../context/AuthContext';
 import { GDriveService } from '../lib/gdrive';
 import { convertPhotoToWebP } from '../lib/imageUtils';
 import { CurrencyInput } from '../components/CurrencyInput';
-import type { Student, StudentStatus, DocumentType, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
+import type { Student, StudentStatus, DocumentType, Payment, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
 
 const SSW_CATEGORIES = [
   'SSW 介護',
@@ -185,7 +187,7 @@ export default function StudentDetail() {
   });
 
   const deletePaymentMutation = useMutation({
-    mutationFn: deletePayment,
+    mutationFn: (paymentId: string) => deletePayment(paymentId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payments', id] }),
   });
 
@@ -216,11 +218,50 @@ export default function StudentDetail() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['studentLogs', id] }),
   });
 
-  const [addPaymentData, setAddPaymentData] = useState({ paymentType: 'education', totalAmount: 0, paidAmount: 0, paymentMethod: 'lump_sum', notes: '' });
+  const [addPaymentData, setAddPaymentData] = useState({ 
+    paymentType: 'education', 
+    totalAmount: 0, 
+    paidAmount: 0, 
+    paymentMethod: 'lump_sum', 
+    notes: '',
+    paidDate: format(new Date(), 'yyyy-MM-dd'),
+    proofFileId: '',
+    proofUrl: ''
+  });
   const [showAddPayment, setShowAddPayment] = useState(false);
   const [showEditPayment, setShowEditPayment] = useState<Payment | null>(null);
   const [showAddDoc, setShowAddDoc] = useState(false);
-  const [addDocData, setAddDocData] = useState({ documentType: 'diploma_high_school', title: '', fileId: '', isHeld: false, notes: '' });
+  const [addDocData, setAddDocData] = useState({ documentType: 'diploma_high_school', title: '', fileId: '', url: '', isHeld: false, notes: '' });
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Helper to ensure student folder exists and upload file
+  const handleFileUpload = async (file: File, subFolder?: string) => {
+    if (!student) return null;
+    setIsUploading(true);
+    try {
+      let folderId = student.driveFolderId;
+      if (!folderId) {
+        const folderName = `${student.name}_${student.registrationNumber || student.id}`;
+        folderId = await GDriveService.createFolder(folderName, import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID);
+        await updateStudent(id!, { driveFolderId: folderId });
+      }
+
+      let fileToUpload = file;
+      if (file.type.startsWith('image/')) {
+        const webpBlob = await convertPhotoToWebP(file);
+        fileToUpload = new File([webpBlob], file.name.replace(/\.[^/.]+$/, "") + ".webp", { type: 'image/webp' });
+      }
+
+      const result = await GDriveService.uploadFile(fileToUpload, folderId);
+      return result;
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Upload failed: ' + (err as Error).message);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
   const [showAddBank, setShowAddBank] = useState(false);
   const [addBankData, setAddBankData] = useState({ bankName: '', accountNumber: '', accountHolder: '', accountType: 'savings', isPrimary: false });
   const [showAddLog, setShowAddLog] = useState(false);
@@ -637,10 +678,20 @@ export default function StudentDetail() {
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 24, fontSize: 13 }}>
+              <div style={{ display: 'flex', gap: 24, fontSize: 13, flexWrap: 'wrap', rowGap: 8 }}>
                 <div><span style={{ color: '#888' }}>{t.total_amount}: </span><strong>Rp {p.totalAmount.toLocaleString('id-ID')}</strong></div>
                 <div><span style={{ color: '#888' }}>{t.paid_amount}: </span><strong style={{ color: '#166534' }}>Rp {p.paidAmount.toLocaleString('id-ID')}</strong></div>
                 <div><span style={{ color: '#888' }}>{t.remaining_balance}: </span><strong style={{ color: '#CC0000' }}>Rp {p.remainingAmount.toLocaleString('id-ID')}</strong></div>
+                {p.paidDate && (
+                  <div><span style={{ color: '#888' }}>{t.payment_date}: </span><strong>{format(p.paidDate, 'dd/MM/yyyy')}</strong></div>
+                )}
+                {p.proofUrl && (
+                  <div>
+                    <a href={p.proofUrl} target="_blank" rel="noreferrer" style={{ color: '#1d4ed8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span>📄</span> {t.view_proof || 'Proof'}
+                    </a>
+                  </div>
+                )}
               </div>
               {p.paymentType === 'job_matching' && (
                 <div style={{ marginTop: 12 }}>
@@ -1304,6 +1355,40 @@ export default function StudentDetail() {
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.memo}</label>
             <input value={addPaymentData.notes} onChange={(e) => setAddPaymentData(p => ({ ...p, notes: e.target.value }))} style={inputStyle} />
           </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_date}</label>
+            <input type="date" value={addPaymentData.paidDate} onChange={(e) => setAddPaymentData(p => ({ ...p, paidDate: e.target.value }))} style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_proof}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="file"
+                id="payment-proof-upload"
+                style={{ display: 'none' }}
+                accept="image/*,application/pdf"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const res = await handleFileUpload(file);
+                    if (res) {
+                      setAddPaymentData(p => ({ ...p, proofFileId: res.fileId, proofUrl: res.url }));
+                    }
+                  }
+                }}
+              />
+              <button
+                onClick={() => document.getElementById('payment-proof-upload')?.click()}
+                disabled={isUploading}
+                style={{ padding: '6px 12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}
+              >
+                {isUploading ? t.loading : addPaymentData.proofFileId ? '✅ ' + t.save : t.select_file}
+              </button>
+              {addPaymentData.proofUrl && (
+                <a href={addPaymentData.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view}</a>
+              )}
+            </div>
+          </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
             <button 
               onClick={() => setShowAddPayment(false)} 
@@ -1328,12 +1413,24 @@ export default function StudentDetail() {
                   remainingAmount: total - paid,
                   paymentStatus: status,
                   notes: addPaymentData.notes || undefined,
+                  paidDate: addPaymentData.paidDate ? new Date(addPaymentData.paidDate) : undefined,
+                  proofFileId: addPaymentData.proofFileId || undefined,
+                  proofUrl: addPaymentData.proofUrl || undefined,
                   createdAt: new Date(),
                   updatedAt: new Date(),
                 }, {
                   onSuccess: () => {
                     setShowAddPayment(false);
-                    setAddPaymentData({ paymentType: 'education', totalAmount: 0, paidAmount: 0, paymentMethod: 'lump_sum', notes: '' });
+                    setAddPaymentData({ 
+                      paymentType: 'education', 
+                      totalAmount: 0, 
+                      paidAmount: 0, 
+                      paymentMethod: 'lump_sum', 
+                      notes: '',
+                      paidDate: format(new Date(), 'yyyy-MM-dd'),
+                      proofFileId: '',
+                      proofUrl: ''
+                    });
                   },
                   onError: (err) => {
                     alert('Error saving payment: ' + (err as Error).message);
@@ -1370,7 +1467,7 @@ export default function StudentDetail() {
         <Modal title={t.edit_payment} onClose={() => setShowEditPayment(null)}>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_type}</label>
-            <select value={showEditPayment.paymentType} onChange={(e) => setShowEditPayment(p => p ? ({ ...p, paymentType: e.target.value as PaymentType }) : null)} style={inputStyle}>
+            <select value={showEditPayment.paymentType} onChange={(e) => setShowEditPayment((p: Payment | null) => p ? ({ ...p, paymentType: e.target.value as PaymentType }) : null)} style={inputStyle}>
               <option value="education">{t.education_fee}</option>
               <option value="job_matching">{t.jm_fee}</option>
               <option value="dormitory">{t.dorm_fee}</option>
@@ -1379,7 +1476,7 @@ export default function StudentDetail() {
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_method}</label>
-            <select value={showEditPayment.paymentMethod} onChange={(e) => setShowEditPayment(p => p ? ({ ...p, paymentMethod: e.target.value as PaymentMethod }) : null)} style={inputStyle}>
+            <select value={showEditPayment.paymentMethod} onChange={(e) => setShowEditPayment((p: Payment | null) => p ? ({ ...p, paymentMethod: e.target.value as PaymentMethod }) : null)} style={inputStyle}>
               <option value="lump_sum">{t.lump_sum}</option>
               <option value="installment">{t.installment}</option>
             </select>
@@ -1388,7 +1485,7 @@ export default function StudentDetail() {
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.total_amount}</label>
             <CurrencyInput 
               value={showEditPayment.totalAmount} 
-              onChange={(val) => setShowEditPayment(p => p ? ({ ...p, totalAmount: val }) : null)} 
+              onChange={(val) => setShowEditPayment((p: Payment | null) => p ? ({ ...p, totalAmount: val }) : null)} 
               style={inputStyle}
               suffix="IDR"
             />
@@ -1397,14 +1494,53 @@ export default function StudentDetail() {
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.paid_amount}</label>
             <CurrencyInput 
               value={showEditPayment.paidAmount} 
-              onChange={(val) => setShowEditPayment(p => p ? ({ ...p, paidAmount: val }) : null)} 
+              onChange={(val) => setShowEditPayment((p: Payment | null) => p ? ({ ...p, paidAmount: val }) : null)} 
               style={inputStyle}
               suffix="IDR"
             />
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.memo}</label>
-            <input value={showEditPayment.notes || ''} onChange={(e) => setShowEditPayment(p => p ? ({ ...p, notes: e.target.value }) : null)} style={inputStyle} />
+            <input value={showEditPayment.notes || ''} onChange={(e) => setShowEditPayment((p: Payment | null) => p ? ({ ...p, notes: e.target.value }) : null)} style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_date}</label>
+            <input 
+              type="date" 
+              value={showEditPayment.paidDate ? format(showEditPayment.paidDate, 'yyyy-MM-dd') : ''} 
+              onChange={(e) => setShowEditPayment((p: Payment | null) => p ? ({ ...p, paidDate: new Date(e.target.value) }) : null)} 
+              style={inputStyle} 
+            />
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_proof}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="file"
+                id="edit-payment-proof-upload"
+                style={{ display: 'none' }}
+                accept="image/*,application/pdf"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const res = await handleFileUpload(file);
+                    if (res) {
+                      setShowEditPayment((p: Payment | null) => p ? ({ ...p, proofFileId: res.fileId, proofUrl: res.url }) : null);
+                    }
+                  }
+                }}
+              />
+              <button
+                onClick={() => document.getElementById('edit-payment-proof-upload')?.click()}
+                disabled={isUploading}
+                style={{ padding: '6px 12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}
+              >
+                {isUploading ? t.loading : showEditPayment.proofFileId ? '✅ ' + t.save : t.select_file}
+              </button>
+              {showEditPayment.proofUrl && (
+                <a href={showEditPayment.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view}</a>
+              )}
+            </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
             <button onClick={() => setShowEditPayment(null)} disabled={updatePaymentMutation.isPending} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
@@ -1425,6 +1561,9 @@ export default function StudentDetail() {
                     remainingAmount: total - paid,
                     paymentStatus: status,
                     notes: showEditPayment.notes,
+                    paidDate: showEditPayment.paidDate,
+                    proofFileId: showEditPayment.proofFileId,
+                    proofUrl: showEditPayment.proofUrl,
                     updatedAt: new Date(),
                   }
                 }, {
@@ -1481,8 +1620,30 @@ export default function StudentDetail() {
             <input value={addDocData.title} onChange={(e) => setAddDocData(p => ({ ...p, title: e.target.value }))} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>Google Drive File ID</label>
-            <input value={addDocData.fileId} onChange={(e) => setAddDocData(p => ({ ...p, fileId: e.target.value }))} style={inputStyle} placeholder="Google Drive ID" />
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.select_file}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="file"
+                id="doc-file-upload"
+                style={{ display: 'none' }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const res = await handleFileUpload(file);
+                    if (res) {
+                      setAddDocData(p => ({ ...p, fileId: res.fileId, url: res.url }));
+                    }
+                  }
+                }}
+              />
+              <button
+                onClick={() => document.getElementById('doc-file-upload')?.click()}
+                disabled={isUploading}
+                style={{ padding: '8px 16px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 6, cursor: 'pointer' }}
+              >
+                {isUploading ? t.loading : addDocData.fileId ? '✅ ' + t.save : t.select_file}
+              </button>
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <input type="checkbox" id="isHeld" checked={addDocData.isHeld} onChange={(e) => setAddDocData(p => ({ ...p, isHeld: e.target.checked }))} />
@@ -1498,6 +1659,7 @@ export default function StudentDetail() {
                     documentType: addDocData.documentType as DocumentType,
                     title: addDocData.title,
                     fileId: addDocData.fileId,
+                    url: addDocData.url,
                     uploadDate: new Date(),
                     isHeld: addDocData.isHeld,
                     heldDate: addDocData.isHeld ? new Date() : undefined,
@@ -1505,6 +1667,7 @@ export default function StudentDetail() {
                   },
                 });
                 setShowAddDoc(false);
+                setAddDocData({ documentType: 'diploma_high_school', title: '', fileId: '', url: '', isHeld: false, notes: '' });
               }}
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >

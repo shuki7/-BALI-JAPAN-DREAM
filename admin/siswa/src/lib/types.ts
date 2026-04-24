@@ -140,6 +140,9 @@ export interface Payment {
   jmStage3Paid?: boolean;
   jmStage3PaidDate?: Date;
   notes?: string;
+  paidDate?: Date;
+  proofFileId?: string;
+  proofUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }

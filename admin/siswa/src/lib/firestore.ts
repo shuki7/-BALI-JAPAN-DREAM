@@ -91,6 +91,7 @@ function convertPayment(id: string, data: any): Payment {
     jmStage1PaidDate: toDateOpt(data.jmStage1PaidDate),
     jmStage2PaidDate: toDateOpt(data.jmStage2PaidDate),
     jmStage3PaidDate: toDateOpt(data.jmStage3PaidDate),
+    paidDate: toDateOpt(data.paidDate),
     installments: data.installments?.map((inst: any) => ({
       ...inst,
       dueDate: toDate(inst.dueDate),
