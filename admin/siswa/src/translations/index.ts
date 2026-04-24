@@ -33,7 +33,7 @@ export const translations = {
     organizations: '関連機関',
     settings: '設定',
     inventory: '在庫管理',
-    discipline: '規律・イエローカード',
+    discipline: 'イエローカード',
     inventory_management: '在庫管理',
     add_item: '在庫追加',
     all_categories: '全カテゴリー',

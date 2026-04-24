@@ -24,7 +24,8 @@ import { useAuth } from '../context/AuthContext';
 import { GDriveService } from '../lib/gdrive';
 import { convertPhotoToWebP } from '../lib/imageUtils';
 import { CurrencyInput } from '../components/CurrencyInput';
-import type { Student, StudentStatus, DocumentType, Payment, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
+import { generateYellowCardInvoicePDF } from '../lib/invoice';
+import type { Student, StudentStatus, DocumentType, Payment, PaymentType, PaymentMethod, PaymentStatus, YellowCardRecord } from '../lib/types';
 
 const SSW_CATEGORIES = [
   'SSW 介護',
@@ -45,7 +46,7 @@ const SSW_CATEGORIES = [
   'SSW 木材産業',
 ];
 
-const TABS_KEYS = ['basic', 'family', 'payment', 'bank', 'documents', 'departure', 'notes', 'logs', 'exams'];
+const TABS_KEYS = ['basic', 'family', 'payment', 'bank', 'documents', 'departure', 'notes', 'logs', 'exams', 'yellow_card'];
 
 const inputStyle = {
   width: '100%',
@@ -275,6 +276,10 @@ export default function StudentDetail() {
   const [addBankData, setAddBankData] = useState({ bankName: '', accountNumber: '', accountHolder: '', accountType: 'savings', isPrimary: false });
   const [showAddLog, setShowAddLog] = useState(false);
   const [addLogData, setAddLogData] = useState({ content: '', date: format(new Date(), 'yyyy-MM-dd') });
+  const [yellowCardReason, setYellowCardReason] = useState('');
+  const [yellowCardFile, setYellowCardFile] = useState<File | null>(null);
+  const [showYellowCardInvoice, setShowYellowCardInvoice] = useState<YellowCardRecord | null>(null);
+  const [yellowCardDueDate, setYellowCardDueDate] = useState(format(new Date().setDate(new Date().getDate() + 7), 'yyyy-MM-dd'));
 
   const tabLabels: Record<string, string> = {
     basic: t.personal_info,
@@ -286,6 +291,7 @@ export default function StudentDetail() {
     notes: t.memo,
     logs: t.daily_log,
     exams: t.exam_interview,
+    yellow_card: t.discipline,
   };
 
   if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>{t.loading}...</div>;
@@ -1892,6 +1898,148 @@ export default function StudentDetail() {
             >
               {t.save}
             </button>
+          </div>
+        </Modal>
+      )}
+      {/* Tab 9: イエローカード */}
+      {activeTab === 9 && (
+        <div style={{ maxWidth: 800 }}>
+          <div style={{ background: '#fff', borderRadius: 10, padding: 24, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginBottom: 20 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>🟨</span> {t.issue_yellow_card}
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label style={labelStyle}>{t.reason}</label>
+                <textarea 
+                  value={yellowCardReason}
+                  onChange={e => setYellowCardReason(e.target.value)}
+                  placeholder={language === 'ja' ? '理由を詳しく記入してください...' : 'Tuliskan alasan secara detail...'}
+                  style={{ ...inputStyle, height: 100, resize: 'none' }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>{t.evidence_photo}</label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={e => setYellowCardFile(e.target.files?.[0] || null)}
+                  style={{ fontSize: 13 }}
+                />
+              </div>
+              <button
+                disabled={isUploading || !yellowCardReason}
+                onClick={async () => {
+                  if (!student) return;
+                  setIsUploading(true);
+                  try {
+                    let photoUrls: string[] = [];
+                    if (yellowCardFile) {
+                      const res = await handleFileUpload(yellowCardFile);
+                      if (res) photoUrls = [res.url];
+                    }
+
+                    const newCard: YellowCardRecord = {
+                      id: crypto.randomUUID(),
+                      date: new Date(),
+                      reason: yellowCardReason,
+                      photoUrls,
+                      issuedBy: user?.displayName || 'Admin',
+                    };
+
+                    const updatedCards = [...(student.yellowCards || []), newCard];
+                    await updateMutation.mutateAsync({ yellowCards: updatedCards });
+                    setYellowCardReason('');
+                    setYellowCardFile(null);
+                  } catch (err) {
+                    console.error(err);
+                    alert('Failed to issue yellow card');
+                  } finally {
+                    setIsUploading(false);
+                  }
+                }}
+                style={{ padding: '12px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-start' }}
+              >
+                {isUploading ? t.loading : t.issue_yellow_card}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ background: '#fff', borderRadius: 10, padding: 24, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>{t.discipline_history}</h3>
+            {(!student.yellowCards || student.yellowCards.length === 0) ? (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: '#aaa' }}>{language === 'ja' ? '保持しているイエローカードはありません' : 'Tidak ada kartu kuning'}</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {student.yellowCards.map((card, i) => (
+                  <div key={card.id} style={{ border: '1px solid #eee', borderRadius: 12, padding: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontWeight: 700, color: '#CC0000' }}>#{i+1} イエローカード</span>
+                      <span style={{ fontSize: 12, color: '#888' }}>{format(card.date, 'dd/MM/yyyy')}</span>
+                    </div>
+                    <div style={{ fontSize: 14, color: '#333', marginBottom: 12 }}>{card.reason}</div>
+                    {card.photoUrls && card.photoUrls.length > 0 && (
+                      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                        {card.photoUrls.map((url, idx) => (
+                          <a key={idx} href={url} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: '#0066cc' }}>🖼 {t.evidence}</a>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ fontSize: 11, color: '#999' }}>{t.issuer}: {card.issuedBy}</div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button 
+                          onClick={() => setShowYellowCardInvoice(card)}
+                          style={{ padding: '4px 10px', background: '#fff', border: '1px solid #ddd', borderRadius: 4, fontSize: 11, cursor: 'pointer' }}
+                        >
+                          📄 {language === 'ja' ? '請求書' : 'Invoice'}
+                        </button>
+                        <button 
+                          onClick={async () => {
+                            if (confirm(t.confirm_delete)) {
+                              const updatedCards = student.yellowCards?.filter(c => c.id !== card.id) || [];
+                              await updateMutation.mutateAsync({ yellowCards: updatedCards });
+                            }
+                          }}
+                          style={{ padding: '4px 10px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#991b1b' }}
+                        >
+                          {t.delete}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Yellow Card Invoice Modal */}
+      {showYellowCardInvoice && (
+        <Modal title={language === 'ja' ? '請求書の作成' : 'Buat Invoice'} onClose={() => setShowYellowCardInvoice(null)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div>
+              <label style={labelStyle}>{t.due_date_label}</label>
+              <input 
+                type="date"
+                value={yellowCardDueDate}
+                onChange={e => setYellowCardDueDate(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button onClick={() => setShowYellowCardInvoice(null)} style={{ flex: 1, padding: '12px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 8, cursor: 'pointer' }}>{t.cancel}</button>
+              <button 
+                onClick={() => {
+                  generateYellowCardInvoicePDF(student, showYellowCardInvoice, yellowCardDueDate, language);
+                  setShowYellowCardInvoice(null);
+                }}
+                style={{ flex: 1, padding: '12px', background: '#1a1a2e', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 700 }}
+              >
+                PDFダウンロード
+              </button>
+            </div>
           </div>
         </Modal>
       )}

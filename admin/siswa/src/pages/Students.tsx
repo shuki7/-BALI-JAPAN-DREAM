@@ -183,6 +183,7 @@ export default function Students() {
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>氏名</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>バッチ</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>プログラム</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>警告</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>ステータス</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>入学日</th>
               </tr>
@@ -238,6 +239,13 @@ export default function Students() {
                   <td style={{ padding: '10px 16px', fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>{s.fullName}</td>
                   <td style={{ padding: '10px 16px', fontSize: 13, color: '#555' }}>Batch {s.batchNumber}</td>
                   <td style={{ padding: '10px 16px', fontSize: 13, color: '#555' }}>{programLabel(s.programType)}</td>
+                  <td style={{ padding: '10px 16px' }}>
+                    <div style={{ display: 'flex', gap: 2 }}>
+                      {s.yellowCards?.map((_, i) => (
+                        <span key={i} title="Yellow Card" style={{ fontSize: 14 }}>🟨</span>
+                      ))}
+                    </div>
+                  </td>
                   <td style={{ padding: '10px 16px' }}>
                     <StatusBadge status={s.status} />
                   </td>
