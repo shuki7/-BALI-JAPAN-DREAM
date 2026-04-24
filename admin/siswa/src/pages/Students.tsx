@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getStudents, getPayments, getStudentDocuments, getStudentLogs } from '../lib/firestore';
+import { getStudents, getPayments } from '../lib/firestore';
 import { generateStudentReportPDF } from '../lib/report';
 import { format } from 'date-fns';
 import { useLanguage } from '../context/LanguageContext';

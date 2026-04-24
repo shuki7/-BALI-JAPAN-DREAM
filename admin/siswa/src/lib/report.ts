@@ -2,7 +2,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { format } from 'date-fns';
 import { id as localeID, ja as localeJA } from 'date-fns/locale';
-import type { Student, Payment, StudentDocument, StudentLog } from './types';
+import type { Student, Payment } from './types';
 import { translations } from '../translations';
 
 export const generateStudentReportPDF = async (
