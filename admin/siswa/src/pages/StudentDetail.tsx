@@ -1271,12 +1271,20 @@ export default function StudentDetail() {
             <input value={addPaymentData.notes} onChange={(e) => setAddPaymentData(p => ({ ...p, notes: e.target.value }))} style={inputStyle} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowAddPayment(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button 
+              onClick={() => setShowAddPayment(false)} 
+              disabled={addPaymentMutation.isPending}
+              style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}
+            >
+              {t.cancel}
+            </button>
             <button
+              disabled={addPaymentMutation.isPending}
               onClick={() => {
-                const total = addPaymentData.totalAmount;
-                const paid = addPaymentData.paidAmount;
+                const total = Number(addPaymentData.totalAmount) || 0;
+                const paid = Number(addPaymentData.paidAmount) || 0;
                 const status: PaymentStatus = paid >= total ? 'paid' : paid > 0 ? 'partial' : 'unpaid';
+                
                 addPaymentMutation.mutate({
                   studentId: id!,
                   paymentType: addPaymentData.paymentType as PaymentType,
@@ -1288,12 +1296,36 @@ export default function StudentDetail() {
                   notes: addPaymentData.notes || undefined,
                   createdAt: new Date(),
                   updatedAt: new Date(),
+                }, {
+                  onSuccess: () => {
+                    setShowAddPayment(false);
+                    setAddPaymentData({ paymentType: 'education', totalAmount: 0, paidAmount: 0, paymentMethod: 'lump_sum', notes: '' });
+                  },
+                  onError: (err) => {
+                    alert('Error saving payment: ' + (err as Error).message);
+                  }
                 });
-                setShowAddPayment(false);
               }}
-              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+              style={{ 
+                padding: '8px 20px', 
+                background: '#CC0000', 
+                color: '#fff', 
+                border: 'none', 
+                borderRadius: 6, 
+                fontWeight: 700, 
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                opacity: addPaymentMutation.isPending ? 0.7 : 1
+              }}
             >
-              {t.save}
+              {addPaymentMutation.isPending ? (
+                <>
+                  <div style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  {t.saving}...
+                </>
+              ) : t.save}
             </button>
           </div>
         </Modal>
