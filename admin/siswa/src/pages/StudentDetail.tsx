@@ -334,12 +334,20 @@ export default function StudentDetail() {
         const viewUrl = drive.getViewUrl(fileId);
         
         // Add to photos array or replace first
-        const currentPhotos = student.photos || [];
+        const currentPhotos = editData.photos || [];
         const newPhotos = [{ fileId, url, caption: '' }, ...currentPhotos].slice(0, 5);
         
         data.photos = newPhotos;
         data.photoUrl = viewUrl;
         data.driveFolderId = studentFolderId;
+      } else {
+        // Even if no new photo, we should save the potentially modified photos array (deletions)
+        data.photos = editData.photos || [];
+        if (data.photos.length > 0) {
+          data.photoUrl = data.photos[0].url;
+        } else {
+          data.photoUrl = '';
+        }
       }
 
       // Format dates
@@ -490,7 +498,8 @@ export default function StudentDetail() {
                       educationLevel: student.educationLevel,
                       schoolName: student.schoolName,
                       graduationYear: student.graduationYear || '',
-                      notes: student.notes || '' 
+                      notes: student.notes || '',
+                      photos: student.photos || []
                     }); 
                     setNewPhoto(null);
                   }}
@@ -525,7 +534,7 @@ export default function StudentDetail() {
                   target="_blank" rel="noopener noreferrer"
                   style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#E1306C', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
                 >
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram" style={{ width: 20, height: 20 }} /> @{student.instagramAccount.replace(/^@/, '')}
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/600px-Instagram_icon.png" alt="Instagram" style={{ width: 20, height: 20 }} /> @{student.instagramAccount.replace(/^@/, '')}
                 </a>
               )}
               {student.tiktokAccount && (
@@ -534,7 +543,7 @@ export default function StudentDetail() {
                   target="_blank" rel="noopener noreferrer"
                   style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#000', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
                 >
-                  <img src="https://www.vectorlogo.zone/logos/tiktok/tiktok-icon.svg" alt="TikTok" style={{ width: 20, height: 20 }} /> @{student.tiktokAccount.replace(/^@/, '')}
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/TikTok_logo.svg/600px-TikTok_logo.svg.png" alt="TikTok" style={{ width: 20, height: 20 }} /> @{student.tiktokAccount.replace(/^@/, '')}
                 </a>
               )}
             </div>
@@ -1020,20 +1029,59 @@ export default function StudentDetail() {
             
             {/* Photo Section */}
             <div style={{ background: '#f9fafb', padding: 16, borderRadius: 8, marginBottom: 8 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#CC0000', marginBottom: 8, textTransform: 'uppercase' }}>{t.photo_upload}</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#CC0000', marginBottom: 8, textTransform: 'uppercase' }}>{t.photo_management || '写真管理'}</label>
+              
+              {/* Existing Photos List */}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {(editData.photos || []).map((p: any, idx: number) => (
+                  <div key={idx} style={{ position: 'relative' }}>
+                    <img src={p.url} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6, border: '1px solid #ddd' }} />
+                    <button
+                      onClick={() => {
+                        const newPhotos = [...(editData.photos || [])];
+                        newPhotos.splice(idx, 1);
+                        setEditData(prev => ({ ...prev, photos: newPhotos }));
+                      }}
+                      style={{
+                        position: 'absolute', top: -6, right: -6, width: 20, height: 20,
+                        background: '#f44336', color: '#fff', border: 'none', borderRadius: '50%',
+                        fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div style={{ position: 'relative' }}>
-                  <img
-                    src={newPhoto ? URL.createObjectURL(newPhoto) : (student.photos?.[0]?.url || student.photoUrl || '')}
-                    alt="Preview"
-                    style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '2px solid #ddd' }}
-                  />
+                  {newPhoto ? (
+                    <img
+                      src={URL.createObjectURL(newPhoto)}
+                      alt="Preview"
+                      style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '2px solid #CC0000' }}
+                    />
+                  ) : (
+                    <div style={{ width: 80, height: 80, borderRadius: 8, border: '2px dashed #ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: '#ccc' }}>
+                      +
+                    </div>
+                  )}
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'inline-block', padding: '6px 12px', background: '#CC0000', color: '#fff', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
                     {t.add_photo}
                     <input type="file" accept="image/*" onChange={(e) => setNewPhoto(e.target.files?.[0] || null)} style={{ display: 'none' }} />
                   </label>
+                  {newPhoto && (
+                    <button 
+                      onClick={() => setNewPhoto(null)}
+                      style={{ marginLeft: 8, background: 'none', border: 'none', color: '#f44336', fontSize: 12, cursor: 'pointer' }}
+                    >
+                      {t.cancel}
+                    </button>
+                  )}
                   <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>{language === 'ja' ? 'WebPに自動変換されます' : 'Akan dikonversi ke WebP'}</p>
                 </div>
               </div>

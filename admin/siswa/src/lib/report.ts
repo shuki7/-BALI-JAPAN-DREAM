@@ -102,20 +102,24 @@ export const generateStudentReportPDF = async (
     let snsX = 20;
     if (student.instagramAccount) {
       try {
-        const igLogo = await loadImageToBase64('https://cdn-icons-png.flaticon.com/512/174/174855.png');
+        const igLogo = await loadImageToBase64('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/600px-Instagram_icon.png');
         doc.addImage(igLogo, 'PNG', snsX, currentY, 5, 5);
         doc.setFontSize(9);
         doc.text(`@${student.instagramAccount}`, snsX + 7, currentY + 4);
         snsX += 45;
-      } catch (e) {}
+      } catch (e) {
+        console.error('IG Logo fail', e);
+      }
     }
     if (student.tiktokAccount) {
       try {
-        const ttLogo = await loadImageToBase64('https://cdn-icons-png.flaticon.com/512/3046/3046121.png');
+        const ttLogo = await loadImageToBase64('https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/TikTok_logo.svg/600px-TikTok_logo.svg.png');
         doc.addImage(ttLogo, 'PNG', snsX, currentY, 5, 5);
         doc.setFontSize(9);
         doc.text(`@${student.tiktokAccount}`, snsX + 7, currentY + 4);
-      } catch (e) {}
+      } catch (e) {
+        console.error('TikTok Logo fail', e);
+      }
     }
     currentY += 10;
   } else {
