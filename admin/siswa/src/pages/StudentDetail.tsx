@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -19,6 +19,8 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations';
 import { useAuth } from '../context/AuthContext';
+import { GDriveService } from '../lib/gdrive';
+import { convertPhotoToWebP } from '../lib/imageUtils';
 import type { StudentStatus, DocumentType, PaymentType, PaymentMethod, PaymentStatus } from '../lib/types';
 
 const SSW_CATEGORIES = [
@@ -105,11 +107,24 @@ export default function StudentDetail() {
   const t = translations[language];
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, googleToken, refreshGoogleToken } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(0);
   const [editModal, setEditModal] = useState<string | null>(null);
   const [editData, setEditData] = useState<Record<string, any>>({});
+  const [newPhoto, setNewPhoto] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
 
   const { data: student, isLoading } = useQuery({
     queryKey: ['student', id],
@@ -205,8 +220,62 @@ export default function StudentDetail() {
   if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>{t.loading}...</div>;
   if (!student) return <div style={{ padding: 40, textAlign: 'center', color: '#CC0000' }}>{t.student_not_found}</div>;
 
-  const saveBasicEdit = () => {
-    updateMutation.mutate(editData as any);
+  const saveBasicEdit = async () => {
+    setIsSaving(true);
+    try {
+      const data: any = { ...editData };
+      
+      // Handle Photo Upload if any
+      if (newPhoto) {
+        if (!googleToken) {
+          if (confirm(t.google_token_expired)) {
+            await refreshGoogleToken();
+            setIsSaving(false);
+            return;
+          }
+          throw new Error("No Google token");
+        }
+
+        const drive = new GDriveService(googleToken);
+        let studentFolderId = student.driveFolderId;
+        
+        // 1. Ensure folder exists
+        if (!studentFolderId) {
+          const rootId = import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID;
+          studentFolderId = await drive.createFolder(`${student.id}_${data.fullName || student.fullName}`, rootId);
+        }
+        
+        // 2. Upload photo
+        const photoFolderId = await drive.createFolder('Photos', studentFolderId);
+        const webp = await convertPhotoToWebP(newPhoto);
+        const file = new File([webp], `photo_updated_${Date.now()}.webp`, { type: 'image/webp' });
+        const fileId = await drive.uploadFile(file, photoFolderId);
+        await drive.makePublic(fileId);
+        
+        const url = drive.getThumbnailUrl(fileId, 400);
+        const viewUrl = drive.getViewUrl(fileId);
+        
+        // Add to photos array or replace first
+        const currentPhotos = student.photos || [];
+        const newPhotos = [{ fileId, url, caption: '' }, ...currentPhotos].slice(0, 5);
+        
+        data.photos = newPhotos;
+        data.photoUrl = viewUrl;
+        data.driveFolderId = studentFolderId;
+      }
+
+      // Format dates
+      if (data.enrollmentDate) data.enrollmentDate = new Date(data.enrollmentDate);
+      if (data.dateOfBirth) data.dateOfBirth = new Date(data.dateOfBirth);
+
+      await updateMutation.mutateAsync(data);
+      setNewPhoto(null);
+    } catch (err) {
+      console.error(err);
+      alert("Error saving: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -261,6 +330,12 @@ export default function StudentDetail() {
                 <img
                   src={student.photos?.[0]?.url || student.photoUrl || ''}
                   alt={student.fullName}
+                  onError={(e) => {
+                    // If the primary URL fails, try to use the drive ID to get a thumbnail if possible
+                    if (student.photos?.[0]?.fileId) {
+                      (e.target as HTMLImageElement).src = `https://drive.google.com/thumbnail?id=${student.photos[0].fileId}&sz=w400`;
+                    }
+                  }}
                   style={{ width: 150, height: 150, objectFit: 'cover', borderRadius: 10, border: '3px solid #CC0000' }}
                 />
               ) : (
@@ -294,7 +369,33 @@ export default function StudentDetail() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{t.personal_info}</h3>
                 <button
-                  onClick={() => { setEditModal('basic'); setEditData({ status: student.status, batchNumber: student.batchNumber, notes: student.notes || '' }); }}
+                  onClick={() => { 
+                    setEditModal('basic'); 
+                    setEditData({ 
+                      fullName: student.fullName,
+                      fullNameKana: student.fullNameKana || '',
+                      registrationNumber: student.registrationNumber,
+                      enrollmentDate: format(student.enrollmentDate, 'yyyy-MM-dd'),
+                      status: student.status, 
+                      batchNumber: student.batchNumber, 
+                      programType: student.programType,
+                      gender: student.gender,
+                      dateOfBirth: format(student.dateOfBirth, 'yyyy-MM-dd'),
+                      nationality: student.nationality,
+                      birthPlace: student.birthPlace,
+                      religion: student.religion || '',
+                      nik: student.nik || '',
+                      whatsapp: student.whatsapp || '',
+                      email: student.email || '',
+                      address: student.address,
+                      city: student.city,
+                      province: student.province,
+                      instagramAccount: student.instagramAccount || '',
+                      tiktokAccount: student.tiktokAccount || '',
+                      notes: student.notes || '' 
+                    }); 
+                    setNewPhoto(null);
+                  }}
                   style={{ padding: '6px 14px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
                 >
                   {t.edit}
@@ -785,23 +886,142 @@ export default function StudentDetail() {
       {/* Edit Modal: basic */}
       {editModal === 'basic' && (
         <Modal title={t.edit_personal_info} onClose={() => setEditModal(null)}>
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.status}</label>
-            <select value={String(editData.status || '')} onChange={(e) => setEditData(p => ({ ...p, status: e.target.value }))} style={inputStyle}>
-              <option value="active">{t.status_active}</option>
-              <option value="departed_japan">{t.status_departed}</option>
-              <option value="graduated">{t.status_graduated}</option>
-              <option value="withdrawn">{t.status_withdrawn}</option>
-              <option value="on_hold">{t.status_on_hold}</option>
-            </select>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            
+            {/* Photo Section */}
+            <div style={{ background: '#f9fafb', padding: 16, borderRadius: 8, marginBottom: 8 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#CC0000', marginBottom: 8, textTransform: 'uppercase' }}>{t.photo_upload}</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ position: 'relative' }}>
+                  <img
+                    src={newPhoto ? URL.createObjectURL(newPhoto) : (student.photos?.[0]?.url || student.photoUrl || '')}
+                    alt="Preview"
+                    style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '2px solid #ddd' }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'inline-block', padding: '6px 12px', background: '#CC0000', color: '#fff', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                    {t.add_photo}
+                    <input type="file" accept="image/*" onChange={(e) => setNewPhoto(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+                  </label>
+                  <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>{language === 'ja' ? 'WebPに自動変換されます' : 'Akan dikonversi ke WebP'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.full_name}</label>
+                <input value={String(editData.fullName || '')} onChange={(e) => setEditData(p => ({ ...p, fullName: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.kana}</label>
+                <input value={String(editData.fullNameKana || '')} onChange={(e) => setEditData(p => ({ ...p, fullNameKana: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.status}</label>
+                <select value={String(editData.status || '')} onChange={(e) => setEditData(p => ({ ...p, status: e.target.value }))} style={inputStyle}>
+                  <option value="active">{t.status_active}</option>
+                  <option value="departed_japan">{t.status_departed}</option>
+                  <option value="graduated">{t.status_graduated}</option>
+                  <option value="withdrawn">{t.status_withdrawn}</option>
+                  <option value="on_hold">{t.status_on_hold}</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.batch_number}</label>
+                <input type="number" value={String(editData.batchNumber || '')} onChange={(e) => setEditData(p => ({ ...p, batchNumber: Number(e.target.value) }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.program}</label>
+                <select value={String(editData.programType || '')} onChange={(e) => setEditData(p => ({ ...p, programType: e.target.value }))} style={inputStyle}>
+                  <option value="tokutei_ginou">{t.tokutei_ginou}</option>
+                  <option value="gijinkoku">{t.gijinkoku}</option>
+                  <option value="job_matching_only">{t.job_matching_only}</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.enroll_date}</label>
+                <input type="date" value={String(editData.enrollmentDate || '')} onChange={(e) => setEditData(p => ({ ...p, enrollmentDate: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.gender}</label>
+                <select value={String(editData.gender || '')} onChange={(e) => setEditData(p => ({ ...p, gender: e.target.value }))} style={inputStyle}>
+                  <option value="male">{t.male}</option>
+                  <option value="female">{t.female}</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.birth_date}</label>
+                <input type="date" value={String(editData.dateOfBirth || '')} onChange={(e) => setEditData(p => ({ ...p, dateOfBirth: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.nationality}</label>
+                <input value={String(editData.nationality || '')} onChange={(e) => setEditData(p => ({ ...p, nationality: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.birth_place}</label>
+                <input value={String(editData.birthPlace || '')} onChange={(e) => setEditData(p => ({ ...p, birthPlace: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.religion}</label>
+                <input value={String(editData.religion || '')} onChange={(e) => setEditData(p => ({ ...p, religion: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.nik}</label>
+                <input value={String(editData.nik || '')} onChange={(e) => setEditData(p => ({ ...p, nik: e.target.value }))} style={inputStyle} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.whatsapp}</label>
+                <input value={String(editData.whatsapp || '')} onChange={(e) => setEditData(p => ({ ...p, whatsapp: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.email}</label>
+                <input type="email" value={String(editData.email || '')} onChange={(e) => setEditData(p => ({ ...p, email: e.target.value }))} style={inputStyle} />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.address}</label>
+              <input value={String(editData.address || '')} onChange={(e) => setEditData(p => ({ ...p, address: e.target.value }))} style={inputStyle} />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.city}</label>
+                <input value={String(editData.city || '')} onChange={(e) => setEditData(p => ({ ...p, city: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.province}</label>
+                <input value={String(editData.province || '')} onChange={(e) => setEditData(p => ({ ...p, province: e.target.value }))} style={inputStyle} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>Instagram (@)</label>
+                <input value={String(editData.instagramAccount || '')} onChange={(e) => setEditData(p => ({ ...p, instagramAccount: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>TikTok (@)</label>
+                <input value={String(editData.tiktokAccount || '')} onChange={(e) => setEditData(p => ({ ...p, tiktokAccount: e.target.value }))} style={inputStyle} />
+              </div>
+            </div>
           </div>
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.batch_number}</label>
-            <input type="number" value={String(editData.batchNumber || '')} onChange={(e) => setEditData(p => ({ ...p, batchNumber: Number(e.target.value) }))} style={inputStyle} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
-            <button onClick={saveBasicEdit} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>{t.save}</button>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
+            <button onClick={() => setEditModal(null)} disabled={isSaving} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button onClick={saveBasicEdit} disabled={isSaving} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+              {isSaving ? (
+                <>
+                  <div style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  {t.saving}...
+                </>
+              ) : t.save}
+            </button>
           </div>
         </Modal>
       )}

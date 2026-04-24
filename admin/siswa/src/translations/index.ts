@@ -4,13 +4,15 @@ export const translations = {
     logout: 'ログアウト',
     cancel: 'キャンセル',
     save: '保存',
-    delete: '削除',
+    saving: '保存中',
     back: '戻る',
     next: '次へ',
     register: '登録する',
     editing: '登録中...',
     edit: '編集',
     actions: '操作',
+    delete: '削除',
+    confirm_delete: '本当に削除しますか？',
     
     login_title: 'Bali Japan Dream',
     login_subtitle: '生徒管理システム',
@@ -42,7 +44,7 @@ export const translations = {
     last_updated: '最終更新',
     stock_warning: '在庫少',
     update_stock: '在庫更新',
-    confirm_delete: '本当に削除しますか？',
+
     item_not_found: '該当する在庫はありません',
     unit: '単位',
     min_stock: '最小在庫数',
@@ -229,7 +231,7 @@ export const translations = {
     joined_date: '入社日',
     contract_period_placeholder: '1年更新、無期など',
     view_current_contract: '現在の契約書を表示',
-    saving: '保存中...',
+
     photo_count_format: '写真 {count}枚',
     status_departed_japan: '渡航済',
     daily_log: '活動日誌',
@@ -478,15 +480,17 @@ export const translations = {
   id: {
     // Common
     logout: 'Keluar',
-    cancel: 'Batal',
+    edit: 'Edit',
     save: 'Simpan',
-    delete: 'Hapus',
+    saving: 'Menyimpan',
+    cancel: 'Batal',
     back: 'Kembali',
     next: 'Lanjut',
     register: 'Daftar',
     editing: 'Mendaftar...',
-    edit: 'Edit',
     actions: 'Aksi',
+    delete: 'Hapus',
+    confirm_delete: 'Apakah Anda yakin ingin menghapus ini?',
     
     login_title: 'Bali Japan Dream',
     login_subtitle: 'Sistem Manajemen Siswa',
@@ -518,7 +522,7 @@ export const translations = {
     last_updated: 'Update Terakhir',
     stock_warning: 'Stok Menipis',
     update_stock: 'Update Stok',
-    confirm_delete: 'Yakin ingin menghapus?',
+
     item_not_found: 'Barang tidak ditemukan',
     unit: 'Satuan',
     min_stock: 'Stok Minimal',
@@ -705,7 +709,7 @@ export const translations = {
     joined_date: 'Tanggal Mulai Bekerja',
     contract_period_placeholder: 'Kontrak 1 tahun, permanen, dll.',
     view_current_contract: 'Lihat Kontrak Saat Ini',
-    saving: 'Menyimpan...',
+
     photo_count_format: '{count} foto',
     status_departed_japan: 'Sudah Berangkat',
     daily_log: 'Buku Harian',
