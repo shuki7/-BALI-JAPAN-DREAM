@@ -19,16 +19,25 @@ export const generateStudentReportPDF = async (
   const dateFormat = language === 'ja' ? 'yyyy/MM/dd' : 'dd/MM/yyyy';
 
   // --- Header ---
-  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.setFillColor(245, 245, 245);
   doc.rect(0, 0, 210, 40, 'F');
 
+  // Load and add logo
+  try {
+    const logoData = await loadImageToBase64('/balijapan_logo.webp');
+    doc.addImage(logoData, 'WEBP', 15, 5, 30, 30);
+  } catch (err) {
+    console.error('Failed to load logo', err);
+  }
+
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor(255, 255, 255);
-  doc.text(language === 'ja' ? '生徒個人レポート' : 'LAPORAN INDIVIDU SISWA', 20, 25);
+  doc.setFontSize(20);
+  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.text(language === 'ja' ? '生徒個人レポート' : 'LAPORAN INDIVIDU SISWA', 50, 22);
   
-  doc.setFontSize(10);
-  doc.text(`Generated: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 150, 25);
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Generated: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 150, 22);
 
   // --- Profile Photo & Basic Info Section ---
   let currentY = 50;
