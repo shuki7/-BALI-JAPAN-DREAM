@@ -192,22 +192,24 @@ export default function Dashboard() {
               cursor: 'pointer',
             }}
           >
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: '50%',
-                background: '#CC0000',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontWeight: 700,
-                fontSize: 14,
-                flexShrink: 0,
-              }}
-            >
-              {s.fullName.charAt(0).toUpperCase()}
+            <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#f3f4f6', border: '1px solid #eee' }}>
+              {((s as any).photos?.[0]?.url || s.photoUrl) ? (
+                <img
+                  src={(s as any).photos?.[0]?.url || s.photoUrl}
+                  alt={s.fullName}
+                  onError={(e) => {
+                    const fileId = (s as any).photos?.[0]?.fileId || (s as any).photoFileId;
+                    if (fileId) {
+                      (e.target as HTMLImageElement).src = `https://drive.google.com/thumbnail?id=${fileId}&sz=100`;
+                    }
+                  }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{ width: '100%', height: '100%', background: '#CC0000', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>
+                  {s.fullName.charAt(0).toUpperCase()}
+                </div>
+              )}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: 14 }}>{s.fullName}</div>
