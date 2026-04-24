@@ -202,25 +202,32 @@ export default function Students() {
                   onMouseLeave={(e) => (e.currentTarget.style.background = idx % 2 === 0 ? '#fff' : '#fafafa')}
                 >
                   <td style={{ padding: '10px 16px' }}>
-                    {s.photoUrl ? (
+                    {((s as any).photos?.[0]?.url || s.photoUrl) ? (
                       <img
-                        src={s.photoUrl}
+                        src={(s as any).photos?.[0]?.url || s.photoUrl}
                         alt={s.fullName}
-                        style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          const fileId = (s as any).photos?.[0]?.fileId || (s as any).photoFileId;
+                          if (fileId) {
+                            (e.target as HTMLImageElement).src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w100`;
+                          }
+                        }}
+                        style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', border: '1px solid #eee' }}
                       />
                     ) : (
                       <div
                         style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '50%',
-                          background: '#CC0000',
-                          color: '#fff',
+                          width: 40,
+                          height: 40,
+                          borderRadius: 8,
+                          background: '#f3f4f6',
+                          color: '#9ca3af',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontWeight: 700,
                           fontSize: 14,
+                          border: '1px solid #e5e7eb'
                         }}
                       >
                         {s.fullName.charAt(0).toUpperCase()}
