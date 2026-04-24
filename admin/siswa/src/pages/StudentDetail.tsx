@@ -375,7 +375,7 @@ export default function StudentDetail() {
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
-            onClick={() => generateStudentReportPDF(student, payments, documents, logs, language)}
+            onClick={() => generateStudentReportPDF(student, payments, language)}
             style={{
               padding: '8px 16px',
               background: '#fff',

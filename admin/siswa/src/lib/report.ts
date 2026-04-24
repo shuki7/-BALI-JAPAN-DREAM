@@ -8,8 +8,6 @@ import { translations } from '../translations';
 export const generateStudentReportPDF = async (
   student: Student,
   payments: Payment[],
-  documents: StudentDocument[],
-  logs: StudentLog[],
   language: 'ja' | 'id'
 ) => {
   const doc = new jsPDF();
@@ -69,7 +67,7 @@ export const generateStudentReportPDF = async (
   doc.text(`ID: ${student.registrationNumber}`, 65, currentY + 18);
   doc.text(`${t.batch}: ${student.batchNumber}`, 65, currentY + 24);
   doc.text(`${t.status}: ${student.status.toUpperCase()}`, 65, currentY + 30);
-  doc.text(`${t.enrollment_date}: ${format(student.enrollmentDate, dateFormat, { locale: dateLocale })}`, 65, currentY + 36);
+  doc.text(`${t.enroll_date}: ${format(student.enrollmentDate, dateFormat, { locale: dateLocale })}`, 65, currentY + 36);
 
   // --- Personal Information Table ---
   currentY += 55;

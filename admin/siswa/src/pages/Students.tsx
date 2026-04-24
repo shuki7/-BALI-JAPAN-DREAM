@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getStudents, getPayments, getStudentDocuments, getStudentLogs } from '../lib/firestore';
 import { generateStudentReportPDF } from '../lib/report';
 import { format } from 'date-fns';
+import { useLanguage } from '../context/LanguageContext';
 import type { StudentStatus, ProgramType } from '../lib/types';
 
 function StatusBadge({ status }: { status: StudentStatus }) {
@@ -33,6 +34,7 @@ function programLabel(p: ProgramType) {
 
 export default function Students() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const { data: students = [], isLoading } = useQuery({ queryKey: ['students'], queryFn: getStudents });
 
   const [search, setSearch] = useState('');
@@ -259,12 +261,10 @@ export default function Students() {
                       onClick={async (e) => {
                         e.stopPropagation();
                         try {
-                          const [pmts, docs, logs] = await Promise.all([
-                            getPayments(s.id),
-                            getStudentDocuments(s.id),
-                            getStudentLogs(s.id)
+                          const [pmts] = await Promise.all([
+                            getPayments(s.id)
                           ]);
-                          generateStudentReportPDF(s, pmts, docs, logs, language);
+                          generateStudentReportPDF(s, pmts, language);
                         } catch (err) {
                           alert('Failed to generate report');
                         }
