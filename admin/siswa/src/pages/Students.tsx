@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getStudents } from '../lib/firestore';
+import { getStudents, getPayments, getStudentDocuments, getStudentLogs } from '../lib/firestore';
+import { generateStudentReportPDF } from '../lib/report';
 import { format } from 'date-fns';
 import type { StudentStatus, ProgramType } from '../lib/types';
 
@@ -186,6 +187,7 @@ export default function Students() {
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>警告</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>ステータス</th>
                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>入学日</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -251,6 +253,37 @@ export default function Students() {
                   </td>
                   <td style={{ padding: '10px 16px', fontSize: 13, color: '#555' }}>
                     {format(s.enrollmentDate, 'dd/MM/yyyy')}
+                  </td>
+                  <td style={{ padding: '10px 16px' }}>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          const [pmts, docs, logs] = await Promise.all([
+                            getPayments(s.id),
+                            getStudentDocuments(s.id),
+                            getStudentLogs(s.id)
+                          ]);
+                          generateStudentReportPDF(s, pmts, docs, logs, language);
+                        } catch (err) {
+                          alert('Failed to generate report');
+                        }
+                      }}
+                      style={{
+                        padding: '6px 10px',
+                        background: '#f3f4f6',
+                        border: '1px solid #d1d5db',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4
+                      }}
+                      title="レポートPDF"
+                    >
+                      📄 レポート
+                    </button>
                   </td>
                 </tr>
               ))}
