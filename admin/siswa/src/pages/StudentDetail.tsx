@@ -525,7 +525,7 @@ export default function StudentDetail() {
                   target="_blank" rel="noopener noreferrer"
                   style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#E1306C', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
                 >
-                  <span style={{ fontSize: 20 }}>📸</span> @{student.instagramAccount.replace(/^@/, '')}
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram" style={{ width: 20, height: 20 }} /> @{student.instagramAccount.replace(/^@/, '')}
                 </a>
               )}
               {student.tiktokAccount && (
@@ -534,7 +534,7 @@ export default function StudentDetail() {
                   target="_blank" rel="noopener noreferrer"
                   style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#000', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
                 >
-                  <span style={{ fontSize: 20 }}>🎵</span> @{student.tiktokAccount.replace(/^@/, '')}
+                  <img src="https://www.vectorlogo.zone/logos/tiktok/tiktok-icon.svg" alt="TikTok" style={{ width: 20, height: 20 }} /> @{student.tiktokAccount.replace(/^@/, '')}
                 </a>
               )}
             </div>
