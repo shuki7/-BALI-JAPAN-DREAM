@@ -25,6 +25,7 @@ import { GDriveService } from '../lib/gdrive';
 import { convertPhotoToWebP } from '../lib/imageUtils';
 import { CurrencyInput } from '../components/CurrencyInput';
 import { generateYellowCardInvoicePDF } from '../lib/invoice';
+import { generateStudentReportPDF } from '../lib/report';
 import type { Student, StudentStatus, DocumentType, Payment, PaymentType, PaymentMethod, PaymentStatus, YellowCardRecord } from '../lib/types';
 
 const SSW_CATEGORIES = [
@@ -364,7 +365,24 @@ export default function StudentDetail() {
           <h1 style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{student.fullName}</h1>
           <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{student.registrationNumber} · Batch {student.batchNumber}</div>
         </div>
-        <div style={{ marginLeft: 'auto' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={() => generateStudentReportPDF(student, payments, documents, logs, language)}
+            style={{
+              padding: '8px 16px',
+              background: '#fff',
+              border: '1px solid #ddd',
+              borderRadius: 6,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6
+            }}
+          >
+            📄 PDFレポート出力
+          </button>
           <StatusBadge status={student.status} />
         </div>
       </div>
