@@ -1,9 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPayments, getStudents, addPayment, updatePayment, deletePayment } from '../lib/firestore';
+import { getPayments, getStudents, addPayment, updatePayment, deletePayment, updateStudent } from '../lib/firestore';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations';
-import type { PaymentType, PaymentStatus, PaymentMethod } from '../lib/types';
+import { CurrencyInput } from '../components/CurrencyInput';
+import { GDriveService } from '../lib/gdrive';
+import { convertPhotoToWebP } from '../lib/imageUtils';
+import { format } from 'date-fns';
+import type { PaymentType, PaymentStatus, PaymentMethod, Payment } from '../lib/types';
 
 function StatusBadge({ status }: { status: PaymentStatus }) {
   const { language } = useLanguage();
@@ -61,14 +65,61 @@ export default function Payments() {
     totalAmount: 0,
     paidAmount: 0,
     notes: '',
+    paidDate: format(new Date(), 'yyyy-MM-dd'),
+    proofFileId: '',
+    proofUrl: ''
   });
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Helper to ensure student folder exists and upload file
+  const handleFileUpload = async (file: File, studentId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) {
+      alert('Please select a student first');
+      return null;
+    }
+    setIsUploading(true);
+    try {
+      let folderId = student.driveFolderId;
+      if (!folderId) {
+        const folderName = `${student.fullName}_${student.registrationNumber || student.id}`;
+        folderId = await GDriveService.createFolder(folderName, import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID);
+        await updateStudent(student.id, { driveFolderId: folderId });
+      }
+
+      let fileToUpload = file;
+      if (file.type.startsWith('image/')) {
+        const webpBlob = await convertPhotoToWebP(file);
+        fileToUpload = new File([webpBlob], file.name.replace(/\.[^/.]+$/, "") + ".webp", { type: 'image/webp' });
+      }
+
+      const result = await GDriveService.uploadFile(fileToUpload, folderId);
+      return result;
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Upload failed: ' + (err as Error).message);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const addMutation = useMutation({
     mutationFn: addPayment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       setShowAdd(false);
-      setAddData({ studentId: '', paymentType: 'education', paymentMethod: 'lump_sum', totalAmount: 0, paidAmount: 0, notes: '' });
+      setAddData({ 
+        studentId: '', 
+        paymentType: 'education', 
+        paymentMethod: 'lump_sum', 
+        totalAmount: 0, 
+        paidAmount: 0, 
+        notes: '',
+        paidDate: format(new Date(), 'yyyy-MM-dd'),
+        proofFileId: '',
+        proofUrl: ''
+      });
     },
   });
 
@@ -124,6 +175,10 @@ export default function Payments() {
       remainingAmount: total - paid,
       paymentStatus: status,
       notes: target.notes || undefined,
+      paidDate: target.paidDate ? new Date(target.paidDate) : undefined,
+      proofFileId: target.proofFileId || undefined,
+      proofUrl: target.proofUrl || undefined,
+      updatedAt: new Date(),
     };
 
     if (editTarget) {
@@ -132,7 +187,6 @@ export default function Payments() {
       addMutation.mutate({
         ...payload,
         createdAt: new Date(),
-        updatedAt: new Date(),
       });
     }
   };
@@ -146,7 +200,17 @@ export default function Payments() {
         </div>
         <button
           onClick={() => {
-            setAddData({ studentId: '', paymentType: 'education', paymentMethod: 'lump_sum', totalAmount: 0, paidAmount: 0, notes: '' });
+            setAddData({ 
+              studentId: '', 
+              paymentType: 'education', 
+              paymentMethod: 'lump_sum', 
+              totalAmount: 0, 
+              paidAmount: 0, 
+              notes: '',
+              paidDate: format(new Date(), 'yyyy-MM-dd'),
+              proofFileId: '',
+              proofUrl: ''
+            });
             setShowAdd(true);
           }}
           style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
@@ -180,7 +244,7 @@ export default function Payments() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-                {[t.full_name, language === 'ja' ? '項目' : 'Kategori', language === 'ja' ? '総額 (IDR)' : 'Total (IDR)', language === 'ja' ? '支払済' : 'Terbayar', language === 'ja' ? '残金' : 'Sisa', t.status, language === 'ja' ? '操作' : 'Aksi'].map((h) => (
+                {[t.full_name, language === 'ja' ? '項目' : 'Kategori', t.payment_date, language === 'ja' ? '総額 (IDR)' : 'Total (IDR)', language === 'ja' ? '支払済' : 'Terbayar', language === 'ja' ? '残金' : 'Sisa', t.status, language === 'ja' ? '操作' : 'Aksi'].map((h) => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{h}</th>
                 ))}
               </tr>
@@ -196,13 +260,21 @@ export default function Payments() {
                 >
                   <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 600 }}>{studentMap[p.studentId] || p.studentId}</td>
                   <td style={{ padding: '10px 16px', fontSize: 13 }}>{typeLabel(p.paymentType)}</td>
+                  <td style={{ padding: '10px 16px', fontSize: 13 }}>
+                    {p.paidDate ? format(p.paidDate, 'dd/MM/yyyy') : '-'}
+                  </td>
                   <td style={{ padding: '10px 16px', fontSize: 13 }}>Rp {p.totalAmount.toLocaleString('id-ID')}</td>
                   <td style={{ padding: '10px 16px', fontSize: 13, color: '#166534' }}>Rp {p.paidAmount.toLocaleString('id-ID')}</td>
                   <td style={{ padding: '10px 16px', fontSize: 13, color: p.remainingAmount > 0 ? '#CC0000' : '#166534' }}>
                     Rp {p.remainingAmount.toLocaleString('id-ID')}
                   </td>
                   <td style={{ padding: '10px 16px' }}>
-                    <StatusBadge status={p.paymentStatus} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <StatusBadge status={p.paymentStatus} />
+                      {p.proofUrl && (
+                        <a href={p.proofUrl} target="_blank" rel="noreferrer" title={t.view_proof} style={{ fontSize: 16 }}>📄</a>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: '10px 16px' }}>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -247,83 +319,165 @@ export default function Payments() {
       </div>
 
       {(showAdd || editTarget) && (
-        <Modal title={editTarget ? t.edit : t.add_payment_record} onClose={() => { setShowAdd(false); setEditTarget(null); }}>
+        <Modal 
+          title={editTarget ? t.edit_payment : t.add_payment} 
+          onClose={() => { setShowAdd(false); setEditTarget(null); }}
+        >
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '生徒' : 'Siswa'}</label>
             <select 
               value={editTarget ? editTarget.studentId : addData.studentId} 
               onChange={(e) => {
-                if (editTarget) setEditTarget({...editTarget, studentId: e.target.value});
-                else setAddData(p => ({ ...p, studentId: e.target.value }));
+                const val = e.target.value;
+                if (editTarget) setEditTarget({ ...editTarget, studentId: val });
+                else setAddData({ ...addData, studentId: val });
               }} 
               style={inputStyle}
+              disabled={!!editTarget}
             >
-              <option value="">{language === 'ja' ? '選択してください' : 'Pilih Siswa'}</option>
-              {students.map((s: any) => <option key={s.id} value={s.id}>{s.fullName}</option>)}
+              <option value="">-- {language === 'ja' ? '選択してください' : 'Pilih Siswa'} --</option>
+              {students.map(s => <option key={s.id} value={s.id}>{s.fullName}</option>)}
             </select>
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_type}</label>
-            <select 
-              value={editTarget ? editTarget.paymentType : addData.paymentType} 
-              onChange={(e) => {
-                if (editTarget) setEditTarget({...editTarget, paymentType: e.target.value});
-                else setAddData(p => ({ ...p, paymentType: e.target.value }));
-              }} 
-              style={inputStyle}
-            >
-              <option value="education">{t.education_fee}</option>
-              <option value="job_matching">{t.jm_fee}</option>
-              <option value="dormitory">{t.dorm_fee}</option>
-              <option value="other">{t.other}</option>
-            </select>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_type}</label>
+              <select 
+                value={editTarget ? editTarget.paymentType : addData.paymentType} 
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (editTarget) setEditTarget({ ...editTarget, paymentType: val });
+                  else setAddData({ ...addData, paymentType: val });
+                }} 
+                style={inputStyle}
+              >
+                <option value="education">{t.education_fee}</option>
+                <option value="job_matching">{t.jm_fee}</option>
+                <option value="dormitory">{t.dorm_fee}</option>
+                <option value="other">{t.other}</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_method}</label>
+              <select 
+                value={editTarget ? editTarget.paymentMethod : addData.paymentMethod} 
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (editTarget) setEditTarget({ ...editTarget, paymentMethod: val });
+                  else setAddData({ ...addData, paymentMethod: val });
+                }} 
+                style={inputStyle}
+              >
+                <option value="lump_sum">{t.lump_sum}</option>
+                <option value="installment">{t.installment}</option>
+              </select>
+            </div>
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_method}</label>
-            <select 
-              value={editTarget ? editTarget.paymentMethod : addData.paymentMethod} 
-              onChange={(e) => {
-                if (editTarget) setEditTarget({...editTarget, paymentMethod: e.target.value});
-                else setAddData(p => ({ ...p, paymentMethod: e.target.value }));
-              }} 
-              style={inputStyle}
-            >
-              <option value="lump_sum">{t.lump_sum}</option>
-              <option value="installment">{t.installment}</option>
-            </select>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.total_amount}</label>
+              <CurrencyInput 
+                value={editTarget ? editTarget.totalAmount : addData.totalAmount} 
+                onChange={(val) => {
+                  if (editTarget) setEditTarget({ ...editTarget, totalAmount: val });
+                  else setAddData({ ...addData, totalAmount: val });
+                }} 
+                style={inputStyle}
+                suffix="IDR"
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.paid_amount}</label>
+              <CurrencyInput 
+                value={editTarget ? editTarget.paidAmount : addData.paidAmount} 
+                onChange={(val) => {
+                  if (editTarget) setEditTarget({ ...editTarget, paidAmount: val });
+                  else setAddData({ ...addData, paidAmount: val });
+                }} 
+                style={inputStyle}
+                suffix="IDR"
+              />
+            </div>
           </div>
+
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.total_amount} (IDR)</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_date}</label>
             <input 
-              type="number" 
-              value={editTarget ? editTarget.totalAmount : addData.totalAmount} 
+              type="date" 
+              value={editTarget ? (editTarget.paidDate ? format(editTarget.paidDate, 'yyyy-MM-dd') : '') : addData.paidDate} 
               onChange={(e) => {
-                if (editTarget) setEditTarget({...editTarget, totalAmount: Number(e.target.value)});
-                else setAddData(p => ({ ...p, totalAmount: Number(e.target.value) }));
+                const val = e.target.value;
+                if (editTarget) setEditTarget({ ...editTarget, paidDate: new Date(val) });
+                else setAddData({ ...addData, paidDate: val });
               }} 
               style={inputStyle} 
             />
           </div>
+
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.paid_amount} (IDR)</label>
-            <input 
-              type="number" 
-              value={editTarget ? editTarget.paidAmount : addData.paidAmount} 
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_proof}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="file"
+                id="global-payment-proof-upload"
+                style={{ display: 'none' }}
+                accept="image/*,application/pdf"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  const studentId = editTarget ? editTarget.studentId : addData.studentId;
+                  if (file && studentId) {
+                    const res = await handleFileUpload(file, studentId);
+                    if (res) {
+                      if (editTarget) setEditTarget({ ...editTarget, proofFileId: res.fileId, proofUrl: res.url });
+                      else setAddData({ ...addData, proofFileId: res.fileId, proofUrl: res.url });
+                    }
+                  } else if (!studentId) {
+                    alert(language === 'ja' ? '先に生徒を選択してください' : 'Pilih siswa terlebih dahulu');
+                  }
+                }}
+              />
+              <button
+                onClick={() => document.getElementById('global-payment-proof-upload')?.click()}
+                disabled={isUploading}
+                style={{ padding: '6px 12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}
+              >
+                {isUploading ? t.loading : (editTarget?.proofFileId || addData.proofFileId) ? '✅ ' + t.save : t.select_file}
+              </button>
+              {(editTarget?.proofUrl || addData.proofUrl) && (
+                <a href={editTarget?.proofUrl || addData.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view}</a>
+              )}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.memo}</label>
+            <textarea 
+              value={editTarget ? editTarget.notes || '' : addData.notes} 
               onChange={(e) => {
-                if (editTarget) setEditTarget({...editTarget, paidAmount: Number(e.target.value)});
-                else setAddData(p => ({ ...p, paidAmount: Number(e.target.value) }));
+                const val = e.target.value;
+                if (editTarget) setEditTarget({ ...editTarget, notes: val });
+                else setAddData({ ...addData, notes: val });
               }} 
-              style={inputStyle} 
+              style={{ ...inputStyle, height: 60, resize: 'none' }} 
             />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => { setShowAdd(false); setEditTarget(null); }} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+            <button 
+              onClick={() => { setShowAdd(false); setEditTarget(null); }} 
+              disabled={addMutation.isPending || updateMutation.isPending}
+              style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}
+            >
+              {t.cancel}
+            </button>
             <button
               onClick={handleSave}
-              disabled={editTarget ? !editTarget.studentId : !addData.studentId}
-              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer', opacity: (editTarget ? editTarget.studentId : addData.studentId) ? 1 : 0.5 }}
+              disabled={addMutation.isPending || updateMutation.isPending || isUploading}
+              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer', opacity: (addMutation.isPending || updateMutation.isPending) ? 0.7 : 1 }}
             >
-              {t.save}
+              {(addMutation.isPending || updateMutation.isPending) ? t.saving + '...' : t.save}
             </button>
           </div>
         </Modal>
