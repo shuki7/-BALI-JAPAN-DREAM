@@ -170,7 +170,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) 
           <span>{t.logout}</span>
         </button>
         <div style={{ padding: '4px 16px', fontSize: '10px', color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
-          v2.0 (Payment Proof Fixed)
+          v2.3 (Student Report & Thumbnail Fix)
         </div>
       </div>
     </aside>
