@@ -3,6 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { translations } from '../../translations';
+import { 
+  LayoutDashboard, Users, FileText, AlertTriangle, 
+  School, UserCheck, Briefcase, Building2, 
+  Package, Settings, LogOut, UserCircle 
+} from 'lucide-react';
 
 const SIDEBAR_WIDTH = 240;
 const SIDEBAR_BG = '#1a1a2e';
@@ -10,19 +15,19 @@ const ACTIVE_BG = '#CC0000';
 const TEXT_COLOR = '#e0e0e0';
 const HOVER_BG = 'rgba(255,255,255,0.08)';
 
-const NAV_ITEMS: { key: keyof typeof translations.ja; path: string; adminOnly?: boolean }[] = [
-  { key: 'dashboard', path: '/dashboard' },
-  { key: 'students', path: '/students' },
-  { key: 'payments', path: '/payments' },
-  { key: 'documents', path: '/documents' },
-  { key: 'discipline', path: '/discipline' },
-  { key: 'partners', path: '/partners' },
-  { key: 'scouters', path: '/scouters' },
-  { key: 'staff', path: '/staff' },
-  { key: 'commissions', path: '/commissions', adminOnly: true },
-  { key: 'organizations', path: '/organizations' },
-  { key: 'inventory', path: '/inventory' },
-  { key: 'settings', path: '/settings', adminOnly: true },
+const NAV_ITEMS: { key: keyof typeof translations.ja; path: string; icon: any; adminOnly?: boolean }[] = [
+  { key: 'dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { key: 'students', path: '/students', icon: Users },
+  { key: 'payments', path: '/payments', icon: FileText },
+  { key: 'documents', path: '/documents', icon: FileText },
+  { key: 'discipline', path: '/discipline', icon: AlertTriangle },
+  { key: 'partners', path: '/partners', icon: School },
+  { key: 'scouters', path: '/scouters', icon: UserCheck },
+  { key: 'staff', path: '/staff', icon: UserCircle },
+  { key: 'commissions', path: '/commissions', icon: Briefcase, adminOnly: true },
+  { key: 'organizations', path: '/organizations', icon: Building2 },
+  { key: 'inventory', path: '/inventory', icon: Package },
+  { key: 'settings', path: '/settings', icon: Settings, adminOnly: true },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -100,8 +105,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                 }}
               >
-                <span style={{ fontSize: 13, fontWeight: 600 }}>{label}</span>
-                <span style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>{sublabel}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <item.icon size={18} style={{ opacity: isActive ? 1 : 0.6 }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>{label}</span>
+                    <span style={{ fontSize: 10, color: isActive ? 'rgba(255,255,255,0.6)' : '#888', fontStyle: 'italic' }}>{sublabel}</span>
+                  </div>
+                </div>
               </button>
             );
           })}
