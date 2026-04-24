@@ -26,7 +26,7 @@ const NAV_ITEMS: { key: keyof typeof translations.ja; path: string; adminOnly?: 
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const { appUser, logout, isAdmin } = useAuth();
+  const { appUser, logout, isAdmin, googleTokenStatus, refreshGoogleToken } = useAuth();
   const { language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -106,6 +106,47 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
+
+        {/* Google Drive Connection */}
+        <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Google Drive</div>
+            <div style={{ 
+              width: '8px', height: '8px', borderRadius: '50%', 
+              background: googleTokenStatus === 'connected' ? '#10b981' : googleTokenStatus === 'expired' ? '#f59e0b' : '#6b7280' 
+            }} />
+          </div>
+          
+          {googleTokenStatus !== 'connected' ? (
+            <button
+              onClick={() => refreshGoogleToken()}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+            >
+              <span>{language === 'ja' ? 'Driveに接続' : 'Hubungkan Drive'}</span>
+            </button>
+          ) : (
+            <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 600, textAlign: 'center' }}>
+              {language === 'ja' ? '接続済み' : 'Terhubung'}
+            </div>
+          )}
+        </div>
 
         {/* User info & logout */}
         <div
