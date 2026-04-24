@@ -165,6 +165,7 @@ export interface StudentDocument {
   documentType: DocumentType;
   title: string;
   fileId: string;
+  url?: string;
   fileUrl?: string;
   uploadDate: Date;
   isHeld: boolean;

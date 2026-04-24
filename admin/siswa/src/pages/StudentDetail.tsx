@@ -235,14 +235,22 @@ export default function StudentDetail() {
   const [isUploading, setIsUploading] = useState(false);
 
   // Helper to ensure student folder exists and upload file
-  const handleFileUpload = async (file: File, subFolder?: string) => {
+  const handleFileUpload = async (file: File) => {
     if (!student) return null;
+    if (!googleToken) {
+      if (confirm(language === 'ja' ? 'Google Driveに接続されていません。接続しますか？' : 'Google Drive belum terhubung. Hubungkan sekarang?')) {
+        await refreshGoogleToken();
+        return null;
+      }
+      return null;
+    }
     setIsUploading(true);
     try {
+      const gDrive = new GDriveService(googleToken);
       let folderId = student.driveFolderId;
       if (!folderId) {
-        const folderName = `${student.name}_${student.registrationNumber || student.id}`;
-        folderId = await GDriveService.createFolder(folderName, import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID);
+        const folderName = `${student.fullName}_${student.registrationNumber || student.id}`;
+        folderId = await gDrive.createFolder(folderName, import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID);
         await updateStudent(id!, { driveFolderId: folderId });
       }
 
@@ -252,8 +260,9 @@ export default function StudentDetail() {
         fileToUpload = new File([webpBlob], file.name.replace(/\.[^/.]+$/, "") + ".webp", { type: 'image/webp' });
       }
 
-      const result = await GDriveService.uploadFile(fileToUpload, folderId);
-      return result;
+      const fileId = await gDrive.uploadFile(fileToUpload, folderId);
+      await gDrive.makePublic(fileId);
+      return { fileId, url: gDrive.getViewUrl(fileId) };
     } catch (err) {
       console.error('Upload failed:', err);
       alert('Upload failed: ' + (err as Error).message);
@@ -1385,7 +1394,7 @@ export default function StudentDetail() {
                 {isUploading ? t.loading : addPaymentData.proofFileId ? '✅ ' + t.save : t.select_file}
               </button>
               {addPaymentData.proofUrl && (
-                <a href={addPaymentData.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view}</a>
+                <a href={addPaymentData.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view_proof}</a>
               )}
             </div>
           </div>
@@ -1538,7 +1547,7 @@ export default function StudentDetail() {
                 {isUploading ? t.loading : showEditPayment.proofFileId ? '✅ ' + t.save : t.select_file}
               </button>
               {showEditPayment.proofUrl && (
-                <a href={showEditPayment.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view}</a>
+                <a href={showEditPayment.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view_proof}</a>
               )}
             </div>
           </div>

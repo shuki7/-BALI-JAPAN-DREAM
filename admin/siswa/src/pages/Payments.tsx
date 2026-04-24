@@ -7,7 +7,8 @@ import { CurrencyInput } from '../components/CurrencyInput';
 import { GDriveService } from '../lib/gdrive';
 import { convertPhotoToWebP } from '../lib/imageUtils';
 import { format } from 'date-fns';
-import type { PaymentType, PaymentStatus, PaymentMethod, Payment } from '../lib/types';
+import { useAuth } from '../context/AuthContext';
+import type { PaymentType, PaymentStatus, PaymentMethod } from '../lib/types';
 
 function StatusBadge({ status }: { status: PaymentStatus }) {
   const { language } = useLanguage();
@@ -50,6 +51,7 @@ const inputStyle = {
 export default function Payments() {
   const queryClient = useQueryClient();
   const { language } = useLanguage();
+  const { googleToken, refreshGoogleToken } = useAuth();
   const t = translations[language];
   const { data: payments = [], isLoading } = useQuery({ queryKey: ['payments'], queryFn: () => getPayments() });
   const { data: students = [] } = useQuery({ queryKey: ['students'], queryFn: getStudents });
@@ -78,12 +80,20 @@ export default function Payments() {
       alert('Please select a student first');
       return null;
     }
+    if (!googleToken) {
+      if (confirm(language === 'ja' ? 'Google Driveに接続されていません。接続しますか？' : 'Google Drive belum terhubung. Hubungkan sekarang?')) {
+        await refreshGoogleToken();
+        return null;
+      }
+      return null;
+    }
     setIsUploading(true);
     try {
+      const gDrive = new GDriveService(googleToken);
       let folderId = student.driveFolderId;
       if (!folderId) {
         const folderName = `${student.fullName}_${student.registrationNumber || student.id}`;
-        folderId = await GDriveService.createFolder(folderName, import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID);
+        folderId = await gDrive.createFolder(folderName, import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID);
         await updateStudent(student.id, { driveFolderId: folderId });
       }
 
@@ -93,8 +103,9 @@ export default function Payments() {
         fileToUpload = new File([webpBlob], file.name.replace(/\.[^/.]+$/, "") + ".webp", { type: 'image/webp' });
       }
 
-      const result = await GDriveService.uploadFile(fileToUpload, folderId);
-      return result;
+      const fileId = await gDrive.uploadFile(fileToUpload, folderId);
+      await gDrive.makePublic(fileId);
+      return { fileId, url: gDrive.getViewUrl(fileId) };
     } catch (err) {
       console.error('Upload failed:', err);
       alert('Upload failed: ' + (err as Error).message);
@@ -446,7 +457,7 @@ export default function Payments() {
                 {isUploading ? t.loading : (editTarget?.proofFileId || addData.proofFileId) ? '✅ ' + t.save : t.select_file}
               </button>
               {(editTarget?.proofUrl || addData.proofUrl) && (
-                <a href={editTarget?.proofUrl || addData.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view}</a>
+                <a href={editTarget?.proofUrl || addData.proofUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: '#CC0000' }}>{t.view_proof}</a>
               )}
             </div>
           </div>
