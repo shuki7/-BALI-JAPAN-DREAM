@@ -54,6 +54,14 @@ const inputStyle = {
   boxSizing: 'border-box' as const,
 };
 
+const labelStyle = {
+  display: 'block',
+  fontSize: 12,
+  fontWeight: 600,
+  color: '#555',
+  marginBottom: 5,
+};
+
 function Badge({ children, color, bg }: { children: React.ReactNode; color: string; bg: string }) {
   return (
     <span style={{ padding: '3px 10px', borderRadius: 99, fontSize: 11, fontWeight: 600, color, background: bg }}>
@@ -392,6 +400,9 @@ export default function StudentDetail() {
                       province: student.province,
                       instagramAccount: student.instagramAccount || '',
                       tiktokAccount: student.tiktokAccount || '',
+                      educationLevel: student.educationLevel,
+                      schoolName: student.schoolName,
+                      graduationYear: student.graduationYear || '',
                       notes: student.notes || '' 
                     }); 
                     setNewPhoto(null);
@@ -1010,6 +1021,26 @@ export default function StudentDetail() {
                 <input value={String(editData.tiktokAccount || '')} onChange={(e) => setEditData(p => ({ ...p, tiktokAccount: e.target.value }))} style={inputStyle} />
               </div>
             </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.education_level}</label>
+                <select value={String(editData.educationLevel || '')} onChange={(e) => setEditData(p => ({ ...p, educationLevel: e.target.value }))} style={inputStyle}>
+                  <option value="sma">SMA</option>
+                  <option value="smk">SMK</option>
+                  <option value="d3">D3</option>
+                  <option value="s1">S1</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.school_name}</label>
+                <input value={String(editData.schoolName || '')} onChange={(e) => setEditData(p => ({ ...p, schoolName: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.graduation_year}</label>
+                <input type="number" value={String(editData.graduationYear || '')} onChange={(e) => setEditData(p => ({ ...p, graduationYear: Number(e.target.value) }))} style={inputStyle} />
+              </div>
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
@@ -1061,22 +1092,92 @@ export default function StudentDetail() {
       {/* Edit Modal: family */}
       {editModal === 'family' && (
         <Modal title={t.edit_family_info} onClose={() => setEditModal(null)}>
-          {(['parentName', 'parentWhatsapp', 'parentAddress', 'parentOccupation', 'emergencyContact', 'emergencyPhone'] as const).map((field) => (
-            <div key={field} style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>
-                {field === 'parentName' ? t.parent_name : 
-                 field === 'parentWhatsapp' ? t.parent_whatsapp : 
-                 field === 'parentAddress' ? t.parent_address : 
-                 field === 'parentOccupation' ? t.parent_occupation : 
-                 field === 'emergencyContact' ? t.emergency_contact : 
-                 t.emergency_phone}
-              </label>
-              <input value={String(editData[field] || '')} onChange={(e) => setEditData(p => ({ ...p, [field]: e.target.value }))} style={inputStyle} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div>
+              <label style={labelStyle}>{t.parent_name}</label>
+              <input value={String(editData.parentName || '')} onChange={(e) => setEditData(p => ({ ...p, parentName: e.target.value }))} style={inputStyle} />
             </div>
-          ))}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+            <div>
+              <label style={labelStyle}>{t.relationship}</label>
+              <select value={String(editData.parentRelationship || '')} onChange={(e) => setEditData(p => ({ ...p, parentRelationship: e.target.value }))} style={inputStyle}>
+                <option value="father">{t.father}</option>
+                <option value="mother">{t.mother}</option>
+                <option value="guardian">{t.guardian}</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>{t.birth_date}</label>
+              <input type="date" value={String(editData.parentDateOfBirth || '')} onChange={(e) => setEditData(p => ({ ...p, parentDateOfBirth: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>{t.gender}</label>
+              <select value={String(editData.parentGender || '')} onChange={(e) => setEditData(p => ({ ...p, parentGender: e.target.value }))} style={inputStyle}>
+                <option value="male">{t.male}</option>
+                <option value="female">{t.female}</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>{t.nik}</label>
+              <input value={String(editData.parentNik || '')} onChange={(e) => setEditData(p => ({ ...p, parentNik: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>{t.occupation}</label>
+              <input value={String(editData.parentOccupation || '')} onChange={(e) => setEditData(p => ({ ...p, parentOccupation: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>{t.whatsapp}</label>
+              <input value={String(editData.parentWhatsapp || '')} onChange={(e) => setEditData(p => ({ ...p, parentWhatsapp: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Email</label>
+              <input type="email" value={String(editData.parentEmail || '')} onChange={(e) => setEditData(p => ({ ...p, parentEmail: e.target.value }))} style={inputStyle} />
+            </div>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <label style={labelStyle}>{t.address}</label>
+            <input value={String(editData.parentAddress || '')} onChange={(e) => setEditData(p => ({ ...p, parentAddress: e.target.value }))} style={inputStyle} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 12 }}>
+            <div>
+              <label style={labelStyle}>{t.city}</label>
+              <input value={String(editData.parentCity || '')} onChange={(e) => setEditData(p => ({ ...p, parentCity: e.target.value }))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>{t.province}</label>
+              <input value={String(editData.parentProvince || '')} onChange={(e) => setEditData(p => ({ ...p, parentProvince: e.target.value }))} style={inputStyle} />
+            </div>
+          </div>
+
+          <div style={{ marginTop: 20, borderTop: '1px solid #eee', paddingTop: 16 }}>
+            <h4 style={{ fontSize: 13, fontWeight: 700, marginBottom: 12 }}>{t.emergency_contact}</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={labelStyle}>{t.full_name}</label>
+                <input value={String(editData.emergencyContact || '')} onChange={(e) => setEditData(p => ({ ...p, emergencyContact: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>{t.phone}</label>
+                <input value={String(editData.emergencyPhone || '')} onChange={(e) => setEditData(p => ({ ...p, emergencyPhone: e.target.value }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>{t.relationship}</label>
+                <input value={String(editData.emergencyRelationship || '')} onChange={(e) => setEditData(p => ({ ...p, emergencyRelationship: e.target.value }))} style={inputStyle} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
             <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
-            <button onClick={saveBasicEdit} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>{t.save}</button>
+            <button
+              onClick={() => {
+                const data: any = { ...editData };
+                if (data.parentDateOfBirth) data.parentDateOfBirth = new Date(data.parentDateOfBirth);
+                updateMutation.mutate(data);
+              }}
+              style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
+            >
+              {t.save}
+            </button>
           </div>
         </Modal>
       )}
@@ -1096,6 +1197,10 @@ export default function StudentDetail() {
               <input type={type} value={String(editData[field] || '')} onChange={(e) => setEditData(p => ({ ...p, [field]: e.target.value }))} style={inputStyle} />
             </div>
           ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <input type="checkbox" checked={Boolean(editData.dormResident)} onChange={(e) => setEditData(p => ({ ...p, dormResident: e.target.checked }))} />
+            <label style={{ fontSize: 13 }}>{language === 'ja' ? '寮に入居している' : 'Tinggal di asrama'}</label>
+          </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.visa_type}</label>
             <select value={String(editData.visaType || '')} onChange={(e) => setEditData(p => ({ ...p, visaType: e.target.value }))} style={inputStyle}>
