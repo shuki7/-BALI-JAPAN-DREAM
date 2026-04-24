@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { GDriveService } from '../lib/gdrive';
 import { activityService } from '../lib/activityService';
 import { convertToWebP, isImageFile } from '../utils/imageConverter';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
 import { 
   File, 
   FileText, 
@@ -29,6 +31,8 @@ interface DriveFile {
 }
 
 const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrowserProps) => {
+  const { language } = useLanguage();
+  const t = translations[language];
   const [files, setFiles] = useState<DriveFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -47,7 +51,7 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
       const driveFiles = await gdrive.listFiles(folderId);
       setFiles(driveFiles);
     } catch (err: any) {
-      setError(err.message || "ファイルの取得に失敗しました");
+      setError(err.message || t.fetch_files_failed);
     } finally {
       setLoading(false);
     }
@@ -79,7 +83,7 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
       }
       await loadFiles();
     } catch (err: any) {
-      alert("アップロードに失敗しました: " + err.message);
+      alert(t.upload_failed + ": " + err.message);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -87,7 +91,7 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
   };
 
   const handleDelete = async (fileId: string, fileName: string) => {
-    if (!window.confirm(`「${fileName}」を削除してもよろしいですか？`)) return;
+    if (!window.confirm(t.delete_confirm.replace('{name}', fileName))) return;
 
     try {
       await gdrive.deleteFile(fileId);
@@ -101,7 +105,7 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
         fileName: fileName
       });
     } catch (err: any) {
-      alert("削除に失敗しました: " + err.message);
+      alert(t.delete_failed + ": " + err.message);
     }
   };
 
@@ -114,7 +118,7 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <Loader2 className="animate-spin text-primary" size={32} />
-        <p className="text-sm text-gray-400 font-medium tracking-wider">ファイルを読み込み中...</p>
+        <p className="text-sm text-gray-400 font-medium tracking-wider">{t.loading}...</p>
       </div>
     );
   }
@@ -123,8 +127,8 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 tracking-tight">ドキュメント</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Google Drive フォルダ内のファイル</p>
+          <h2 className="text-xl font-bold text-gray-900 tracking-tight">{t.documents}</h2>
+          <p className="text-xs text-gray-500 mt-0.5">{t.drive_folder_desc}</p>
         </div>
         
         <label className={`
@@ -132,7 +136,7 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
           ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95 shadow-lg shadow-primary/20'}
         `}>
           {uploading ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
-          {uploading ? 'アップロード中...' : 'ファイルを追加'}
+          {uploading ? t.uploading : t.add_item}
           <input 
             type="file" 
             className="hidden" 
@@ -148,18 +152,18 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
         <div className="p-8 bg-red-50 rounded-2xl border border-red-100 flex flex-col items-center text-center gap-3">
           <AlertCircle className="text-red-500" size={32} />
           <div>
-            <p className="text-red-800 font-bold">アクセスエラー</p>
+            <p className="text-red-800 font-bold">{t.access_error}</p>
             <p className="text-red-600 text-sm">{error}</p>
           </div>
-          <button onClick={loadFiles} className="text-xs font-bold text-red-500 underline decoration-2 underline-offset-4">再試行する</button>
+          <button onClick={loadFiles} className="text-xs font-bold text-red-500 underline decoration-2 underline-offset-4">{t.retry}</button>
         </div>
       ) : files.length === 0 ? (
         <div className="p-12 border-2 border-dashed border-gray-100 rounded-3xl flex flex-col items-center text-center bg-gray-50/30">
           <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
             <File className="text-gray-200" size={32} />
           </div>
-          <p className="text-gray-400 font-medium">この生徒のフォルダは空です</p>
-          <p className="text-xs text-gray-300 mt-1">右上のボタンから書類をアップロードしてください</p>
+          <p className="text-gray-400 font-medium">{t.folder_empty}</p>
+          <p className="text-xs text-gray-300 mt-1">{t.upload_instruction}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -189,12 +193,12 @@ const FileBrowser = ({ folderId, accessToken, studentName, studentId }: FileBrow
                   className="flex-grow py-1.5 bg-gray-50 hover:bg-primary/10 text-gray-600 hover:text-primary rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                 >
                   <ExternalLink size={12} />
-                  開く
+                  {t.open_file}
                 </a>
                 <button 
                   onClick={() => handleDelete(file.id, file.name)}
                   className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                  title="削除"
+                  title={t.delete}
                 >
                   <Trash2 size={14} />
                 </button>

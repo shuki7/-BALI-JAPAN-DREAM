@@ -61,12 +61,14 @@ function Badge({ children, color, bg }: { children: React.ReactNode; color: stri
 }
 
 function StatusBadge({ status }: { status: StudentStatus }) {
+  const { language } = useLanguage();
+  const t = translations[language];
   const m: Record<StudentStatus, [string, string, string]> = {
-    active: ['在籍中', '#166534', '#dcfce7'],
-    departed_japan: ['渡航済', '#1d4ed8', '#dbeafe'],
-    graduated: ['修了', '#92400e', '#fef3c7'],
-    withdrawn: ['退学', '#6b7280', '#f3f4f6'],
-    on_hold: ['保留', '#92400e', '#fef9c3'],
+    active: [t.status_active, '#166534', '#dcfce7'],
+    departed_japan: [t.status_departed, '#1d4ed8', '#dbeafe'],
+    graduated: [t.status_graduated, '#92400e', '#fef3c7'],
+    withdrawn: [t.status_withdrawn, '#6b7280', '#f3f4f6'],
+    on_hold: [t.status_on_hold, '#92400e', '#fef9c3'],
   };
   const [label, color, bg] = m[status];
   return <Badge color={color} bg={bg}>{label}</Badge>;
@@ -99,6 +101,8 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 }
 
 export default function StudentDetail() {
+  const { language } = useLanguage();
+  const t = translations[language];
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAdmin, user } = useAuth();
@@ -186,9 +190,6 @@ export default function StudentDetail() {
   const [showAddLog, setShowAddLog] = useState(false);
   const [addLogData, setAddLogData] = useState({ content: '', date: format(new Date(), 'yyyy-MM-dd') });
 
-  const { language } = useLanguage();
-  const t = translations[language];
-
   const tabLabels: Record<string, string> = {
     basic: t.personal_info,
     family: t.guarantor_info,
@@ -201,8 +202,8 @@ export default function StudentDetail() {
     exams: t.exam_interview,
   };
 
-  if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>読み込み中...</div>;
-  if (!student) return <div style={{ padding: 40, textAlign: 'center', color: '#CC0000' }}>生徒が見つかりません</div>;
+  if (isLoading) return <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>{t.loading}...</div>;
+  if (!student) return <div style={{ padding: 40, textAlign: 'center', color: '#CC0000' }}>{t.student_not_found}</div>;
 
   const saveBasicEdit = () => {
     updateMutation.mutate(editData as any);
@@ -283,7 +284,7 @@ export default function StudentDetail() {
               )}
               {student.photos && student.photos.length > 0 && (
                 <div style={{ fontSize: 11, color: '#888', marginTop: 6, textAlign: 'center' }}>
-                  📷 {student.photos.length}枚
+                  📷 {t.photo_count_format.replace('{count}', student.photos.length.toString())}
                 </div>
               )}
             </div>
@@ -291,34 +292,34 @@ export default function StudentDetail() {
             {/* Info */}
             <div style={{ flex: 1, minWidth: 280 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>個人情報</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{t.personal_info}</h3>
                 <button
                   onClick={() => { setEditModal('basic'); setEditData({ status: student.status, batchNumber: student.batchNumber, notes: student.notes || '' }); }}
                   style={{ padding: '6px 14px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
                 >
-                  編集
+                  {t.edit}
                 </button>
               </div>
-              <InfoRow label="登録番号" value={student.registrationNumber} />
-              <InfoRow label="入学日" value={format(student.enrollmentDate, 'dd/MM/yyyy')} />
-              <InfoRow label="ステータス" value={student.status} />
-              <InfoRow label="プログラム" value={student.programType} />
-              <InfoRow label="性別" value={student.gender === 'male' ? '男性' : '女性'} />
-              <InfoRow label="生年月日" value={format(student.dateOfBirth, 'dd/MM/yyyy')} />
-              <InfoRow label="国籍" value={student.nationality} />
-              <InfoRow label="出生地" value={student.birthPlace} />
-              <InfoRow label="宗教" value={student.religion} />
-              <InfoRow label="NIK" value={student.nik} />
-              <InfoRow label="WhatsApp" value={student.whatsapp ? <a href={`https://wa.me/${student.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{student.whatsapp}</a> : null} />
-              <InfoRow label="メール" value={student.email} />
-              <InfoRow label="住所" value={`${student.address}, ${student.city}, ${student.province}`} />
+              <InfoRow label={t.reg_number} value={student.registrationNumber} />
+              <InfoRow label={t.enroll_date} value={format(student.enrollmentDate, 'dd/MM/yyyy')} />
+              <InfoRow label={t.status} value={t[`status_${student.status}`] || student.status} />
+              <InfoRow label={t.program} value={student.programType} />
+              <InfoRow label={t.gender} value={student.gender === 'male' ? t.male : t.female} />
+              <InfoRow label={t.birth_date} value={format(student.dateOfBirth, 'dd/MM/yyyy')} />
+              <InfoRow label={t.nationality} value={student.nationality} />
+              <InfoRow label={t.birth_place} value={student.birthPlace} />
+              <InfoRow label={t.religion} value={student.religion} />
+              <InfoRow label={t.nik} value={student.nik} />
+              <InfoRow label={t.whatsapp} value={student.whatsapp ? <a href={`https://wa.me/${student.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{student.whatsapp}</a> : null} />
+              <InfoRow label={t.email} value={student.email} />
+              <InfoRow label={t.address} value={`${student.address}, ${student.city}, ${student.province}`} />
             </div>
           </div>
 
           {/* SNS アカウント */}
           {(student.instagramAccount || student.tiktokAccount) && (
             <div style={{ marginTop: 16, background: '#fff', borderRadius: 10, padding: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-              <h3 style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#888', width: '100%' }}>SNS アカウント</h3>
+              <h3 style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#888', width: '100%' }}>{t.sns_accounts}</h3>
               {student.instagramAccount && (
                 <a
                   href={`https://www.instagram.com/${student.instagramAccount.replace(/^@/, '')}`}
@@ -343,29 +344,29 @@ export default function StudentDetail() {
           {/* 学歴・資格 */}
           <div style={{ marginTop: 16, background: '#fff', borderRadius: 10, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>学歴・資格</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{t.edu_qualifications}</h3>
               <button
                 onClick={() => { setEditModal('qualifications'); setEditData({ jlptLevel: student.jlptLevel, jftPassed: student.jftPassed, sswPassed: student.sswPassed, psychotestDone: student.psychotestDone, mcuDone: student.mcuDone }); }}
                 style={{ padding: '6px 14px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
               >
-                編集
+                {t.edit}
               </button>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               <Badge color="#1e40af" bg="#dbeafe">JLPT {student.jlptLevel.toUpperCase()}</Badge>
-              {student.jftPassed && <Badge color="#166534" bg="#dcfce7">JFT 合格</Badge>}
-              {!student.jftPassed && <Badge color="#6b7280" bg="#f3f4f6">JFT 未</Badge>}
-              {student.sswPassed && <Badge color="#166534" bg="#dcfce7">SSW 合格</Badge>}
-              {!student.sswPassed && <Badge color="#6b7280" bg="#f3f4f6">SSW 未</Badge>}
-              {student.psychotestDone && <Badge color="#166534" bg="#dcfce7">心理検査 済</Badge>}
-              {!student.psychotestDone && <Badge color="#6b7280" bg="#f3f4f6">心理検査 未</Badge>}
-              {student.mcuDone && <Badge color="#166534" bg="#dcfce7">健康診断 済</Badge>}
-              {!student.mcuDone && <Badge color="#6b7280" bg="#f3f4f6">健康診断 未</Badge>}
+              {student.jftPassed && <Badge color="#166534" bg="#dcfce7">JFT {t.passed}</Badge>}
+              {!student.jftPassed && <Badge color="#6b7280" bg="#f3f4f6">JFT {t.not_passed}</Badge>}
+              {student.sswPassed && <Badge color="#166534" bg="#dcfce7">SSW {t.passed}</Badge>}
+              {!student.sswPassed && <Badge color="#6b7280" bg="#f3f4f6">SSW {t.not_passed}</Badge>}
+              {student.psychotestDone && <Badge color="#166534" bg="#dcfce7">{t.psychotest} {t.done}</Badge>}
+              {!student.psychotestDone && <Badge color="#6b7280" bg="#f3f4f6">{t.psychotest} {t.not_done}</Badge>}
+              {student.mcuDone && <Badge color="#166534" bg="#dcfce7">{t.mcu} {t.done}</Badge>}
+              {!student.mcuDone && <Badge color="#6b7280" bg="#f3f4f6">{t.mcu} {t.not_done}</Badge>}
             </div>
             <div style={{ marginTop: 12 }}>
-              <InfoRow label="学歴" value={student.educationLevel.toUpperCase()} />
-              <InfoRow label="学校名" value={student.schoolName} />
-              <InfoRow label="卒業年度" value={student.graduationYear?.toString()} />
+              <InfoRow label={t.education_level} value={student.educationLevel.toUpperCase()} />
+              <InfoRow label={t.school_name} value={student.schoolName} />
+              <InfoRow label={t.graduation_year} value={student.graduationYear?.toString()} />
             </div>
           </div>
         </div>
@@ -379,7 +380,7 @@ export default function StudentDetail() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 20 }}>🛡️</span>
-                <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#CC0000' }}>保証人情報</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#CC0000' }}>{t.guarantor_info}</h3>
               </div>
               <button
                 onClick={() => {
@@ -402,28 +403,29 @@ export default function StudentDetail() {
                 }}
                 style={{ padding: '6px 14px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
               >
-                編集
+                {t.edit}
               </button>
             </div>
-            <p style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>※ 保証人として署名された法的責任者</p>
+            <p style={{ fontSize: 11, color: '#888', marginBottom: 14 }}>※ {t.guarantor_desc}</p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 32px' }}>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#CC0000', borderBottom: '1px solid #fecaca', paddingBottom: 4, marginBottom: 10, textTransform: 'uppercase' }}>基本情報</div>
-                <InfoRow label="氏名" value={student.parentName} />
-                <InfoRow label="続柄" value={student.parentRelationship === 'father' ? '父 (Ayah)' : student.parentRelationship === 'mother' ? '母 (Ibu)' : '後見人 (Wali)'} />
-                <InfoRow label="性別" value={(student as any).parentGender === 'male' ? '男性' : (student as any).parentGender === 'female' ? '女性' : undefined} />
-                <InfoRow label="生年月日" value={(student as any).parentDateOfBirth ? format(new Date((student as any).parentDateOfBirth), 'dd/MM/yyyy') : undefined} />
-                <InfoRow label="職業" value={student.parentOccupation} />
-                <InfoRow label="KTP番号 (NIK)" value={(student as any).parentNik} />
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#CC0000', borderBottom: '1px solid #fecaca', paddingBottom: 4, marginBottom: 10, textTransform: 'uppercase' }}>{t.personal_info}</div>
+                <InfoRow label={t.full_name} value={student.parentName} />
+                <InfoRow label={t.relationship} value={student.parentRelationship === 'father' ? t.father : student.parentRelationship === 'mother' ? t.mother : t.guardian} />
+                <InfoRow label={t.gender} value={(student as any).parentGender === 'male' ? t.male : (student as any).parentGender === 'female' ? t.female : undefined} />
+                <InfoRow label={t.birth_date} value={(student as any).parentDateOfBirth ? format(new Date((student as any).parentDateOfBirth), 'dd/MM/yyyy') : undefined} />
+                <InfoRow label={t.occupation} value={student.parentOccupation} />
+                <InfoRow label={t.nik} value={(student as any).parentNik} />
               </div>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#CC0000', borderBottom: '1px solid #fecaca', paddingBottom: 4, marginBottom: 10, textTransform: 'uppercase' }}>連絡先・住所</div>
-                <InfoRow label="WhatsApp" value={student.parentWhatsapp ? <a href={`https://wa.me/${student.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{student.parentWhatsapp}</a> : null} />
-                <InfoRow label="メール" value={(student as any).parentEmail} />
-                <InfoRow label="住所" value={student.parentAddress} />
-                <InfoRow label="市 (Kota)" value={(student as any).parentCity} />
-                <InfoRow label="州 (Provinsi)" value={(student as any).parentProvince} />
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#CC0000', borderBottom: '1px solid #fecaca', paddingBottom: 4, marginBottom: 10, textTransform: 'uppercase' }}>{t.contact_info}</div>
+                <InfoRow label={t.whatsapp} value={student.parentWhatsapp ? <a href={`https://wa.me/${student.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{student.parentWhatsapp}</a> : null} />
+                <InfoRow label={t.email} value={(student as any).parentEmail} />
+                <InfoRow label={t.address} value={student.parentAddress} />
+                <InfoRow label={t.city} value={(student as any).parentCity} />
+                <InfoRow label={t.province} value={(student as any).parentProvince} />
+                <InfoRow label={language === 'ja' ? '入寮日' : 'Tanggal Masuk Asrama'} value={student.dormCheckInDate ? format(student.dormCheckInDate, 'dd/MM/yyyy') : undefined} />
               </div>
             </div>
 
@@ -446,16 +448,16 @@ export default function StudentDetail() {
           <div style={{ background: '#fff', borderRadius: 10, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
               <span style={{ fontSize: 18 }}>🚨</span>
-              <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>緊急連絡先（保証人と別の場合）</h3>
+              <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>{t.emergency_contact_alt}</h3>
             </div>
             {student.emergencyContact ? (
               <>
-                <InfoRow label="氏名" value={student.emergencyContact} />
-                <InfoRow label="続柄" value={(student as any).emergencyRelationship} />
-                <InfoRow label="電話番号" value={student.emergencyPhone} />
+                <InfoRow label={t.full_name} value={student.emergencyContact} />
+                <InfoRow label={t.relationship} value={(student as any).emergencyRelationship} />
+                <InfoRow label={t.phone_number} value={student.emergencyPhone} />
               </>
             ) : (
-              <p style={{ color: '#aaa', fontSize: 13 }}>—（保証人を緊急連絡先として使用）</p>
+              <p style={{ color: '#aaa', fontSize: 13 }}>—（{t.use_guarantor_as_emergency}）</p>
             )}
           </div>
         </div>
@@ -469,7 +471,7 @@ export default function StudentDetail() {
               onClick={() => setShowAddPayment(true)}
               style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              + 支払い記録追加
+              + {t.add_payment_record}
             </button>
           </div>
           {payments.map((p) => (
@@ -477,25 +479,25 @@ export default function StudentDetail() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div>
                   <span style={{ fontWeight: 700, fontSize: 14 }}>
-                    {p.paymentType === 'education' ? '教育費' : p.paymentType === 'job_matching' ? 'JM費' : p.paymentType === 'dormitory' ? '寮費' : 'その他'}
+                    {p.paymentType === 'education' ? t.education_fee : p.paymentType === 'job_matching' ? t.jm_fee : p.paymentType === 'dormitory' ? t.dorm_fee : t.other}
                   </span>
-                  <span style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>{p.paymentMethod === 'lump_sum' ? '一括' : '分割'}</span>
+                  <span style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>{p.paymentMethod === 'lump_sum' ? t.lump_sum_short : t.installment_short}</span>
                 </div>
                 <Badge
                   color={p.paymentStatus === 'paid' ? '#166534' : p.paymentStatus === 'partial' ? '#92400e' : '#991b1b'}
                   bg={p.paymentStatus === 'paid' ? '#dcfce7' : p.paymentStatus === 'partial' ? '#fef3c7' : '#fee2e2'}
                 >
-                  {p.paymentStatus === 'paid' ? '支払済' : p.paymentStatus === 'partial' ? '一部' : '未払い'}
+                  {p.paymentStatus === 'paid' ? t.paid : p.paymentStatus === 'partial' ? t.partial : t.unpaid}
                 </Badge>
               </div>
               <div style={{ display: 'flex', gap: 24, fontSize: 13 }}>
-                <div><span style={{ color: '#888' }}>総額: </span><strong>Rp {p.totalAmount.toLocaleString('id-ID')}</strong></div>
-                <div><span style={{ color: '#888' }}>支払済: </span><strong style={{ color: '#166534' }}>Rp {p.paidAmount.toLocaleString('id-ID')}</strong></div>
-                <div><span style={{ color: '#888' }}>残金: </span><strong style={{ color: '#CC0000' }}>Rp {p.remainingAmount.toLocaleString('id-ID')}</strong></div>
+                <div><span style={{ color: '#888' }}>{t.total_amount}: </span><strong>Rp {p.totalAmount.toLocaleString('id-ID')}</strong></div>
+                <div><span style={{ color: '#888' }}>{t.paid_amount}: </span><strong style={{ color: '#166534' }}>Rp {p.paidAmount.toLocaleString('id-ID')}</strong></div>
+                <div><span style={{ color: '#888' }}>{t.remaining_balance}: </span><strong style={{ color: '#CC0000' }}>Rp {p.remainingAmount.toLocaleString('id-ID')}</strong></div>
               </div>
               {p.paymentType === 'job_matching' && (
                 <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 12, color: '#888', marginBottom: 6 }}>JM段階進捗</div>
+                  <div style={{ fontSize: 12, color: '#888', marginBottom: 6 }}>{t.jm_stage_progress}</div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     {[1, 2, 3].map((stage) => {
                       const paid = stage === 1 ? p.jmStage1Paid : stage === 2 ? p.jmStage2Paid : p.jmStage3Paid;
@@ -510,7 +512,7 @@ export default function StudentDetail() {
               )}
             </div>
           ))}
-          {payments.length === 0 && <div style={{ color: '#aaa', textAlign: 'center', padding: 32 }}>支払い記録がありません</div>}
+          {payments.length === 0 && <div style={{ color: '#aaa', textAlign: 'center', padding: 32 }}>{t.no_payment_records}</div>}
         </div>
       )}
 
@@ -522,25 +524,25 @@ export default function StudentDetail() {
               onClick={() => setShowAddBank(true)}
               style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              + 口座追加
+              + {t.add_account}
             </button>
           </div>
           {bankAccounts.map((a) => (
             <div key={a.id} style={{ background: '#fff', borderRadius: 10, padding: 20, marginBottom: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{a.bankName} {a.isPrimary && <Badge color="#1d4ed8" bg="#dbeafe">主口座</Badge>}</div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{a.bankName} {a.isPrimary && <Badge color="#1d4ed8" bg="#dbeafe">{t.primary_account}</Badge>}</div>
                 <div style={{ fontSize: 13, color: '#555', marginTop: 4 }}>{a.accountNumber} — {a.accountHolder}</div>
-                <div style={{ fontSize: 12, color: '#888' }}>{a.accountType === 'savings' ? '普通' : '当座'}</div>
+                <div style={{ fontSize: 12, color: '#888' }}>{a.accountType === 'savings' ? t.savings : t.current}</div>
               </div>
               <button
-                onClick={() => { if (confirm('削除しますか？')) deleteBankMutation.mutate(a.id); }}
+                onClick={() => { if (confirm(t.confirm_delete)) deleteBankMutation.mutate(a.id); }}
                 style={{ border: 'none', background: '#fee2e2', color: '#991b1b', borderRadius: 6, padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}
               >
-                削除
+                {t.delete}
               </button>
             </div>
           ))}
-          {bankAccounts.length === 0 && <div style={{ color: '#aaa', textAlign: 'center', padding: 32 }}>口座情報がありません</div>}
+          {bankAccounts.length === 0 && <div style={{ color: '#aaa', textAlign: 'center', padding: 32 }}>{t.no_account_data}</div>}
         </div>
       )}
 
@@ -552,18 +554,18 @@ export default function StudentDetail() {
               onClick={() => setShowAddDoc(true)}
               style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              + 書類追加
+              + {t.add_doc}
             </button>
           </div>
           <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>書類種別</th>
-                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>タイトル</th>
-                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>アップロード日</th>
-                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>担保</th>
-                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>操作</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{t.doc_type}</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{t.title}</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{t.upload_date}</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{t.collateral}</th>
+                  <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{t.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -601,7 +603,7 @@ export default function StudentDetail() {
                   );
                 })}
                 {documents.length === 0 && (
-                  <tr><td colSpan={5} style={{ padding: 32, textAlign: 'center', color: '#aaa' }}>書類がありません</td></tr>
+                  <tr><td colSpan={5} style={{ padding: 32, textAlign: 'center', color: '#aaa' }}>{t.no_documents}</td></tr>
                 )}
               </tbody>
             </table>
@@ -613,7 +615,7 @@ export default function StudentDetail() {
       {activeTab === 5 && (
         <div style={{ background: '#fff', borderRadius: 10, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>渡航情報</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{t.departure_info}</h3>
             <button
               onClick={() => {
                 setEditModal('departure');
@@ -627,15 +629,15 @@ export default function StudentDetail() {
               }}
               style={{ padding: '6px 14px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
             >
-              編集
+              {t.edit}
             </button>
           </div>
-          <InfoRow label="出発日" value={student.departureDate ? format(student.departureDate, 'dd/MM/yyyy') : undefined} />
-          <InfoRow label="就職先企業" value={student.destinationCompany} />
-          <InfoRow label="都道府県" value={student.destinationPrefecture} />
-          <InfoRow label="ビザ種別" value={student.visaType} />
-          <InfoRow label="COE発行日" value={student.coeIssueDate ? format(student.coeIssueDate, 'dd/MM/yyyy') : undefined} />
-          <InfoRow label="COE失効日" value={student.coeCancellationDate ? format(student.coeCancellationDate, 'dd/MM/yyyy') : undefined} />
+          <InfoRow label={t.departure_date} value={student.departureDate ? format(student.departureDate, 'dd/MM/yyyy') : undefined} />
+          <InfoRow label={t.destination_company} value={student.destinationCompany} />
+          <InfoRow label={t.prefecture} value={student.destinationPrefecture} />
+          <InfoRow label={t.visa_type} value={student.visaType} />
+          <InfoRow label={t.coe_issue_date} value={student.coeIssueDate ? format(student.coeIssueDate, 'dd/MM/yyyy') : undefined} />
+          <InfoRow label={t.coe_cancel_date} value={student.coeCancellationDate ? format(student.coeCancellationDate, 'dd/MM/yyyy') : undefined} />
 
           <h3 style={{ fontSize: 15, fontWeight: 600, marginTop: 20, marginBottom: 12 }}>試験結果</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -650,14 +652,14 @@ export default function StudentDetail() {
       {/* Tab 6: 備考 */}
       {activeTab === 6 && (
         <div style={{ background: '#fff', borderRadius: 10, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>備考・メモ</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{t.memo}</h3>
           <textarea
             defaultValue={student.notes || ''}
             onBlur={(e) => updateMutation.mutate({ notes: e.target.value })}
             style={{ ...inputStyle, height: 200, resize: 'vertical', fontFamily: 'inherit' }}
-            placeholder="自由にメモを記入できます..."
+            placeholder={t.memo_placeholder}
           />
-          <div style={{ fontSize: 12, color: '#888', marginTop: 8 }}>フォーカスを外すと自動保存されます</div>
+          <div style={{ fontSize: 12, color: '#888', marginTop: 8 }}>{t.auto_save_on_blur}</div>
         </div>
       )}
 
@@ -691,7 +693,7 @@ export default function StudentDetail() {
             ))}
             {logs.length === 0 && (
               <div style={{ padding: 40, textAlign: 'center', color: '#aaa', fontSize: 13 }}>
-                {language === 'ja' ? '日誌がありません' : 'Belum ada catatan buku harian'}
+                {t.no_daily_logs}
               </div>
             )}
           </div>
@@ -782,35 +784,35 @@ export default function StudentDetail() {
 
       {/* Edit Modal: basic */}
       {editModal === 'basic' && (
-        <Modal title="基本情報を編集" onClose={() => setEditModal(null)}>
+        <Modal title={t.edit_personal_info} onClose={() => setEditModal(null)}>
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>ステータス</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.status}</label>
             <select value={String(editData.status || '')} onChange={(e) => setEditData(p => ({ ...p, status: e.target.value }))} style={inputStyle}>
-              <option value="active">在籍中</option>
-              <option value="departed_japan">渡航済</option>
-              <option value="graduated">修了</option>
-              <option value="withdrawn">退学</option>
-              <option value="on_hold">保留</option>
+              <option value="active">{t.status_active}</option>
+              <option value="departed_japan">{t.status_departed}</option>
+              <option value="graduated">{t.status_graduated}</option>
+              <option value="withdrawn">{t.status_withdrawn}</option>
+              <option value="on_hold">{t.status_on_hold}</option>
             </select>
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>バッチ番号</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.batch_number}</label>
             <input type="number" value={String(editData.batchNumber || '')} onChange={(e) => setEditData(p => ({ ...p, batchNumber: Number(e.target.value) }))} style={inputStyle} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
-            <button onClick={saveBasicEdit} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>保存</button>
+            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button onClick={saveBasicEdit} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>{t.save}</button>
           </div>
         </Modal>
       )}
 
       {/* Edit Modal: qualifications */}
       {editModal === 'qualifications' && (
-        <Modal title="資格情報を編集" onClose={() => setEditModal(null)}>
+        <Modal title={t.edit_qualifications} onClose={() => setEditModal(null)}>
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>JLPTレベル</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.jlpt_level}</label>
             <select value={String(editData.jlptLevel || 'none')} onChange={(e) => setEditData(p => ({ ...p, jlptLevel: e.target.value }))} style={inputStyle}>
-              <option value="none">なし</option>
+              <option value="none">{t.none}</option>
               <option value="n5">N5</option>
               <option value="n4">N4</option>
               <option value="n3">N3</option>
@@ -821,40 +823,53 @@ export default function StudentDetail() {
           {(['jftPassed', 'sswPassed', 'psychotestDone', 'mcuDone'] as const).map((field) => (
             <div key={field} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <input type="checkbox" checked={Boolean(editData[field])} onChange={(e) => setEditData(p => ({ ...p, [field]: e.target.checked }))} />
-              <label style={{ fontSize: 13 }}>{field === 'jftPassed' ? 'JFT合格' : field === 'sswPassed' ? 'SSW合格' : field === 'psychotestDone' ? '心理検査済' : '健康診断済'}</label>
+              <label style={{ fontSize: 13 }}>
+                {field === 'jftPassed' ? `JFT ${t.passed}` : 
+                 field === 'sswPassed' ? `SSW ${t.passed}` : 
+                 field === 'psychotestDone' ? `${t.psychotest} ${t.done}` : 
+                 `${t.mcu} ${t.done}`}
+              </label>
             </div>
           ))}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
-            <button onClick={saveBasicEdit} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>保存</button>
+            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button onClick={saveBasicEdit} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>{t.save}</button>
           </div>
         </Modal>
       )}
 
       {/* Edit Modal: family */}
       {editModal === 'family' && (
-        <Modal title="家族情報を編集" onClose={() => setEditModal(null)}>
+        <Modal title={t.edit_family_info} onClose={() => setEditModal(null)}>
           {(['parentName', 'parentWhatsapp', 'parentAddress', 'parentOccupation', 'emergencyContact', 'emergencyPhone'] as const).map((field) => (
             <div key={field} style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{field}</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>
+                {field === 'parentName' ? t.parent_name : 
+                 field === 'parentWhatsapp' ? t.parent_whatsapp : 
+                 field === 'parentAddress' ? t.parent_address : 
+                 field === 'parentOccupation' ? t.parent_occupation : 
+                 field === 'emergencyContact' ? t.emergency_contact : 
+                 t.emergency_phone}
+              </label>
               <input value={String(editData[field] || '')} onChange={(e) => setEditData(p => ({ ...p, [field]: e.target.value }))} style={inputStyle} />
             </div>
           ))}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
-            <button onClick={saveBasicEdit} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>保存</button>
+            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button onClick={saveBasicEdit} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>{t.save}</button>
           </div>
         </Modal>
       )}
 
       {/* Edit Modal: departure */}
       {editModal === 'departure' && (
-        <Modal title="渡航情報を編集" onClose={() => setEditModal(null)}>
+        <Modal title={t.edit_departure_info} onClose={() => setEditModal(null)}>
           {[
-            { field: 'departureDate', label: '出発日', type: 'date' },
-            { field: 'destinationCompany', label: '就職先企業', type: 'text' },
-            { field: 'destinationPrefecture', label: '都道府県', type: 'text' },
-            { field: 'coeIssueDate', label: 'COE発行日', type: 'date' },
+            { field: 'departureDate', label: t.departure_date, type: 'date' },
+            { field: 'destinationCompany', label: t.destination_company, type: 'text' },
+            { field: 'destinationPrefecture', label: t.prefecture, type: 'text' },
+            { field: 'coeIssueDate', label: t.coe_issue_date, type: 'date' },
+            { field: 'dormCheckInDate', label: language === 'ja' ? '入寮日' : 'Tgl Masuk Asrama', type: 'date' },
           ].map(({ field, label, type }) => (
             <div key={field} style={{ marginBottom: 12 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{label}</label>
@@ -862,26 +877,27 @@ export default function StudentDetail() {
             </div>
           ))}
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>ビザ種別</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.visa_type}</label>
             <select value={String(editData.visaType || '')} onChange={(e) => setEditData(p => ({ ...p, visaType: e.target.value }))} style={inputStyle}>
-              <option value="">未定</option>
-              <option value="ssw">特定技能</option>
-              <option value="gijinkoku">技人国</option>
-              <option value="other">その他</option>
+              <option value="">{t.undecided}</option>
+              <option value="ssw">{t.ssw_tokutei_ginou}</option>
+              <option value="gijinkoku">{t.gijinkoku}</option>
+              <option value="other">{t.other}</option>
             </select>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button
               onClick={() => {
                 const data: any = { ...editData };
                 if (data.departureDate) data.departureDate = new Date(data.departureDate);
                 if (data.coeIssueDate) data.coeIssueDate = new Date(data.coeIssueDate);
+                if (data.dormCheckInDate) data.dormCheckInDate = new Date(data.dormCheckInDate);
                 updateMutation.mutate(data);
               }}
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              保存
+              {t.save}
             </button>
           </div>
         </Modal>
@@ -889,37 +905,37 @@ export default function StudentDetail() {
 
       {/* Add Payment Modal */}
       {showAddPayment && (
-        <Modal title="支払い記録追加" onClose={() => setShowAddPayment(false)}>
+        <Modal title={t.add_payment_record} onClose={() => setShowAddPayment(false)}>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>支払種別</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_type}</label>
             <select value={addPaymentData.paymentType} onChange={(e) => setAddPaymentData(p => ({ ...p, paymentType: e.target.value }))} style={inputStyle}>
-              <option value="education">教育費</option>
-              <option value="job_matching">JM費</option>
-              <option value="dormitory">寮費</option>
-              <option value="other">その他</option>
+              <option value="education">{t.education_fee}</option>
+              <option value="job_matching">{t.jm_fee}</option>
+              <option value="dormitory">{t.dorm_fee}</option>
+              <option value="other">{t.other}</option>
             </select>
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>支払方法</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.payment_method}</label>
             <select value={addPaymentData.paymentMethod} onChange={(e) => setAddPaymentData(p => ({ ...p, paymentMethod: e.target.value }))} style={inputStyle}>
-              <option value="lump_sum">一括</option>
-              <option value="installment">分割</option>
+              <option value="lump_sum">{t.lump_sum}</option>
+              <option value="installment">{t.installment}</option>
             </select>
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>総額 (IDR)</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.total_amount} (IDR)</label>
             <input type="number" value={addPaymentData.totalAmount} onChange={(e) => setAddPaymentData(p => ({ ...p, totalAmount: Number(e.target.value) }))} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>支払済額 (IDR)</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.paid_amount} (IDR)</label>
             <input type="number" value={addPaymentData.paidAmount} onChange={(e) => setAddPaymentData(p => ({ ...p, paidAmount: Number(e.target.value) }))} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>備考</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.memo}</label>
             <input value={addPaymentData.notes} onChange={(e) => setAddPaymentData(p => ({ ...p, notes: e.target.value }))} style={inputStyle} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowAddPayment(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button onClick={() => setShowAddPayment(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button
               onClick={() => {
                 const total = addPaymentData.totalAmount;
@@ -941,7 +957,7 @@ export default function StudentDetail() {
               }}
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              保存
+              {t.save}
             </button>
           </div>
         </Modal>
@@ -949,42 +965,42 @@ export default function StudentDetail() {
 
       {/* Add Document Modal */}
       {showAddDoc && (
-        <Modal title="書類追加" onClose={() => setShowAddDoc(false)}>
+        <Modal title={t.add_doc} onClose={() => setShowAddDoc(false)}>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>書類種別</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.doc_type}</label>
             <select value={addDocData.documentType} onChange={(e) => setAddDocData(p => ({ ...p, documentType: e.target.value }))} style={inputStyle}>
-              <option value="diploma_high_school">高校卒業証書</option>
-              <option value="diploma_vocational">職業高校卒業証書</option>
-              <option value="diploma_university">大学卒業証書</option>
-              <option value="transcript">成績証明書</option>
-              <option value="ktp">KTP</option>
-              <option value="kk">KK</option>
-              <option value="passport">パスポート</option>
-              <option value="jlpt_certificate">JLPT合格証</option>
-              <option value="jft_certificate">JFT合格証</option>
-              <option value="ssw_certificate">SSW証明書</option>
-              <option value="psychotest_result">心理検査結果</option>
-              <option value="mcu_result">健康診断結果</option>
-              <option value="job_offer_letter">内定通知書</option>
-              <option value="employment_contract">雇用契約書</option>
-              <option value="coe_document">COE</option>
-              <option value="other">その他</option>
+              <option value="diploma_high_school">{t.doc_diploma_high_school}</option>
+              <option value="diploma_vocational">{t.doc_diploma_vocational}</option>
+              <option value="diploma_university">{t.doc_diploma_university}</option>
+              <option value="transcript">{t.doc_transcript}</option>
+              <option value="ktp">{t.doc_ktp}</option>
+              <option value="kk">{t.doc_kk}</option>
+              <option value="passport">{t.doc_passport}</option>
+              <option value="jlpt_certificate">{t.doc_jlpt}</option>
+              <option value="jft_certificate">{t.doc_jft}</option>
+              <option value="ssw_certificate">{t.doc_ssw}</option>
+              <option value="psychotest_result">{t.doc_psychotest}</option>
+              <option value="mcu_result">{t.doc_mcu}</option>
+              <option value="job_offer_letter">{t.doc_job_offer}</option>
+              <option value="employment_contract">{t.doc_employment_contract}</option>
+              <option value="coe_document">{t.doc_coe}</option>
+              <option value="other">{t.other}</option>
             </select>
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>タイトル</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.title}</label>
             <input value={addDocData.title} onChange={(e) => setAddDocData(p => ({ ...p, title: e.target.value }))} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>Google Drive File ID</label>
-            <input value={addDocData.fileId} onChange={(e) => setAddDocData(p => ({ ...p, fileId: e.target.value }))} style={inputStyle} placeholder="Google DriveのファイルID" />
+            <input value={addDocData.fileId} onChange={(e) => setAddDocData(p => ({ ...p, fileId: e.target.value }))} style={inputStyle} placeholder="Google Drive ID" />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <input type="checkbox" id="isHeld" checked={addDocData.isHeld} onChange={(e) => setAddDocData(p => ({ ...p, isHeld: e.target.checked }))} />
-            <label htmlFor="isHeld" style={{ fontSize: 13 }}>担保として預かり中</label>
+            <label htmlFor="isHeld" style={{ fontSize: 13 }}>{t.held_as_collateral}</label>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowAddDoc(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button onClick={() => setShowAddDoc(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button
               onClick={() => {
                 addDocMutation.mutate({
@@ -1003,7 +1019,7 @@ export default function StudentDetail() {
               }}
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              保存
+              {t.save}
             </button>
           </div>
         </Modal>
@@ -1011,11 +1027,11 @@ export default function StudentDetail() {
 
       {/* Add Bank Modal */}
       {showAddBank && (
-        <Modal title="銀行口座追加" onClose={() => setShowAddBank(false)}>
+        <Modal title={t.add_account} onClose={() => setShowAddBank(false)}>
           {[
-            { field: 'bankName', label: '銀行名', type: 'text' },
-            { field: 'accountNumber', label: '口座番号', type: 'text' },
-            { field: 'accountHolder', label: '名義人', type: 'text' },
+            { field: 'bankName', label: t.bank_name, type: 'text' },
+            { field: 'accountNumber', label: t.account_number, type: 'text' },
+            { field: 'accountHolder', label: t.account_holder, type: 'text' },
           ].map(({ field, label, type }) => (
             <div key={field} style={{ marginBottom: 12 }}>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{label}</label>
@@ -1023,18 +1039,18 @@ export default function StudentDetail() {
             </div>
           ))}
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>口座種別</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.account_type}</label>
             <select value={addBankData.accountType} onChange={(e) => setAddBankData(p => ({ ...p, accountType: e.target.value }))} style={inputStyle}>
-              <option value="savings">普通</option>
-              <option value="current">当座</option>
+              <option value="savings">{t.savings}</option>
+              <option value="current">{t.current}</option>
             </select>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <input type="checkbox" id="isPrimary" checked={addBankData.isPrimary} onChange={(e) => setAddBankData(p => ({ ...p, isPrimary: e.target.checked }))} />
-            <label htmlFor="isPrimary" style={{ fontSize: 13 }}>主口座</label>
+            <label htmlFor="isPrimary" style={{ fontSize: 13 }}>{t.primary_account}</label>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowAddBank(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button onClick={() => setShowAddBank(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button
               onClick={() => {
                 addBankMutation.mutate({
@@ -1050,7 +1066,7 @@ export default function StudentDetail() {
               }}
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              保存
+              {t.save}
             </button>
           </div>
         </Modal>
@@ -1060,7 +1076,7 @@ export default function StudentDetail() {
       {showAddLog && (
         <Modal title={t.add_log} onClose={() => setShowAddLog(false)}>
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{language === 'ja' ? '日付' : 'Tanggal'}</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 5 }}>{t.date}</label>
             <input type="date" value={addLogData.date} onChange={(e) => setAddLogData(p => ({ ...p, date: e.target.value }))} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 14 }}>
@@ -1069,11 +1085,11 @@ export default function StudentDetail() {
               value={addLogData.content}
               onChange={(e) => setAddLogData(p => ({ ...p, content: e.target.value }))}
               style={{ ...inputStyle, height: 150, resize: 'vertical' }}
-              placeholder={language === 'ja' ? '生徒の様子などを記入してください...' : 'Tuliskan perkembangan siswa...'}
+              placeholder={t.log_content_placeholder}
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowAddLog(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button onClick={() => setShowAddLog(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button
               onClick={() => {
                 addLogMutation.mutate({
@@ -1133,7 +1149,7 @@ export default function StudentDetail() {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
-            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button
               onClick={() => {
                 const data: any = { ...editData };
@@ -1145,7 +1161,7 @@ export default function StudentDetail() {
               }}
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              保存
+              {t.save}
             </button>
           </div>
         </Modal>
@@ -1198,7 +1214,7 @@ export default function StudentDetail() {
             })}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
-            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
+            <button onClick={() => setEditModal(null)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button
               onClick={() => {
                 const ivs = (editData.interviews as any[])
@@ -1213,7 +1229,7 @@ export default function StudentDetail() {
               }}
               style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}
             >
-              保存
+              {t.save}
             </button>
           </div>
         </Modal>

@@ -18,6 +18,14 @@ export type VisaType = 'ssw' | 'gijinkoku' | 'other';
 export type CommissionPaymentType = 'to_scouter' | 'to_partner' | 'from_partner';
 export type CommissionPaymentTiming = 'on_enrollment' | 'on_departure' | 'on_job_matching' | 'custom';
 
+export interface YellowCardRecord {
+  id: string;
+  date: Date;
+  reason: string;
+  photoUrls?: string[];
+  issuedBy: string;
+}
+
 export interface Student {
   id: string;
   registrationNumber: string;
@@ -100,6 +108,7 @@ export interface Student {
   interviews?: { date: Date; notes?: string }[];
 
   notes?: string;
+  yellowCards?: YellowCardRecord[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -287,7 +296,7 @@ export interface StaffMember {
   updatedAt: Date;
 }
 
-export interface StudentLog {
+export type StudentLog = {
   id: string;
   studentId: string;
   staffId: string;
@@ -297,3 +306,18 @@ export interface StudentLog {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type InventoryCategory = 'textbook' | 'uniform' | 'other';
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: InventoryCategory;
+  stock: number;
+  unit: string; // e.g., "pcs", "set", "book"
+  minimumStock: number;
+  location?: string;
+  notes?: string;
+  updatedAt: Date;
+}
+

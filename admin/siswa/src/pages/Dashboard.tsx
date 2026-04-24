@@ -19,6 +19,8 @@ const CARD_STYLE = {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const { language } = useLanguage();
+  const t = translations[language];
 
   const { data: students = [] } = useQuery({
     queryKey: ['students'],
@@ -60,8 +62,8 @@ export default function Dashboard() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, gap: 20 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>ダッシュボード</h1>
-          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>BJD生徒管理システム概要</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{t.dashboard}</h1>
+          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>{t.dashboard_desc}</p>
         </div>
         <AnnouncementBoard />
       </div>
@@ -77,34 +79,34 @@ export default function Dashboard() {
       >
         {/* Card 1 */}
         <div style={CARD_STYLE}>
-          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>アクティブ生徒数</div>
+          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>{t.total_active_students}</div>
           <div style={{ fontSize: 36, fontWeight: 700, color: '#CC0000' }}>{activeStudents.length}</div>
-          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>現在在籍中の生徒</div>
+          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{t.currently_enrolled}</div>
         </div>
 
         {/* Card 2 */}
         <div style={CARD_STYLE}>
-          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>最新バッチ在籍</div>
+          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>{t.latest_batch_enrollment}</div>
           <div style={{ fontSize: 36, fontWeight: 700, color: '#CC0000' }}>{currentBatchStudents.length}</div>
-          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Batch {maxBatch} アクティブ</div>
+          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Batch {maxBatch} {t.batch_active}</div>
         </div>
 
         {/* Card 3 */}
         <div style={CARD_STYLE}>
-          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>今月支払い未払い</div>
+          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>{t.unpaid_this_month}</div>
           <div style={{ fontSize: 36, fontWeight: 700, color: unpaidPayments.length > 0 ? '#CC0000' : '#22c55e' }}>
             {unpaidPayments.length}
           </div>
-          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>件の未払い</div>
+          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{unpaidPayments.length} {t.unpaid_count}</div>
         </div>
 
         {/* Card 4 */}
         <div style={CARD_STYLE}>
-          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>出発予定（30日以内）</div>
+          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>{t.departure_within_30_days}</div>
           <div style={{ fontSize: 36, fontWeight: 700, color: upcomingDepartures.length > 0 ? '#f59e0b' : '#22c55e' }}>
             {upcomingDepartures.length}
           </div>
-          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>名が出発予定</div>
+          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{upcomingDepartures.length} {t.departure_count}</div>
         </div>
 
         {/* Card 5: 書類担保 */}
@@ -113,18 +115,18 @@ export default function Dashboard() {
         {/* Card 6: Commission (admin only) */}
         {isAdmin && (
           <div style={CARD_STYLE}>
-            <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>未払いコミッション</div>
+            <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>{t.commissions}</div>
             <div style={{ fontSize: 36, fontWeight: 700, color: unpaidCommissions.length > 0 ? '#CC0000' : '#22c55e' }}>
               {unpaidCommissions.length}
             </div>
-            <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>件の未払い</div>
+            <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{unpaidCommissions.length} {t.unpaid_count}</div>
           </div>
         )}
       </div>
 
       {/* Quick access */}
       <div style={{ background: '#fff', borderRadius: 10, padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 16px' }}>クイックアクセス</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 16px' }}>{t.quick_access}</h2>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button
             onClick={() => navigate('/students/new')}
@@ -139,7 +141,7 @@ export default function Dashboard() {
               cursor: 'pointer',
             }}
           >
-            + 新規生徒登録
+            {t.add_student}
           </button>
           <button
             onClick={() => navigate('/students')}
@@ -154,7 +156,7 @@ export default function Dashboard() {
               cursor: 'pointer',
             }}
           >
-            生徒一覧
+            {t.student_list}
           </button>
           <button
             onClick={() => navigate('/payments')}
@@ -169,14 +171,14 @@ export default function Dashboard() {
               cursor: 'pointer',
             }}
           >
-            支払い管理
+            {t.payment_management}
           </button>
         </div>
       </div>
 
       {/* Recent students */}
       <div style={{ marginTop: 20, background: '#fff', borderRadius: 10, padding: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 16px' }}>最近登録した生徒</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 16px' }}>{t.recent_registered_students}</h2>
         {students.slice(0, 5).map((s) => (
           <div
             key={s.id}
@@ -215,7 +217,7 @@ export default function Dashboard() {
           </div>
         ))}
         {students.length === 0 && (
-          <div style={{ color: '#aaa', fontSize: 13 }}>生徒データがありません</div>
+          <div style={{ color: '#aaa', fontSize: 13 }}>{t.no_student_data}</div>
         )}
       </div>
     </div>
@@ -223,22 +225,26 @@ export default function Dashboard() {
 }
 
 function HeldDocumentsCard() {
+  const { language } = useLanguage();
+  const t = translations[language];
   return (
     <div style={CARD_STYLE}>
-      <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>担保証書預かり中</div>
+      <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>{t.held_documents}</div>
       <div style={{ fontSize: 36, fontWeight: 700, color: '#CC0000' }}>-</div>
-      <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>書類管理で確認</div>
+      <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{t.check_in_documents}</div>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const { language } = useLanguage();
+  const t = translations[language];
   const map: Record<string, { label: string; color: string; bg: string }> = {
-    active: { label: '在籍中', color: '#166534', bg: '#dcfce7' },
-    departed_japan: { label: '渡航済', color: '#1d4ed8', bg: '#dbeafe' },
-    graduated: { label: '修了', color: '#92400e', bg: '#fef3c7' },
-    withdrawn: { label: '退学', color: '#6b7280', bg: '#f3f4f6' },
-    on_hold: { label: '保留', color: '#92400e', bg: '#fef9c3' },
+    active: { label: t.status_active, color: '#166534', bg: '#dcfce7' },
+    departed_japan: { label: t.status_departed, color: '#1d4ed8', bg: '#dbeafe' },
+    graduated: { label: t.status_graduated, color: '#92400e', bg: '#fef3c7' },
+    withdrawn: { label: t.status_withdrawn, color: '#6b7280', bg: '#f3f4f6' },
+    on_hold: { label: t.status_on_hold, color: '#92400e', bg: '#fef9c3' },
   };
   const s = map[status] || { label: status, color: '#333', bg: '#eee' };
   return (
@@ -332,24 +338,24 @@ function AnnouncementBoard() {
               onClick={() => setIsEditing(false)}
               style={{ padding: '4px 12px', fontSize: 12, borderRadius: 4, border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
             >
-              {language === 'ja' ? 'キャンセル' : 'Batal'}
+              {t.cancel}
             </button>
             <button
               onClick={() => mutation.mutate(editContent)}
               style={{ padding: '4px 12px', fontSize: 12, borderRadius: 4, border: 'none', background: '#CC0000', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
             >
-              {language === 'ja' ? '保存' : 'Simpan'}
+              {t.save}
             </button>
           </div>
         </div>
       ) : (
         <div>
           <div style={{ fontSize: 14, color: '#333', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-            {announcement?.content || (language === 'ja' ? 'まだメッセージはありません。' : 'Belum ada pesan.')}
+            {announcement?.content || t.no_message}
           </div>
           {announcement?.updatedAt && (
             <div style={{ fontSize: 10, color: '#999', marginTop: 10, textAlign: 'right' }}>
-              Updated: {format(announcement.updatedAt, 'yyyy/MM/dd HH:mm')}
+              {language === 'ja' ? '更新日' : 'Diperbarui'}: {format(announcement.updatedAt, 'yyyy/MM/dd HH:mm')}
             </div>
           )}
         </div>

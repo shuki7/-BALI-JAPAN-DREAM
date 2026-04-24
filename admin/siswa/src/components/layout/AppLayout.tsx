@@ -10,24 +10,19 @@ const ACTIVE_BG = '#CC0000';
 const TEXT_COLOR = '#e0e0e0';
 const HOVER_BG = 'rgba(255,255,255,0.08)';
 
-interface NavItem {
-  label: string;
-  sublabel: string;
-  path: string;
-  adminOnly?: boolean;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'ダッシュボード', sublabel: 'Dashboard', path: '/dashboard' },
-  { label: '生徒管理', sublabel: 'Siswa', path: '/students' },
-  { label: '支払い管理', sublabel: 'Pembayaran', path: '/payments' },
-  { label: '書類・担保', sublabel: 'Dokumen', path: '/documents' },
-  { label: '提携校・機関', sublabel: 'Mitra', path: '/partners' },
-  { label: 'スカウター', sublabel: 'Scouter', path: '/scouters' },
-  { label: 'スタッフ・先生管理', sublabel: 'Staff & Teachers', path: '/staff' },
-  { label: 'コミッション', sublabel: 'Komisi', path: '/commissions', adminOnly: true },
-  { label: '関連機関', sublabel: 'Organisasi', path: '/organizations' },
-  { label: '設定', sublabel: 'Settings', path: '/settings', adminOnly: true },
+const NAV_ITEMS: { key: keyof typeof translations.ja; path: string; adminOnly?: boolean }[] = [
+  { key: 'dashboard', path: '/dashboard' },
+  { key: 'students', path: '/students' },
+  { key: 'payments', path: '/payments' },
+  { key: 'documents', path: '/documents' },
+  { key: 'discipline', path: '/discipline' },
+  { key: 'partners', path: '/partners' },
+  { key: 'scouters', path: '/scouters' },
+  { key: 'staff', path: '/staff' },
+  { key: 'commissions', path: '/commissions', adminOnly: true },
+  { key: 'organizations', path: '/organizations' },
+  { key: 'inventory', path: '/inventory' },
+  { key: 'settings', path: '/settings', adminOnly: true },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -38,16 +33,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const t = translations[language];
 
   // Translate nav items based on current language
-  const translatedNavItems = NAV_ITEMS.map(item => {
-    const key = item.path.split('/')[1] as keyof typeof t;
-    return {
-      ...item,
-      label: (t[key] as string) || item.label,
-      // sublabel remains the Indonesian text for visual consistency or we can flip it
-    };
-  });
-
-  const visibleItems = translatedNavItems.filter((item) => !item.adminOnly || isAdmin);
+  const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f5f5f5' }}>
@@ -87,6 +73,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <nav style={{ flex: 1, padding: '12px 0' }}>
           {visibleItems.map((item) => {
             const isActive = location.pathname.startsWith(item.path);
+            const label = t[item.key] as string;
+            const sublabel = translations.id[item.key] as string;
             return (
               <button
                 key={item.path}
@@ -112,8 +100,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                 }}
               >
-                <span style={{ fontSize: 13, fontWeight: 600 }}>{item.label}</span>
-                <span style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>{item.sublabel}</span>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>{label}</span>
+                <span style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>{sublabel}</span>
               </button>
             );
           })}
@@ -132,7 +120,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 {appUser.email}
               </div>
               <div style={{ fontSize: 11, color: '#CC0000', marginTop: 2 }}>
-                {appUser.role === 'admin' ? 'Admin' : 'Staff'}
+                {appUser.role === 'admin' ? t.role_admin : t.role_staff}
               </div>
             </div>
           )}
@@ -174,7 +162,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         >
           <div style={{ flex: 1 }}>
             <span style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>
-              {visibleItems.find((i) => location.pathname.startsWith(i.path))?.label || 'BJD管理'}
+              {(() => {
+                const item = visibleItems.find((i) => location.pathname.startsWith(i.path));
+                return item ? (t[item.key] as string) : 'BJD';
+              })()}
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>

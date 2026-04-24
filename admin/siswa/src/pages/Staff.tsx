@@ -129,7 +129,7 @@ export default function Staff() {
     const files = Array.from(e.target.files || []);
     const availableSlots = 5 - (editTarget?.photos?.length || 0) - photos.length;
     if (availableSlots <= 0) {
-      alert(language === 'ja' ? '写真は最大5枚までです。' : 'Maksimal 5 foto.');
+      alert(t.max_photos_limit);
       return;
     }
 
@@ -146,7 +146,7 @@ export default function Staff() {
 
   const handleSave = async () => {
     setSubmitting(true);
-    setUploadProgress(language === 'ja' ? '準備中...' : 'Menyiapkan...');
+    setUploadProgress(t.preparing);
     
     try {
       let finalPhotos = editTarget?.photos || [];
@@ -155,7 +155,7 @@ export default function Staff() {
 
       // Upload new photos to GDrive if token exists
       if (googleToken && photos.length > 0) {
-        setUploadProgress(language === 'ja' ? '写真をアップロード中...' : 'Mengunggah foto...');
+        setUploadProgress(t.uploading_photos);
         const drive = new GDriveService(googleToken);
         const rootId = import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID;
         
@@ -174,7 +174,7 @@ export default function Staff() {
 
       // Upload contract if changed
       if (googleToken && contractFile) {
-        setUploadProgress(language === 'ja' ? '契約書をアップロード中...' : 'Mengunggah kontrak...');
+        setUploadProgress(t.uploading_contract);
         const drive = new GDriveService(googleToken);
         const rootId = import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID;
         
@@ -230,10 +230,10 @@ export default function Staff() {
   };
 
   const roleLabels = {
-    staff: language === 'ja' ? 'スタッフ' : 'Staf',
-    teacher: language === 'ja' ? '先生' : 'Guru',
-    management: language === 'ja' ? 'マネジメント' : 'Manajemen',
-    other: language === 'ja' ? 'その他' : 'Lainnya',
+    staff: t.role_staff,
+    teacher: t.role_teacher,
+    management: t.role_management,
+    other: t.role_other,
   };
 
   return (
@@ -241,28 +241,28 @@ export default function Staff() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{t.staff_management}</h1>
-          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>{language === 'ja' ? 'スタッフ・講師一覧' : 'Daftar staf & guru'} — {staff.length}{language === 'ja' ? '名' : ' orang'}</p>
+          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>{t.staff_list_desc} — {staff.length} {t.students_unit}</p>
         </div>
         <button onClick={openAdd} style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>
-          + {language === 'ja' ? 'スタッフ追加' : 'Tambah Staf'}
+          + {t.add_staff}
         </button>
       </div>
 
       <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
         {isLoading ? (
-          <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>{language === 'ja' ? '読み込み中...' : 'Memuat...'}</div>
+          <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>{t.loading}</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                 {[
-                  language === 'ja' ? '氏名' : 'Nama',
-                  language === 'ja' ? '役割' : 'Peran',
-                  language === 'ja' ? '専門/担当' : 'Spesialisasi',
-                  language === 'ja' ? '連絡先' : 'Kontak',
-                  language === 'ja' ? '入社日' : 'Tgl Masuk',
-                  language === 'ja' ? '状態' : 'Status',
-                  language === 'ja' ? '操作' : 'Aksi'
+                  t.name,
+                  t.role,
+                  t.specialty_assignment,
+                  t.contact,
+                  t.joined_date,
+                  t.state,
+                  t.actions
                 ].map((h) => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{h}</th>
                 ))}
@@ -299,19 +299,19 @@ export default function Staff() {
                   </td>
                   <td style={{ padding: '10px 16px' }}>
                     <span style={{ padding: '2px 10px', borderRadius: 99, fontSize: 11, fontWeight: 600, color: s.isActive ? '#166534' : '#6b7280', background: s.isActive ? '#dcfce7' : '#f3f4f6' }}>
-                      {s.isActive ? (language === 'ja' ? 'アクティブ' : 'Aktif') : (language === 'ja' ? '非アクティブ' : 'Nonaktif')}
+                      {s.isActive ? t.status_active : t.status_inactive}
                     </span>
                   </td>
                   <td style={{ padding: '10px 16px' }}>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => openEdit(s)} style={{ padding: '4px 10px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, fontSize: 11, cursor: 'pointer' }}>{language === 'ja' ? '編集' : 'Edit'}</button>
-                      <button onClick={() => { if (confirm(language === 'ja' ? '削除しますか？' : 'Hapus staf ini?')) deleteMutation.mutate(s.id); }} style={{ padding: '4px 10px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#991b1b' }}>{t.delete}</button>
+                      <button onClick={() => openEdit(s)} style={{ padding: '4px 10px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, fontSize: 11, cursor: 'pointer' }}>{t.edit}</button>
+                      <button onClick={() => { if (confirm(t.confirm_delete)) deleteMutation.mutate(s.id); }} style={{ padding: '4px 10px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#991b1b' }}>{t.delete}</button>
                     </div>
                   </td>
                 </tr>
               ))}
               {staff.length === 0 && (
-                <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: '#aaa' }}>{language === 'ja' ? 'データがありません' : 'Tidak ada data'}</td></tr>
+                <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: '#aaa' }}>{t.no_student_data}</td></tr>
               )}
             </tbody>
           </table>
@@ -319,18 +319,18 @@ export default function Staff() {
       </div>
 
       {showModal && (
-        <Modal title={editTarget ? (language === 'ja' ? 'スタッフを編集' : 'Edit Staf') : (language === 'ja' ? 'スタッフを追加' : 'Tambah Staf')} onClose={() => setShowModal(false)}>
+        <Modal title={editTarget ? t.edit_staff : t.add_staff} onClose={() => setShowModal(false)}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '氏名 *' : 'Nama Lengkap *'}</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.name} *</label>
               <input type="text" value={form.fullName} onChange={(e) => setForm(p => ({ ...p, fullName: e.target.value }))} style={inputStyle} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? 'フリガナ' : 'Furigana'}</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.furigana}</label>
               <input type="text" value={form.fullNameKana} onChange={(e) => setForm(p => ({ ...p, fullNameKana: e.target.value }))} style={inputStyle} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '役割' : 'Peran'}</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.role}</label>
               <select value={form.role} onChange={(e) => setForm(p => ({ ...p, role: e.target.value as StaffMember['role'] }))} style={inputStyle}>
                 <option value="staff">{roleLabels.staff}</option>
                 <option value="teacher">{roleLabels.teacher}</option>
@@ -339,11 +339,11 @@ export default function Staff() {
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '専門/担当' : 'Spesialisasi'}</label>
-              <input type="text" value={form.specialty} placeholder="例: 日本語講師" onChange={(e) => setForm(p => ({ ...p, specialty: e.target.value }))} style={inputStyle} />
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.specialty_assignment}</label>
+              <input type="text" value={form.specialty} placeholder={t.specialty_placeholder} onChange={(e) => setForm(p => ({ ...p, specialty: e.target.value }))} style={inputStyle} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '電話番号' : 'No. Telepon'}</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.phone_number}</label>
               <input type="text" value={form.phone} onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))} style={inputStyle} />
             </div>
             <div>
@@ -351,7 +351,7 @@ export default function Staff() {
               <input type="text" value={form.whatsapp} onChange={(e) => setForm(p => ({ ...p, whatsapp: e.target.value }))} style={inputStyle} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? 'メール' : 'Email'}</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.email}</label>
               <input type="email" value={form.email} onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} />
             </div>
 
@@ -362,12 +362,12 @@ export default function Staff() {
               <input type="date" value={form.contractDate} onChange={(e) => setForm(p => ({ ...p, contractDate: e.target.value }))} style={inputStyle} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '入社日' : 'Tanggal Masuk'}</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.joined_date}</label>
               <input type="date" value={form.joinedDate} onChange={(e) => setForm(p => ({ ...p, joinedDate: e.target.value }))} style={inputStyle} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.contract_period}</label>
-              <input type="text" value={form.contractPeriod} placeholder="例: 1年" onChange={(e) => setForm(p => ({ ...p, contractPeriod: e.target.value }))} style={inputStyle} />
+              <input type="text" value={form.contractPeriod} placeholder={t.contract_period_placeholder} onChange={(e) => setForm(p => ({ ...p, contractPeriod: e.target.value }))} style={inputStyle} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.salary} (IDR)</label>
@@ -432,7 +432,7 @@ export default function Staff() {
               {editTarget?.contractFileUrl && (
                 <div style={{ marginBottom: 8, fontSize: 12 }}>
                   <a href={editTarget.contractFileUrl} target="_blank" rel="noreferrer" style={{ color: '#CC0000', textDecoration: 'underline' }}>
-                    📄 {language === 'ja' ? '現在の契約書を表示' : 'Lihat kontrak saat ini'}
+                    📄 {t.view_current_contract}
                   </a>
                 </div>
               )}
@@ -447,21 +447,21 @@ export default function Staff() {
             </div>
             
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? 'メモ' : 'Catatan'}</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.notes}</label>
               <textarea value={form.notes} onChange={(e) => setForm(p => ({ ...p, notes: e.target.value }))} style={{ ...inputStyle, height: 60, resize: 'vertical' }} />
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16 }}>
             <input type="checkbox" id="staffActive" checked={form.isActive} onChange={(e) => setForm(p => ({ ...p, isActive: e.target.checked }))} />
-            <label htmlFor="staffActive" style={{ fontSize: 13 }}>{language === 'ja' ? 'アクティブ' : 'Aktif'}</label>
+            <label htmlFor="staffActive" style={{ fontSize: 13 }}>{t.status_active}</label>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 24 }}>
             {uploadProgress && <span style={{ fontSize: 12, color: '#666' }}>{uploadProgress}</span>}
             <button onClick={() => setShowModal(false)} disabled={submitting} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
             <button onClick={handleSave} disabled={submitting} style={{ padding: '8px 24px', background: submitting ? '#aaa' : '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer' }}>
-              {submitting ? (language === 'ja' ? '保存中...' : 'Menyimpan...') : t.save}
+              {submitting ? t.saving : t.save}
             </button>
           </div>
         </Modal>

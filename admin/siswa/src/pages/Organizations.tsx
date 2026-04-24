@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrganizations, addOrganization, updateOrganization, deleteOrganization } from '../lib/firestore';
 import type { Organization, OrgType } from '../lib/types';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
 
 const inputStyle = {
   width: '100%',
@@ -30,14 +32,6 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-const orgTypeLabel: Record<OrgType, string> = {
-  registered_support_org: '登録支援機関',
-  university_jp: '日本の大学',
-  financial_institution: '金融機関',
-  immigration: '入国管理局',
-  other: 'その他',
-};
-
 const emptyForm = {
   orgType: 'registered_support_org' as OrgType,
   orgName: '',
@@ -55,12 +49,22 @@ const emptyForm = {
 };
 
 export default function Organizations() {
+  const { language } = useLanguage();
+  const t = translations[language];
   const queryClient = useQueryClient();
   const { data: orgs = [], isLoading } = useQuery({ queryKey: ['organizations'], queryFn: getOrganizations });
 
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState<Organization | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  const orgTypeLabel: Record<OrgType, string> = {
+    registered_support_org: t.registered_support_org,
+    university_jp: t.university_jp,
+    financial_institution: t.financial_institution,
+    immigration: t.immigration,
+    other: t.other,
+  };
 
   const addMutation = useMutation({
     mutationFn: (data: Omit<Organization, 'id'>) => addOrganization(data),
@@ -131,16 +135,16 @@ export default function Organizations() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>関連機関</h1>
-          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>Organisasi Terkait — {orgs.length}件</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{t.related_orgs}</h1>
+          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>{t.org_count.replace('{count}', orgs.length.toString())}</p>
         </div>
         <button onClick={openAdd} style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>
-          + 機関追加
+          + {t.add_org}
         </button>
       </div>
 
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>読み込み中...</div>
+        <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>{t.loading}...</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
           {orgs.map((o) => (
@@ -157,46 +161,46 @@ export default function Organizations() {
               <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>{o.country}</div>
               {o.contactPersonName && (
                 <div style={{ fontSize: 13, color: '#555', marginBottom: 4 }}>
-                  担当: {o.contactPersonName} {o.contactPersonTitle && `(${o.contactPersonTitle})`}
+                  {t.contact}: {o.contactPersonName} {o.contactPersonTitle && `(${o.contactPersonTitle})`}
                 </div>
               )}
               {o.contactPhone && <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>{o.contactPhone}</div>}
               {o.contactEmail && <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>{o.contactEmail}</div>}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ padding: '2px 10px', borderRadius: 99, fontSize: 11, fontWeight: 600, color: o.isActive ? '#166534' : '#6b7280', background: o.isActive ? '#dcfce7' : '#f3f4f6' }}>
-                  {o.isActive ? 'アクティブ' : '非アクティブ'}
+                  {o.isActive ? t.status_active : t.status_inactive}
                 </span>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => openEdit(o)} style={{ padding: '5px 12px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 5, fontSize: 12, cursor: 'pointer' }}>編集</button>
+                  <button onClick={() => openEdit(o)} style={{ padding: '5px 12px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 5, fontSize: 12, cursor: 'pointer' }}>{t.edit}</button>
                   <button
-                    onClick={() => { if (confirm('削除しますか？')) deleteMutation.mutate(o.id); }}
+                    onClick={() => { if (confirm(t.confirm_delete)) deleteMutation.mutate(o.id); }}
                     style={{ padding: '5px 12px', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 5, fontSize: 12, cursor: 'pointer', color: '#991b1b' }}
                   >
-                    削除
+                    {t.delete}
                   </button>
                 </div>
               </div>
             </div>
           ))}
           {orgs.length === 0 && (
-            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: '#aaa' }}>関連機関がありません</div>
+            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: '#aaa' }}>{t.no_orgs}</div>
           )}
         </div>
       )}
 
       {showModal && (
-        <Modal title={editTarget ? '機関を編集' : '機関を追加'} onClose={() => setShowModal(false)}>
+        <Modal title={editTarget ? t.edit_org : t.add_org} onClose={() => setShowModal(false)}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {[
-              { field: 'orgName', label: '機関名 *', type: 'text' },
-              { field: 'orgNameId', label: '機関名 (インドネシア語)', type: 'text' },
-              { field: 'country', label: '国', type: 'text' },
-              { field: 'address', label: '住所', type: 'text' },
-              { field: 'contactPersonName', label: '担当者名', type: 'text' },
-              { field: 'contactPersonTitle', label: '担当者役職', type: 'text' },
-              { field: 'contactPhone', label: '電話番号', type: 'text' },
-              { field: 'contactEmail', label: 'メール', type: 'email' },
-              { field: 'registrationNumber', label: '登録番号', type: 'text' },
+              { field: 'orgName', label: `${t.org_name} *`, type: 'text' },
+              { field: 'orgNameId', label: `${t.org_name} (${t.indonesian})`, type: 'text' },
+              { field: 'country', label: t.country, type: 'text' },
+              { field: 'address', label: t.address, type: 'text' },
+              { field: 'contactPersonName', label: t.contact_person, type: 'text' },
+              { field: 'contactPersonTitle', label: t.position, type: 'text' },
+              { field: 'contactPhone', label: t.phone_number, type: 'text' },
+              { field: 'contactEmail', label: t.email, type: 'email' },
+              { field: 'registrationNumber', label: t.registration_number, type: 'text' },
             ].map(({ field, label, type }) => (
               <div key={field}>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{label}</label>
@@ -204,27 +208,27 @@ export default function Organizations() {
               </div>
             ))}
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>種別</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.type}</label>
               <select value={form.orgType} onChange={(e) => setForm(p => ({ ...p, orgType: e.target.value as OrgType }))} style={inputStyle}>
-                <option value="registered_support_org">登録支援機関</option>
-                <option value="university_jp">日本の大学</option>
-                <option value="financial_institution">金融機関</option>
-                <option value="immigration">入国管理局</option>
-                <option value="other">その他</option>
+                <option value="registered_support_org">{t.registered_support_org}</option>
+                <option value="university_jp">{t.university_jp}</option>
+                <option value="financial_institution">{t.financial_institution}</option>
+                <option value="immigration">{t.immigration}</option>
+                <option value="other">{t.other}</option>
               </select>
             </div>
           </div>
           <div style={{ marginTop: 12 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>契約詳細</label>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#555', marginBottom: 4 }}>{t.contract_details}</label>
             <textarea value={form.contractDetails} onChange={(e) => setForm(p => ({ ...p, contractDetails: e.target.value }))} style={{ ...inputStyle, height: 80, resize: 'vertical', fontFamily: 'inherit' }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <input type="checkbox" id="orgActive" checked={form.isActive} onChange={(e) => setForm(p => ({ ...p, isActive: e.target.checked }))} />
-            <label htmlFor="orgActive" style={{ fontSize: 13 }}>アクティブ</label>
+            <label htmlFor="orgActive" style={{ fontSize: 13 }}>{t.status_active}</label>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-            <button onClick={() => setShowModal(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>キャンセル</button>
-            <button onClick={handleSave} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>保存</button>
+            <button onClick={() => setShowModal(false)} style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 6, cursor: 'pointer' }}>{t.cancel}</button>
+            <button onClick={handleSave} style={{ padding: '8px 20px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>{t.save}</button>
           </div>
         </Modal>
       )}

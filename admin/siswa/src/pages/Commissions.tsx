@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
+import { format } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCommissionPayments, addCommissionPayment, updateCommissionPayment, getStudents, getScouters, getPartners } from '../lib/firestore';
-import { format } from 'date-fns';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
 import type { CommissionPaymentType } from '../lib/types';
 
 const inputStyle = {
@@ -33,6 +35,8 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 
 export default function Commissions() {
   const queryClient = useQueryClient();
+  const { language } = useLanguage();
+  const t = translations[language];
   const { data: commissions = [], isLoading } = useQuery({ queryKey: ['commissions'], queryFn: getCommissionPayments });
   const { data: students = [] } = useQuery({ queryKey: ['students'], queryFn: getStudents });
   const { data: scouters = [] } = useQuery({ queryKey: ['scouters'], queryFn: getScouters });
@@ -94,11 +98,14 @@ export default function Commissions() {
     return partnerMap[c.recipientId] || c.recipientId;
   };
 
-  const typeLabel = (t: CommissionPaymentType) => ({
-    to_scouter: 'スカウターへ',
-    to_partner: 'パートナーへ',
-    from_partner: 'パートナーから',
-  }[t]);
+  const typeLabel = (ty: CommissionPaymentType) => {
+    const labels: Record<string, string> = {
+      to_scouter: language === 'ja' ? 'スカウターへ' : 'Ke Scouter',
+      to_partner: language === 'ja' ? 'パートナーへ' : 'Ke Mitra',
+      from_partner: language === 'ja' ? 'パートナーから' : 'Dari Mitra',
+    };
+    return labels[ty] || ty;
+  };
 
   const totalUnpaid = filtered.filter((c) => !c.isPaid).reduce((a, c) => a + c.amount, 0);
 
@@ -106,38 +113,38 @@ export default function Commissions() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>コミッション管理</h1>
-          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>未払い合計: Rp {totalUnpaid.toLocaleString('id-ID')}</p>
+          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{language === 'ja' ? 'コミッション管理' : 'Manajemen Komisi'}</h1>
+          <p style={{ color: '#666', marginTop: 4, fontSize: 13 }}>{language === 'ja' ? '未払い合計' : 'Total Belum Bayar'}: Rp {totalUnpaid.toLocaleString('id-ID')}</p>
         </div>
         <button onClick={() => setShowAdd(true)} style={{ padding: '8px 18px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, cursor: 'pointer' }}>
-          + コミッション追加
+          + {language === 'ja' ? 'コミッション追加' : 'Tambah Komisi'}
         </button>
       </div>
 
       {/* Filters */}
       <div style={{ background: '#fff', borderRadius: 10, padding: '14px 20px', marginBottom: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', display: 'flex', gap: 12 }}>
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)} style={{ ...inputStyle, maxWidth: 200 }}>
-          <option value="">全種別</option>
-          <option value="to_scouter">スカウターへ</option>
-          <option value="to_partner">パートナーへ</option>
-          <option value="from_partner">パートナーから</option>
+          <option value="">{language === 'ja' ? '全種別' : 'Semua Tipe'}</option>
+          <option value="to_scouter">{language === 'ja' ? 'スカウターへ' : 'Ke Scouter'}</option>
+          <option value="to_partner">{language === 'ja' ? 'パートナーへ' : 'Ke Mitra'}</option>
+          <option value="from_partner">{language === 'ja' ? 'パートナーから' : 'Dari Mitra'}</option>
         </select>
         <select value={filterPaid} onChange={(e) => setFilterPaid(e.target.value)} style={{ ...inputStyle, maxWidth: 180 }}>
-          <option value="">全ステータス</option>
-          <option value="paid">支払済</option>
-          <option value="unpaid">未払い</option>
+          <option value="">{language === 'ja' ? '全ステータス' : 'Semua Status'}</option>
+          <option value="paid">{language === 'ja' ? '支払済' : 'Lunas'}</option>
+          <option value="unpaid">{language === 'ja' ? '未払い' : 'Belum Bayar'}</option>
         </select>
       </div>
 
       {/* Table */}
       <div style={{ background: '#fff', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
         {isLoading ? (
-          <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>読み込み中...</div>
+          <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>{t.loading}</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
-                {['種別', '受取人', '対象生徒', '金額', '通貨', '支払日', 'ステータス', '操作'].map((h) => (
+                {[language === 'ja' ? '種別' : 'Tipe', language === 'ja' ? '受取人' : 'Penerima', language === 'ja' ? '対象生徒' : 'Siswa', language === 'ja' ? '金額' : 'Nominal', language === 'ja' ? '通貨' : 'Mata Uang', language === 'ja' ? '支払日' : 'Tgl Bayar', t.status, language === 'ja' ? '操作' : 'Aksi'].map((h) => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280' }}>{h}</th>
                 ))}
               </tr>
@@ -164,7 +171,7 @@ export default function Commissions() {
                       color: c.isPaid ? '#166534' : '#991b1b',
                       background: c.isPaid ? '#dcfce7' : '#fee2e2',
                     }}>
-                      {c.isPaid ? '支払済' : '未払い'}
+                      {c.isPaid ? (language === 'ja' ? '支払済' : 'Lunas') : (language === 'ja' ? '未払い' : 'Belum Bayar')}
                     </span>
                   </td>
                   <td style={{ padding: '10px 16px' }}>
@@ -173,14 +180,14 @@ export default function Commissions() {
                         onClick={() => markPaidMutation.mutate({ id: c.id })}
                         style={{ padding: '4px 12px', background: '#dcfce7', border: '1px solid #86efac', borderRadius: 4, fontSize: 11, cursor: 'pointer', color: '#166534', fontWeight: 600 }}
                       >
-                        支払い完了
+                        {language === 'ja' ? '支払済にする' : 'Tandai Lunas'}
                       </button>
                     )}
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={8} style={{ padding: 40, textAlign: 'center', color: '#aaa' }}>コミッションデータがありません</td></tr>
+                <tr><td colSpan={8} style={{ padding: 40, textAlign: 'center', color: '#aaa' }}>{language === 'ja' ? 'コミッションデータがありません' : 'Tidak ada data komisi'}</td></tr>
               )}
             </tbody>
           </table>
@@ -188,9 +195,9 @@ export default function Commissions() {
       </div>
 
       {showAdd && (
-        <Modal title="コミッション追加" onClose={() => setShowAdd(false)}>
+        <Modal title={language === 'ja' ? 'コミッション追加' : 'Tambah Komisi'} onClose={() => setShowAdd(false)}>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>種別</label>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 4 }}>{language === 'ja' ? '種別' : 'Tipe'}</label>
             <select value={addData.commissionType} onChange={(e) => {
               const t = e.target.value as CommissionPaymentType;
               setAddData(p => ({ ...p, commissionType: t, recipientType: t === 'to_scouter' ? 'scouter' : 'partner' }));

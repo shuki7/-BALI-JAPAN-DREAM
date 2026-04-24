@@ -467,3 +467,40 @@ export async function updateAnnouncement(content: string): Promise<void> {
     updatedAt: new Date(),
   }, { merge: true });
 }
+
+// =================== Inventory ===================
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function convertInventoryItem(id: string, data: any): any {
+  return {
+    ...data,
+    id,
+    updatedAt: toDate(data.updatedAt),
+  };
+}
+
+export async function getInventory(): Promise<any[]> {
+  const q = query(collection(db, 'inventory'), orderBy('category', 'asc'), orderBy('name', 'asc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => convertInventoryItem(d.id, d.data()));
+}
+
+export async function addInventoryItem(data: any): Promise<string> {
+  const ref = await addDoc(collection(db, 'inventory'), {
+    ...data,
+    updatedAt: new Date(),
+  });
+  return ref.id;
+}
+
+export async function updateInventoryItem(id: string, data: any): Promise<void> {
+  await updateDoc(doc(db, 'inventory', id), {
+    ...data,
+    updatedAt: new Date(),
+  });
+}
+
+export async function deleteInventoryItem(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'inventory', id));
+}
+

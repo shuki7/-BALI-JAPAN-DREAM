@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { activityService } from '../lib/activityService';
 import type { Activity } from '../types/activity';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
 import { 
   UserPlus, 
   UserMinus, 
@@ -12,6 +14,8 @@ import {
 } from 'lucide-react';
 
 const ActivityList = () => {
+  const { language } = useLanguage();
+  const t = translations[language];
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,20 +51,29 @@ const ActivityList = () => {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (minutes < 1) return 'たった今';
-    if (minutes < 60) return `${minutes}分前`;
-    if (hours < 24) return `${hours}時間前`;
-    return `${days}日前`;
+    if (minutes < 1) return t.just_now;
+    if (minutes < 60) return `${minutes}${t.minutes_ago}`;
+    if (hours < 24) return `${hours}${t.hours_ago}`;
+    return `${days}${t.days_ago}`;
   };
 
   const getMessage = (activity: Activity) => {
+    const name = activity.studentName;
+    const file = activity.fileName;
+
     switch (activity.type) {
-      case 'student_added': return <span>生徒 <b>{activity.studentName}</b> を登録しました</span>;
-      case 'student_updated': return <span>生徒 <b>{activity.studentName}</b> の情報を更新しました</span>;
-      case 'student_deleted': return <span>生徒 <b>{activity.studentName}</b> を削除しました</span>;
-      case 'file_uploaded': return <span><b>{activity.studentName}</b> に書類 「{activity.fileName}」 を追加しました</span>;
-      case 'file_deleted': return <span><b>{activity.studentName}</b> の書類 「{activity.fileName}」 を削除しました</span>;
-      default: return <span>不明な操作が発生しました</span>;
+      case 'student_added': 
+        return <span dangerouslySetInnerHTML={{ __html: t.activity_student_added.replace('{name}', name) }} />;
+      case 'student_updated': 
+        return <span dangerouslySetInnerHTML={{ __html: t.activity_student_updated.replace('{name}', name) }} />;
+      case 'student_deleted': 
+        return <span dangerouslySetInnerHTML={{ __html: t.activity_student_deleted.replace('{name}', name) }} />;
+      case 'file_uploaded': 
+        return <span dangerouslySetInnerHTML={{ __html: t.activity_file_uploaded.replace('{name}', name).replace('{file}', file || '') }} />;
+      case 'file_deleted': 
+        return <span dangerouslySetInnerHTML={{ __html: t.activity_file_deleted.replace('{name}', name).replace('{file}', file || '') }} />;
+      default: 
+        return <span>{t.unknown_operation}</span>;
     }
   };
 
@@ -76,7 +89,7 @@ const ActivityList = () => {
     return (
       <div className="flex flex-col items-center justify-center h-40 text-gray-300">
         <Clock size={32} className="opacity-20 mb-2" />
-        <p className="text-xs font-medium">アクティビティがありません</p>
+        <p className="text-xs font-medium">{t.no_activities}</p>
       </div>
     );
   }

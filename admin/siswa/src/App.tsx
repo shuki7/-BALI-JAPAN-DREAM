@@ -16,6 +16,8 @@ import Documents from './pages/Documents';
 import Organizations from './pages/Organizations';
 import Settings from './pages/Settings';
 import Staff from './pages/Staff';
+import Inventory from './pages/Inventory';
+import Discipline from './pages/Discipline';
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ function ProtectedRoutes() {
         <Route path="/commissions" element={<Commissions />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/organizations" element={<Organizations />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/discipline" element={<Discipline />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />

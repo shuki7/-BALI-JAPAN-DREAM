@@ -1,5 +1,8 @@
 import React from 'react';
-import { Users, LayoutDashboard, Settings, LogOut, FileText, Image as ImageIcon } from 'lucide-react';
+import { Users, LayoutDashboard, Settings, LogOut, FileText, Package, AlertTriangle, School, UserCheck, Briefcase, Building2 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../translations';
+import { useAuth } from '../context/AuthContext';
 
 interface SidebarProps {
   activeTab: string;
@@ -8,13 +11,28 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) => {
+  const { language } = useLanguage();
+  const { isAdmin } = useAuth();
+  const t = translations[language];
+
   const menuItems = [
-    { id: 'dashboard', label: 'ダッシュボード', icon: LayoutDashboard },
-    { id: 'students', label: '生徒管理', icon: Users },
-    { id: 'documents', label: '書類管理', icon: FileText },
-    { id: 'images', label: '画像管理', icon: ImageIcon },
-    { id: 'settings', label: '設定', icon: Settings },
+    { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+    { id: 'students', label: t.students, icon: Users },
+    { id: 'payments', label: t.payments, icon: FileText },
+    { id: 'documents', label: t.documents, icon: FileText },
+    { id: 'discipline', label: t.discipline, icon: AlertTriangle },
+    { id: 'partners', label: t.partners, icon: School },
+    { id: 'scouters', label: t.scouters, icon: UserCheck },
+    { id: 'commissions', label: t.commissions, icon: Briefcase },
+    { id: 'inventory', label: t.inventory, icon: Package },
+    { id: 'organizations', label: t.organizations, icon: Building2 },
+    { id: 'settings', label: t.settings, icon: Settings },
   ];
+
+  // Filter out admin-only items if needed, or just keep them all for now
+  const visibleItems = isAdmin ? menuItems : menuItems.filter(item => 
+    ['dashboard', 'students', 'documents', 'discipline', 'settings'].includes(item.id)
+  );
 
   return (
     <aside style={{
@@ -43,14 +61,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) 
           }}>BJD</div>
           <div>
             <div style={{ color: '#ffffff', fontWeight: 800, fontSize: '14px', letterSpacing: '0.05em' }}>BJD SISWA</div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>管理システム</div>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
+              {language === 'ja' ? '管理システム' : 'Sistem Manajemen'}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Nav */}
       <nav style={{ flex: 1, padding: '12px 8px', overflowY: 'auto' }}>
-        {menuItems.map((item) => {
+        {visibleItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
             <button
@@ -106,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout }) 
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)'; }}
         >
           <LogOut size={18} />
-          <span>ログアウト</span>
+          <span>{t.logout}</span>
         </button>
       </div>
     </aside>

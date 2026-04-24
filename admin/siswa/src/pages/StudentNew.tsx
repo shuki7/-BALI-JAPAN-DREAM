@@ -12,56 +12,51 @@ import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../translations';
 import type { StudentStatus, ProgramType, StudentSource, GenderType, ParentRelationship, EducationLevel, JLPTLevel, DocumentType, PaymentStatus } from '../lib/types';
 
-const step1Schema = z.object({
-  fullName: z.string().min(2, '氏名を入力してください'),
-  fullNameKana: z.string().optional(),
-  dateOfBirth: z.string().min(1, '生年月日を入力してください'),
-  gender: z.enum(['male', 'female']),
-  nationality: z.string().min(1, '国籍を入力してください'),
-  birthPlace: z.string().min(1, '出生地を入力してください'),
-  address: z.string().min(1, '住所を入力してください'),
-  city: z.string().min(1, '市を入力してください'),
-  province: z.string().min(1, '州を入力してください'),
-  whatsapp: z.string().min(1, 'WhatsApp番号を入力してください'),
-  email: z.string().email().optional().or(z.literal('')),
-  nik: z.string().optional(),
-  religion: z.string().optional(),
-  instagramAccount: z.string().optional(),
-  tiktokAccount: z.string().optional(),
-  programType: z.enum(['tokutei_ginou', 'gijinkoku', 'job_matching_only']),
-  batchNumber: z.coerce.number().min(1, 'バッチ番号を入力してください'),
-  source: z.enum(['direct', 'partner_school']),
-  partnerSchoolId: z.string().optional(),
-  scouterId: z.string().optional(),
-  enrollmentDate: z.string().min(1, '入学日を入力してください'),
-  // 学歴
-  educationLevel: z.enum(['sma', 'smk', 'd3', 's1']),
-  schoolName: z.string().min(1, '学校名を入力してください'),
-  graduationYear: z.coerce.number().optional(),
-});
+// Types for schemas
+type Step1Data = {
+  fullName: string;
+  fullNameKana?: string;
+  dateOfBirth: string;
+  gender: 'male' | 'female';
+  nationality: string;
+  birthPlace: string;
+  address: string;
+  city: string;
+  province: string;
+  whatsapp: string;
+  email?: string;
+  nik?: string;
+  religion?: string;
+  instagramAccount?: string;
+  tiktokAccount?: string;
+  programType: 'tokutei_ginou' | 'gijinkoku' | 'job_matching_only';
+  batchNumber: number;
+  source: 'direct' | 'partner_school';
+  partnerSchoolId?: string;
+  scouterId?: string;
+  enrollmentDate: string;
+  educationLevel: 'sma' | 'smk' | 'd3' | 's1';
+  schoolName: string;
+  graduationYear?: number;
+};
 
-// 保証人情報は全て必須
-const step2Schema = z.object({
-  // 保証人情報
-  parentName: z.string().min(1, '保証人名を入力してください'),
-  parentRelationship: z.enum(['father', 'mother', 'guardian']),
-  parentDateOfBirth: z.string().optional(),
-  parentGender: z.enum(['male', 'female']).optional(),
-  parentNik: z.string().min(1, '保証人のKTP番号を入力してください'),
-  parentWhatsapp: z.string().min(1, '保証人のWhatsAppを入力してください'),
-  parentAddress: z.string().min(1, '保証人の住所を入力してください'),
-  parentCity: z.string().min(1, '保証人の市を入力してください'),
-  parentProvince: z.string().min(1, '保証人の州を入力してください'),
-  parentOccupation: z.string().min(1, '保証人の職業を入力してください'),
-  parentEmail: z.string().email().optional().or(z.literal('')),
-  // 緊急連絡先（別の場合）
-  emergencyContact: z.string().optional(),
-  emergencyPhone: z.string().optional(),
-  emergencyRelationship: z.string().optional(),
-});
+type Step2Data = {
+  parentName: string;
+  parentRelationship: 'father' | 'mother' | 'guardian';
+  parentDateOfBirth?: string;
+  parentGender?: 'male' | 'female';
+  parentNik: string;
+  parentWhatsapp: string;
+  parentAddress: string;
+  parentCity: string;
+  parentProvince: string;
+  parentOccupation: string;
+  parentEmail?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  emergencyRelationship?: string;
+};
 
-type Step1Data = z.infer<typeof step1Schema>;
-type Step2Data = z.infer<typeof step2Schema>;
 
 interface ScheduleItem {
   dueDate: string;
@@ -158,6 +153,50 @@ export default function StudentNew() {
   const { data: partners = [] } = useQuery({ queryKey: ['partners'], queryFn: getPartners });
   const { data: scouters = [] } = useQuery({ queryKey: ['scouters'], queryFn: getScouters });
 
+  const step1Schema = z.object({
+    fullName: z.string().min(2, t.val_name),
+    fullNameKana: z.string().optional(),
+    dateOfBirth: z.string().min(1, t.val_dob),
+    gender: z.enum(['male', 'female']),
+    nationality: z.string().min(1, t.val_nationality),
+    birthPlace: z.string().min(1, t.val_birthplace),
+    address: z.string().min(1, t.val_address),
+    city: z.string().min(1, t.val_city),
+    province: z.string().min(1, t.val_province),
+    whatsapp: z.string().min(1, t.val_whatsapp),
+    email: z.string().email().optional().or(z.literal('')),
+    nik: z.string().optional(),
+    religion: z.string().optional(),
+    instagramAccount: z.string().optional(),
+    tiktokAccount: z.string().optional(),
+    programType: z.enum(['tokutei_ginou', 'gijinkoku', 'job_matching_only']),
+    batchNumber: z.coerce.number().min(1, t.val_batch),
+    source: z.enum(['direct', 'partner_school']),
+    partnerSchoolId: z.string().optional(),
+    scouterId: z.string().optional(),
+    enrollmentDate: z.string().min(1, t.val_enroll_date),
+    educationLevel: z.enum(['sma', 'smk', 'd3', 's1']),
+    schoolName: z.string().min(1, t.val_school),
+    graduationYear: z.coerce.number().optional(),
+  });
+
+  const step2Schema = z.object({
+    parentName: z.string().min(1, t.val_guarantor_name),
+    parentRelationship: z.enum(['father', 'mother', 'guardian']),
+    parentDateOfBirth: z.string().optional(),
+    parentGender: z.enum(['male', 'female']).optional(),
+    parentNik: z.string().min(1, t.val_guarantor_nik),
+    parentWhatsapp: z.string().min(1, t.val_guarantor_whatsapp),
+    parentAddress: z.string().min(1, t.val_guarantor_address),
+    parentCity: z.string().min(1, t.val_guarantor_city),
+    parentProvince: z.string().min(1, t.val_guarantor_province),
+    parentOccupation: z.string().min(1, t.val_guarantor_occupation),
+    parentEmail: z.string().email().optional().or(z.literal('')),
+    emergencyContact: z.string().optional(),
+    emergencyPhone: z.string().optional(),
+    emergencyRelationship: z.string().optional(),
+  });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form1 = useForm<Step1Data>({ resolver: zodResolver(step1Schema) as any, defaultValues: { nationality: 'Indonesia', gender: 'male', programType: 'tokutei_ginou', source: 'direct', batchNumber: 5, educationLevel: 'smk' } });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -207,7 +246,7 @@ export default function StudentNew() {
   }, [step, form1Values, form2Values, step3Data, step1Data, step2Data]);
 
   const clearDraft = () => {
-    if (confirm('下書きを削除して最初からやり直しますか？（写真と書類は再度選択が必要です）')) {
+    if (confirm(t.draft_reset_warning)) {
       localStorage.removeItem(DRAFT_KEY);
       setStep(1);
       setStep1Data(null);
@@ -246,7 +285,7 @@ export default function StudentNew() {
     // 現在の写真数と追加する写真数の合計が5を超えないように制限
     const availableSlots = 5 - photos.length;
     if (availableSlots <= 0) {
-      alert('写真は最大5枚までです。');
+      alert(t.max_photos_warning);
       e.target.value = '';
       return;
     }
@@ -309,7 +348,7 @@ export default function StudentNew() {
     try {
       const registrationNumber = generateRegistrationNumber(step1Data.batchNumber);
 
-      setUploadProgress('生徒情報を保存中...');
+      setUploadProgress(t.saving_student_info);
       const studentId = await addStudent({
         registrationNumber,
         enrollmentDate: new Date(step1Data.enrollmentDate),
@@ -413,7 +452,7 @@ export default function StudentNew() {
 
       // Google Drive に写真をアップロード
       if (photos.length > 0 && googleToken) {
-        setUploadProgress('Google Driveにフォルダを作成中...');
+        setUploadProgress(t.creating_folder);
         const drive = new GDriveService(googleToken);
         const rootId = import.meta.env.VITE_GOOGLE_DRIVE_FOLDER_ID;
         const studentFolderId = await drive.createFolder(
@@ -424,7 +463,7 @@ export default function StudentNew() {
 
         const uploadedPhotos: { fileId: string; url: string; caption?: string }[] = [];
         for (let i = 0; i < photos.length; i++) {
-          setUploadProgress(`写真をアップロード中 (${i + 1}/${photos.length})...`);
+          setUploadProgress(`${t.uploading_photo} (${i + 1}/${photos.length})...`);
           const { blob, caption } = photos[i];
           const file = new File([blob], `photo_${i + 1}.webp`, { type: 'image/webp' });
           const fileId = await drive.uploadFile(file, photoFolderId);
@@ -433,7 +472,7 @@ export default function StudentNew() {
           uploadedPhotos.push({ fileId, url, caption: caption || undefined });
         }
 
-        setUploadProgress('情報を更新中...');
+        setUploadProgress(t.updating_info);
         await updateStudent(studentId, {
           driveFolderId: studentFolderId,
           photos: uploadedPhotos,
@@ -443,11 +482,11 @@ export default function StudentNew() {
 
         // 学歴証明書のアップロード
         if (eduDocs.length > 0) {
-          setUploadProgress('学歴証明書をアップロード中...');
+          setUploadProgress(t.uploading_edu_doc);
           const docsFolderId = await drive.createFolder('Documents', studentFolderId);
           
           for (let i = 0; i < eduDocs.length; i++) {
-            setUploadProgress(`学歴証明書をアップロード中 (${i + 1}/${eduDocs.length})...`);
+            setUploadProgress(`${t.uploading_edu_doc} (${i + 1}/${eduDocs.length})...`);
             const file = eduDocs[i];
             const fileId = await drive.uploadFile(file, docsFolderId);
             await drive.makePublic(fileId);
@@ -461,7 +500,7 @@ export default function StudentNew() {
             await addStudentDocument(studentId, {
               studentId,
               documentType: docType,
-              title: `学歴証明書 ${i + 1} (${file.name})`,
+              title: `${t.edu_docs} ${i + 1} (${file.name})`,
               fileId,
               fileUrl,
               uploadDate: new Date(),
@@ -470,7 +509,7 @@ export default function StudentNew() {
           }
         }
       } else if (photos.length > 0 && !googleToken) {
-        alert('Googleトークンが期限切れです。再ログインして写真をアップロードしてください。');
+        alert(t.google_token_expired);
       }
 
       // 下書きをクリア
@@ -481,7 +520,7 @@ export default function StudentNew() {
     } catch (err) {
       console.error(err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      alert(`登録に失敗しました。再度お試しください。\n詳細: ${errMsg}`);
+      alert(`${t.reg_failed}\nDetail: ${errMsg}`);
     } finally {
       setSubmitting(false);
       setUploadProgress('');
@@ -498,7 +537,7 @@ export default function StudentNew() {
         <div style={{ background: '#e0f2fe', borderLeft: '4px solid #0284c7', padding: '12px 16px', borderRadius: '0 8px 8px 0', marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#0369a1' }}>{t.draft_restored}</div>
-            <div style={{ fontSize: 12, color: '#0284c7', marginTop: 4 }}>※写真や書類は復元されないため、再アップロードしてください。</div>
+            <div style={{ fontSize: 12, color: '#0284c7', marginTop: 4 }}>※{language === 'ja' ? '写真や書類は復元されないため、再アップロードしてください。' : 'Foto dan dokumen tidak dipulihkan, silakan unggah ulang.'}</div>
           </div>
           <button type="button" onClick={clearDraft} style={{ background: '#fff', border: '1px solid #bae6fd', color: '#0369a1', padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
             {t.clear_draft}
@@ -634,9 +673,9 @@ export default function StudentNew() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
               <FormGroup label={t.program} required>
                 <select {...form1.register('programType')} style={inputStyle}>
-                  <option value="tokutei_ginou">特定技能</option>
-                  <option value="gijinkoku">技人国</option>
-                  <option value="job_matching_only">JMのみ</option>
+                  <option value="tokutei_ginou">{t.tokutei_ginou}</option>
+                  <option value="gijinkoku">{t.gijinkoku}</option>
+                  <option value="job_matching_only">{t.job_matching_only}</option>
                 </select>
               </FormGroup>
               <FormGroup label={t.batch} required>
@@ -649,8 +688,8 @@ export default function StudentNew() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <FormGroup label={t.enroll_route} required>
                 <select {...form1.register('source')} style={inputStyle}>
-                  <option value="direct">直接入学</option>
-                  <option value="partner_school">提携校経由</option>
+                  <option value="direct">{t.enroll_direct}</option>
+                  <option value="partner_school">{t.enroll_partner}</option>
                 </select>
               </FormGroup>
               {watchSource === 'partner_school' && (
@@ -677,10 +716,10 @@ export default function StudentNew() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
               <FormGroup label={t.education_level} required>
                 <select {...form1.register('educationLevel')} style={inputStyle}>
-                  <option value="sma">SMA (高校)</option>
-                  <option value="smk">SMK (職業高校)</option>
-                  <option value="d3">D3 (短大)</option>
-                  <option value="s1">S1 (大学)</option>
+                  <option value="sma">SMA ({t.high_school})</option>
+                  <option value="smk">SMK ({t.vocational_high_school})</option>
+                  <option value="d3">D3 ({t.junior_college})</option>
+                  <option value="s1">S1 ({t.university})</option>
                 </select>
               </FormGroup>
               <FormGroup label={t.school_name} required error={form1.formState.errors.schoolName?.message}>
@@ -749,11 +788,11 @@ export default function StudentNew() {
                   <option value="female">{t.female}</option>
                 </select>
               </FormGroup>
-              <FormGroup label={t.nik} required error={form2.formState.errors.parentNik?.message}>
-                <input {...form2.register('parentNik')} style={inputStyle} placeholder="16桁のNIK番号" />
+               <FormGroup label={t.nik} required error={form2.formState.errors.parentNik?.message}>
+                <input {...form2.register('parentNik')} style={inputStyle} placeholder={language === 'ja' ? '16桁のNIK番号' : '16 digit nomor NIK'} />
               </FormGroup>
               <FormGroup label={t.occupation} required error={form2.formState.errors.parentOccupation?.message}>
-                <input {...form2.register('parentOccupation')} style={inputStyle} placeholder="例: Petani, PNS, Swasta" />
+                <input {...form2.register('parentOccupation')} style={inputStyle} placeholder={language === 'ja' ? '例: 農家、公務員、民間企業' : 'Contoh: Petani, PNS, Swasta'} />
               </FormGroup>
             </div>
 
@@ -789,7 +828,7 @@ export default function StudentNew() {
                 <input {...form2.register('emergencyPhone')} style={inputStyle} />
               </FormGroup>
               <FormGroup label={t.relationship}>
-                <input {...form2.register('emergencyRelationship')} style={inputStyle} placeholder="例: Saudara" />
+                <input {...form2.register('emergencyRelationship')} style={inputStyle} placeholder={language === 'ja' ? '例: 兄弟' : 'Contoh: Saudara'} />
               </FormGroup>
             </div>
 
@@ -822,13 +861,13 @@ export default function StudentNew() {
                   <input type="number" value={step3Data.educationAmount} onChange={(e) => setStep3Data(p => ({ ...p, educationAmount: Number(e.target.value) }))} style={inputStyle} />
                 </FormGroup>
                 {step3Data.educationPaymentMethod === 'installment' && (
-                  <FormGroup label={t.installment_count + ' (最大5回)'}>
+                  <FormGroup label={`${t.installment_count} (${language === 'ja' ? '最大5回' : 'Maks 5 kali'})`}>
                     <select 
                       value={step3Data.educationInstallments} 
                       onChange={(e) => setStep3Data(p => ({ ...p, educationInstallments: Number(e.target.value) }))} 
                       style={inputStyle}
                     >
-                      {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}回</option>)}
+                      {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}{language === 'ja' ? '回' : ' kali'}</option>)}
                     </select>
                   </FormGroup>
                 )}
@@ -842,7 +881,7 @@ export default function StudentNew() {
                       const s = step3Data.educationSchedules[idx] || { dueDate: '', amount: 0, isPaid: false, notes: '' };
                       return (
                         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', padding: '12px 16px', border: '1px solid #ddd', borderRadius: 8 }}>
-                          <div style={{ width: 40, fontWeight: 700, color: '#CC0000', fontSize: 13 }}>{idx + 1}回目</div>
+                          <div style={{ width: 60, fontWeight: 700, color: '#CC0000', fontSize: 13 }}>{idx + 1}{language === 'ja' ? '回目' : ' kali'}</div>
                           <div style={{ flex: 1 }}>
                             <label style={{ fontSize: 11, color: '#888', display: 'block', marginBottom: 4 }}>{t.due_date}</label>
                             <input 
@@ -874,7 +913,7 @@ export default function StudentNew() {
                             <input 
                               type="text" 
                               value={s.notes} 
-                              placeholder="メモ..."
+                              placeholder={t.memo}
                               onChange={(e) => {
                                 const newScheds = [...step3Data.educationSchedules];
                                 newScheds[idx] = { ...newScheds[idx], notes: e.target.value };
@@ -921,7 +960,7 @@ export default function StudentNew() {
             <div style={{ padding: 16, background: '#f9fafb', borderRadius: 8, border: '1px solid #e5e7eb', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                 <input type="checkbox" id="hasJM" checked={step3Data.hasJM} onChange={(e) => setStep3Data(p => ({ ...p, hasJM: e.target.checked }))} />
-                <label htmlFor="hasJM" style={{ fontWeight: 600, fontSize: 14 }}>{t.has_jm} (合計 Rp 20,000,000)</label>
+                <label htmlFor="hasJM" style={{ fontWeight: 600, fontSize: 14 }}>{t.has_jm} ({language === 'ja' ? '合計' : 'Total'} Rp 20,000,000)</label>
               </div>
             </div>
 
@@ -955,7 +994,11 @@ export default function StudentNew() {
                   {step1Data.instagramAccount && <div><strong>Instagram:</strong> <a href={`https://instagram.com/${step1Data.instagramAccount.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>@{step1Data.instagramAccount.replace(/^@/, '')}</a></div>}
                   {step1Data.tiktokAccount && <div><strong>TikTok:</strong> <a href={`https://tiktok.com/@${step1Data.tiktokAccount.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>@{step1Data.tiktokAccount.replace(/^@/, '')}</a></div>}
                   <div style={{ gridColumn: '1/-1', borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 4 }}>
-                    <strong>{t.guarantor_info}:</strong> {step2Data.parentName} ({step2Data.parentRelationship === 'father' ? (t.male === '男性' ? '父' : 'Ayah') : step2Data.parentRelationship === 'mother' ? (t.male === '男性' ? '母' : 'Ibu') : (t.male === '男性' ? '後見人' : 'Wali')})
+                    <strong>{t.guarantor_info}:</strong> {step2Data.parentName} ({
+                      step2Data.parentRelationship === 'father' ? t.father : 
+                      step2Data.parentRelationship === 'mother' ? t.mother : 
+                      t.guardian
+                    })
                   </div>
                   <div><strong>KTP:</strong> {step2Data.parentNik}</div>
                   <div><strong>{t.whatsapp}:</strong> <a href={`https://wa.me/${step2Data.parentWhatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline' }}>{step2Data.parentWhatsapp}</a></div>
@@ -967,10 +1010,10 @@ export default function StudentNew() {
                   <div><strong>{t.amount}:</strong> Rp {step3Data.educationAmount.toLocaleString('id-ID')}</div>
                   {step3Data.educationPaymentMethod === 'installment' && (
                     <div style={{ gridColumn: '1/-1', background: '#fff', padding: '8px 12px', borderRadius: 6, border: '1px solid #eee', marginTop: 4 }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginBottom: 4 }}>{t.payment_schedule} ({step3Data.educationInstallments}回)</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#888', marginBottom: 4 }}>{t.payment_schedule} ({step3Data.educationInstallments}{language === 'ja' ? '回' : ' kali'})</div>
                       {step3Data.educationSchedules.slice(0, step3Data.educationInstallments).map((s, idx) => (
                         <div key={idx} style={{ fontSize: 12, display: 'flex', gap: 12, borderBottom: idx === step3Data.educationInstallments - 1 ? 'none' : '1px solid #f5f5f5', padding: '2px 0' }}>
-                          <span style={{ width: 45, fontWeight: 600 }}>{idx + 1}{language === 'ja' ? '回目' : ''}:</span>
+                          <span style={{ width: 60, fontWeight: 600 }}>{idx + 1}{language === 'ja' ? '回目' : ''}:</span>
                           <span style={{ width: 85 }}>{s.dueDate || (language === 'ja' ? '日付未定' : 'Tgl belum ditentukan')}</span>
                           <span style={{ flex: 1 }}>Rp {s.amount.toLocaleString('id-ID')}</span>
                           {s.isPaid && <span style={{ color: '#166534', fontWeight: 700 }}>[{t.is_paid}]</span>}
@@ -980,19 +1023,19 @@ export default function StudentNew() {
                   )}
 
                   <div style={{ gridColumn: '1/-1', borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 4 }}>
-                    <strong>{language === 'ja' ? 'その他設定' : 'Pengaturan Lainnya'}:</strong> {step3Data.hasDorm ? `${t.dorm_resident} (Rp ${step3Data.dormAmount.toLocaleString('id-ID')}/月)` : (language === 'ja' ? '寮入居なし' : 'Tidak ada asrama')} / {step3Data.hasJM ? t.has_jm : (language === 'ja' ? 'JM費なし' : 'Tidak ada JM')}
+                    <strong>{t.other_settings}:</strong> {step3Data.hasDorm ? `${t.dorm_resident} (Rp ${step3Data.dormAmount.toLocaleString('id-ID')}/月)` : (language === 'ja' ? '寮入居なし' : 'Tidak ada asrama')} / {step3Data.hasJM ? t.has_jm : (language === 'ja' ? 'JM費なし' : 'Tidak ada JM')}
                   </div>
-                  <div><strong>{language === 'ja' ? '写真枚数' : 'Jumlah Foto'}:</strong> {photos.length}{language === 'ja' ? '枚' : ''} {photos.length > 0 ? `(Google Drive ${language === 'ja' ? 'へアップロード' : 'diunggah'})` : ''}</div>
+                  <div><strong>{t.photo_count}:</strong> {photos.length}{language === 'ja' ? '枚' : ''} {photos.length > 0 ? `(Google Drive ${language === 'ja' ? 'へアップロード' : 'diunggah'})` : ''}</div>
                   {!googleToken && photos.length > 0 && (
                      <div style={{ gridColumn: '1/-1', color: '#CC0000', fontSize: 12, background: '#fff1f2', padding: 12, borderRadius: 8, marginTop: 8, border: '1px solid #fecaca' }}>
-                       <div style={{ fontWeight: 700, marginBottom: 4 }}>⚠ {language === 'ja' ? 'Googleトークンが期限切れです' : 'Token Google kedaluwarsa'}</div>
-                       <p style={{ margin: '0 0 10px 0' }}>{language === 'ja' ? '写真をアップロードするには、Google Driveへのアクセス許可を再取得する必要があります。' : 'Untuk mengunggah foto, Anda perlu mendapatkan kembali izin akses ke Google Drive.'}</p>
+                       <div style={{ fontWeight: 700, marginBottom: 4 }}>⚠ {t.google_token_expired}</div>
+                       <p style={{ margin: '0 0 10px 0' }}>{t.google_token_relogin_needed}</p>
                        <button
                          type="button"
                          onClick={refreshGoogleToken}
                          style={{ padding: '6px 12px', background: '#CC0000', color: '#fff', border: 'none', borderRadius: 4, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
                        >
-                         {language === 'ja' ? '再ログイン (Google認証)' : 'Login Ulang (Otentikasi Google)'}
+                         {t.google_relogin}
                        </button>
                      </div>
                    )}
