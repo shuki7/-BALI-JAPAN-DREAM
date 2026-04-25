@@ -43,10 +43,12 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <AuthProvider>
-          <BrowserRouter basename="/admin/siswa">
+          <BrowserRouter basename="/admin/siswa/">
             <Routes>
               {/* Public Routes */}
+              <Route path="apply" element={<Apply />} />
               <Route path="/apply" element={<Apply />} />
+              <Route path="login" element={<Login />} />
               <Route path="/login" element={<Login />} />
               
               {/* Protected Routes */}
