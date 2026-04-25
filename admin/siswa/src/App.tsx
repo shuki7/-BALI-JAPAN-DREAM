@@ -23,36 +23,19 @@ import Applicants from './pages/Applicants';
 
 const queryClient = new QueryClient();
 
-function ProtectedRoutes() {
+interface ProtectedProps {
+  children: ReactNode;
+}
+
+function ProtectedRoute({ children }: ProtectedProps) {
   const { user, loading } = useAuth();
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#CC0000', fontWeight: 600 }}>
       Loading...
     </div>
   );
-  if (!user) return <Navigate to="/login" />;
-  return (
-    <AppLayout>
-      <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/students" element={<Students />} />
-        <Route path="/students/new" element={<StudentNew />} />
-        <Route path="/students/:id" element={<StudentDetail />} />
-        <Route path="/payments" element={<Payments />} />
-        <Route path="/partners" element={<Partners />} />
-        <Route path="/scouters" element={<Scouters />} />
-        <Route path="/commissions" element={<Commissions />} />
-        <Route path="/documents" element={<Documents />} />
-        <Route path="/organizations" element={<Organizations />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/discipline" element={<Discipline />} />
-        <Route path="/staff" element={<Staff />} />
-        <Route path="/applicants" element={<Applicants />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </AppLayout>
-  );
+  if (!user) return <Navigate to="/login" replace />;
+  return <AppLayout>{children}</AppLayout>;
 }
 
 export default function App() {
@@ -62,12 +45,30 @@ export default function App() {
         <AuthProvider>
           <BrowserRouter basename="/admin/siswa">
             <Routes>
-              {/* Public Routes - No Login Required */}
+              {/* Public Routes */}
               <Route path="/apply" element={<Apply />} />
               <Route path="/login" element={<Login />} />
               
-              {/* Protected Routes - Login Required */}
-              <Route path="/*" element={<ProtectedRoutes />} />
+              {/* Protected Routes */}
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
+              <Route path="/students/new" element={<ProtectedRoute><StudentNew /></ProtectedRoute>} />
+              <Route path="/students/:id" element={<ProtectedRoute><StudentDetail /></ProtectedRoute>} />
+              <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+              <Route path="/partners" element={<ProtectedRoute><Partners /></ProtectedRoute>} />
+              <Route path="/scouters" element={<ProtectedRoute><Scouters /></ProtectedRoute>} />
+              <Route path="/commissions" element={<ProtectedRoute><Commissions /></ProtectedRoute>} />
+              <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+              <Route path="/organizations" element={<ProtectedRoute><Organizations /></ProtectedRoute>} />
+              <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+              <Route path="/discipline" element={<ProtectedRoute><Discipline /></ProtectedRoute>} />
+              <Route path="/staff" element={<ProtectedRoute><Staff /></ProtectedRoute>} />
+              <Route path="/applicants" element={<ProtectedRoute><Applicants /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              
+              {/* Fallback */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>
