@@ -18,6 +18,8 @@ import Settings from './pages/Settings';
 import Staff from './pages/Staff';
 import Inventory from './pages/Inventory';
 import Discipline from './pages/Discipline';
+import Apply from './pages/Apply';
+import Applicants from './pages/Applicants';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,7 @@ function ProtectedRoutes() {
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/discipline" element={<Discipline />} />
         <Route path="/staff" element={<Staff />} />
+        <Route path="/applicants" element={<Applicants />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
@@ -60,6 +63,7 @@ export default function App() {
           <BrowserRouter basename="/admin/siswa">
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/apply" element={<Apply />} />
               <Route path="/*" element={<ProtectedRoutes />} />
             </Routes>
           </BrowserRouter>

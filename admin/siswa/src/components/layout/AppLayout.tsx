@@ -6,7 +6,7 @@ import { translations } from '../../translations';
 import { 
   LayoutDashboard, Users, FileText, AlertTriangle, 
   School, UserCheck, Briefcase, Building2, 
-  Package, Settings, LogOut, UserCircle 
+  Package, Settings, LogOut, UserCircle, UserPlus 
 } from 'lucide-react';
 
 const SIDEBAR_WIDTH = 240;
@@ -23,6 +23,7 @@ const NAV_ITEMS: { key: keyof typeof translations.ja; path: string; icon: any; a
   { key: 'discipline', path: '/discipline', icon: AlertTriangle },
   { key: 'partners', path: '/partners', icon: School },
   { key: 'scouters', path: '/scouters', icon: UserCheck },
+  { key: 'applicants', path: '/applicants', icon: UserPlus },
   { key: 'staff', path: '/staff', icon: UserCircle },
   { key: 'commissions', path: '/commissions', icon: Briefcase, adminOnly: true },
   { key: 'organizations', path: '/organizations', icon: Building2 },
