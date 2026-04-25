@@ -71,6 +71,18 @@ export default function Apply() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      // Send Email Notification
+      try {
+        await fetch('/admin/siswa/api/send_mail.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+      } catch (e) {
+        console.warn('Email notification failed but application was saved', e);
+      }
+
       setSubmitted(true);
     } catch (error) {
       console.error('Error submitting application:', error);
