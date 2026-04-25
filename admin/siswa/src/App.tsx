@@ -39,6 +39,19 @@ function ProtectedRoute({ children }: ProtectedProps) {
 }
 
 export default function App() {
+  // Direct path check for cPanel/basename robust matching
+  const isApplyPage = window.location.pathname.includes('/apply');
+
+  if (isApplyPage) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <LanguageProvider>
+          <Apply />
+        </LanguageProvider>
+      </QueryClientProvider>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
