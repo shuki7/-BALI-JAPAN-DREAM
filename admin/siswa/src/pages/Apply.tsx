@@ -187,9 +187,9 @@ export default function Apply() {
         }}>
           
           {step === 1 && (
-            <div className=\"animate-in fade-in slide-in-from-bottom-4 duration-300\">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 style={{ fontSize: 20, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                <User size={24} color=\"#CC0000\" /> {language === 'ja' ? 'コース選択と個人情報' : 'Pilihan Kursus & Data Pribadi'}
+                <User size={24} color="#CC0000" /> {language === 'ja' ? 'コース選択と個人情報' : 'Pilihan Kursus & Data Pribadi'}
               </h2>
               
               <div style={{ marginBottom: 24 }}>
@@ -229,93 +229,93 @@ export default function Apply() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>{language === 'ja' ? '氏名 (ローマ字)' : 'Nama Lengkap'}</label>
-                  <input required name=\"fullName\" value={formData.fullName} onChange={handleChange} style={inputStyle} placeholder=\"SHUKI UEMURA\" />
+                  <input required name="fullName" value={formData.fullName} onChange={handleChange} style={inputStyle} placeholder="SHUKI UEMURA" />
                 </div>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>{language === 'ja' ? 'フリガナ (カタカナ)' : 'Nama Katakana'}</label>
-                  <input required name=\"fullNameFurigana\" value={formData.fullNameFurigana} onChange={handleChange} style={inputStyle} placeholder=\"シュキ ウエムラ\" />
+                  <input required name="fullNameFurigana" value={formData.fullNameFurigana} onChange={handleChange} style={inputStyle} placeholder="シュキ ウエムラ" />
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>{language === 'ja' ? '生年月日' : 'Tanggal Lahir'}</label>
-                  <input required type=\"date\" name=\"dateOfBirth\" value={formData.dateOfBirth} onChange={handleChange} style={inputStyle} />
+                  <input required type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} style={inputStyle} />
                 </div>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>{language === 'ja' ? '出生地' : 'Tempat Lahir'}</label>
-                  <input required name=\"birthPlace\" value={formData.birthPlace} onChange={handleChange} style={inputStyle} placeholder=\"Denpasar\" />
+                  <input required name="birthPlace" value={formData.birthPlace} onChange={handleChange} style={inputStyle} placeholder="Denpasar" />
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>{language === 'ja' ? '性別' : 'Jenis Kelamin'}</label>
-                  <select name=\"gender\" value={formData.gender} onChange={handleChange} style={inputStyle}>
-                    <option value=\"male\">{language === 'ja' ? '男性' : 'Laki-laki'}</option>
-                    <option value=\"female\">{language === 'ja' ? '女性' : 'Perempuan'}</option>
+                  <select name="gender" value={formData.gender} onChange={handleChange} style={inputStyle}>
+                    <option value="male">{language === 'ja' ? '男性' : 'Laki-laki'}</option>
+                    <option value="female">{language === 'ja' ? '女性' : 'Perempuan'}</option>
                   </select>
                 </div>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>{language === 'ja' ? '宗教' : 'Agama'}</label>
-                  <input required name=\"religion\" value={formData.religion} onChange={handleChange} style={inputStyle} placeholder=\"Islam / Hindu / etc\" />
+                  <input required name="religion" value={formData.religion} onChange={handleChange} style={inputStyle} placeholder="Islam / Hindu / etc" />
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>WhatsApp</label>
-                  <input required name=\"whatsapp\" value={formData.whatsapp} onChange={handleChange} style={inputStyle} placeholder=\"0812...\" />
+                  <input required name="whatsapp" value={formData.whatsapp} onChange={handleChange} style={inputStyle} placeholder="0812..." />
                 </div>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>Email</label>
-                  <input required type=\"email\" name=\"email\" value={formData.email} onChange={handleChange} style={inputStyle} placeholder=\"example@mail.com\" />
+                  <input required type="email" name="email" value={formData.email} onChange={handleChange} style={inputStyle} placeholder="example@mail.com" />
                 </div>
               </div>
             </div>
           )}
 
           {step === 2 && (
-            <div className=\"animate-in fade-in slide-in-from-bottom-4 duration-300\">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 style={{ fontSize: 20, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                <Users size={24} color=\"#CC0000\" /> {language === 'ja' ? '保証人情報' : 'Informasi Penjamin'}
+                <Users size={24} color="#CC0000" /> {language === 'ja' ? '保証人情報' : 'Informasi Penjamin'}
               </h2>
               <div style={{ marginBottom: 20 }}>
                 <label style={labelStyle}>{language === 'ja' ? '保証人氏名' : 'Nama Penjamin'}</label>
-                <input required name=\"guarantorName\" value={formData.guarantorName} onChange={handleChange} style={inputStyle} />
+                <input required name="guarantorName" value={formData.guarantorName} onChange={handleChange} style={inputStyle} />
               </div>
               <div style={{ marginBottom: 20 }}>
                 <label style={labelStyle}>{language === 'ja' ? '続柄' : 'Hubungan'}</label>
-                <input required name=\"guarantorRelation\" value={formData.guarantorRelation} onChange={handleChange} style={inputStyle} placeholder=\"Orang Tua / Wali\" />
+                <input required name="guarantorRelation" value={formData.guarantorRelation} onChange={handleChange} style={inputStyle} placeholder="Orang Tua / Wali" />
               </div>
               <div style={{ marginBottom: 20 }}>
                 <label style={labelStyle}>WhatsApp ({language === 'ja' ? '保証人' : 'Penjamin'})</label>
-                <input required name=\"guarantorWhatsapp\" value={formData.guarantorWhatsapp} onChange={handleChange} style={inputStyle} />
+                <input required name="guarantorWhatsapp" value={formData.guarantorWhatsapp} onChange={handleChange} style={inputStyle} />
               </div>
               <div style={{ marginBottom: 20 }}>
                 <label style={labelStyle}>{language === 'ja' ? '保証人住所' : 'Alamat Penjamin'}</label>
-                <input required name=\"guarantorAddress\" value={formData.guarantorAddress} onChange={handleChange} style={inputStyle} />
+                <input required name="guarantorAddress" value={formData.guarantorAddress} onChange={handleChange} style={inputStyle} />
               </div>
             </div>
           )}
 
           {step === 3 && (
-            <div className=\"animate-in fade-in slide-in-from-bottom-4 duration-300\">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 style={{ fontSize: 20, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                <Landmark size={24} color=\"#CC0000\" /> {language === 'ja' ? '銀行口座情報' : 'Informasi Rekening Bank'}
+                <Landmark size={24} color="#CC0000" /> {language === 'ja' ? '銀行口座情報' : 'Informasi Rekening Bank'}
               </h2>
               <div style={{ marginBottom: 20 }}>
                 <label style={labelStyle}>{language === 'ja' ? '銀行名' : 'Nama Bank'}</label>
-                <input required name=\"bankName\" value={formData.bankName} onChange={handleChange} style={inputStyle} placeholder=\"BCA / BNI / BRI\" />
+                <input required name="bankName" value={formData.bankName} onChange={handleChange} style={inputStyle} placeholder="BCA / BNI / BRI" />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>{language === 'ja' ? '口座名義' : 'Nama Pemilik Rekening'}</label>
-                  <input required name=\"bankAccountHolder\" value={formData.bankAccountHolder} onChange={handleChange} style={inputStyle} />
+                  <input required name="bankAccountHolder" value={formData.bankAccountHolder} onChange={handleChange} style={inputStyle} />
                 </div>
                 <div style={{ marginBottom: 20 }}>
                   <label style={labelStyle}>{language === 'ja' ? '口座番号' : 'Nomor Rekening'}</label>
-                  <input required name=\"bankAccountNumber\" value={formData.bankAccountNumber} onChange={handleChange} style={inputStyle} />
+                  <input required name="bankAccountNumber" value={formData.bankAccountNumber} onChange={handleChange} style={inputStyle} />
                 </div>
               </div>
               <div style={{ padding: '16px', background: '#fff9f0', borderRadius: 12, border: '1px solid #ffedd5', color: '#9a3412', fontSize: 12 }}>
@@ -327,9 +327,9 @@ export default function Apply() {
           )}
 
           {step === 4 && (
-            <div className=\"animate-in fade-in slide-in-from-bottom-4 duration-300\">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 style={{ fontSize: 20, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                <FileUp size={24} color=\"#CC0000\" /> {language === 'ja' ? '書類確認と送信' : 'Konfirmasi & Kirim'}
+                <FileUp size={24} color="#CC0000" /> {language === 'ja' ? '書類確認と送信' : 'Konfirmasi & Kirim'}
               </h2>
               <div style={{ background: '#f8fafc', padding: 20, borderRadius: 16, marginBottom: 24 }}>
                 <p style={{ fontSize: 14, color: '#475569', marginBottom: 0 }}>
@@ -373,23 +373,23 @@ export default function Apply() {
                 <ArrowLeft size={18} /> {language === 'ja' ? '戻る' : 'Kembali'}
               </button>
             )}
-            <button 
-              type=\"submit\"
-              disabled={loading}
-              style={{ 
-                flex: 2, padding: '14px', background: '#CC0000', color: '#fff', 
-                borderRadius: 12, border: 'none', fontWeight: 800, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: '0 4px 12px rgba(204,0,0,0.2)', opacity: loading ? 0.7 : 1
-              }}
-            >
-              {loading ? <Loader2 className=\"animate-spin\" size={20} /> : (
-                <>
-                  {step === 4 ? (language === 'ja' ? '送信する' : 'Kirim Sekarang') : (language === 'ja' ? '次へ進む' : 'Lanjutkan')}
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
+              <button 
+                type="submit"
+                disabled={loading}
+                style={{ 
+                  flex: 2, padding: '14px', background: '#CC0000', color: '#fff', 
+                  borderRadius: 12, border: 'none', fontWeight: 800, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  boxShadow: '0 4px 12px rgba(204,0,0,0.2)', opacity: loading ? 0.7 : 1
+                }}
+              >
+                {loading ? <Loader2 className="animate-spin" size={20} /> : (
+                  <>
+                    {step === 4 ? (language === 'ja' ? '送信する' : 'Kirim Sekarang') : (language === 'ja' ? '次へ進む' : 'Lanjutkan')}
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
           </div>
 
         </form>

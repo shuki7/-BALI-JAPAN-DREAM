@@ -43,13 +43,15 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <AuthProvider>
-          <BrowserRouter basename="/admin/siswa/">
+          <BrowserRouter basename="/admin/siswa">
             <Routes>
-              {/* Public Routes */}
-              <Route path="apply" element={<Apply />} />
+              {/* Public Routes - Checked first */}
               <Route path="/apply" element={<Apply />} />
-              <Route path="login" element={<Login />} />
+              <Route path="apply" element={<Apply />} />
+              <Route path="/apply/*" element={<Apply />} />
+              
               <Route path="/login" element={<Login />} />
+              <Route path="login" element={<Login />} />
               
               {/* Protected Routes */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -68,7 +70,7 @@ export default function App() {
               <Route path="/applicants" element={<ProtectedRoute><Applicants /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               
-              {/* Fallback */}
+              {/* Fallback - Only if nothing else matches */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
