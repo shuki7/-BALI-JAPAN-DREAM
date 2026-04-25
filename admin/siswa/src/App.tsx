@@ -62,8 +62,11 @@ export default function App() {
         <AuthProvider>
           <BrowserRouter basename="/admin/siswa">
             <Routes>
-              <Route path="/login" element={<Login />} />
+              {/* Public Routes - No Login Required */}
               <Route path="/apply" element={<Apply />} />
+              <Route path="/login" element={<Login />} />
+              
+              {/* Protected Routes - Login Required */}
               <Route path="/*" element={<ProtectedRoutes />} />
             </Routes>
           </BrowserRouter>
